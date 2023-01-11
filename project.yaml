@@ -4,9 +4,103 @@ expectations:
   population_size: 1000
 
 actions:
-
-  generate_study_population:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition
+  generate_study_population_report_ethnicity:
+    run: cohortextractor:latest generate_cohort 
+      --study-definition study_definition_ethnicity_report --output-dir output/report --output-format=csv.gz
     outputs:
       highly_sensitive:
-        cohort: output/input.csv
+        cohort: output/report/input_ethnicity_report.csv.gz
+
+
+  generate_study_population_report:
+    run: cohortextractor:latest generate_cohort 
+      --study-definition study_definition_report 
+      --param codelist_1_frequency="monthly"
+      --param codelist_2_comparison_date="event_1_date"
+      --param codelist_2_period_start="- 365"
+      --param codelist_2_period_end="+ 0"
+      --param operator="AND"
+      --param population="registered_adults"
+      --param breakdowns="sex,age_band,imd,region"
+      --index-date-range "2019-01-01 to 2022-11-01 by month" 
+      --output-dir=output/report
+      --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/report/input_*.csv.gz
+
+  join_cohorts_report:
+    run: >
+      cohort-joiner:v0.0.38
+        --lhs output/report/input_report_20*.csv.gz
+        --rhs output/report/input_ethnicity_report.csv.gz
+        --output-dir output/report/joined
+    needs: [generate_study_population_report, generate_study_population_report_ethnicity]
+    outputs:
+      highly_sensitive:
+        cohort: output/report/joined/input_report_20*.csv.gz
+  
+  generate_measures_report:
+    run: >
+      python:latest python analysis/report/measures_report.py --breakdowns="sex,age_band,imd,region,ethnicity" --input_dir="output/report/joined" --measure="med_review"
+
+    needs: [join_cohorts_report]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/joined/measure*rate.csv
+        decile_measure: output/report/joined/measure*rate_deciles.csv
+
+  top_5_table_report:
+    run: >
+      python:latest python analysis/report/top_5_report.py
+  
+    needs: [generate_measures_report]
+    outputs:
+      moderately_sensitive:
+        tables: output/report/joined/top_5*.csv
+
+  deciles_chart_report:
+    run: >
+      deciles-charts:v0.0.33
+        --input-files output/report/joined/measure_practice_rate_deciles.csv
+        --output-dir output/report/joined
+    config:
+      show_outer_percentiles: true
+      tables:
+        output: true
+      charts:
+        output: true
+    needs: [generate_measures_report]
+    outputs:
+      moderately_sensitive:
+        deciles_charts: output/report/joined/deciles_*.*
+  
+  plot_measure_report:
+    run: >
+      python:latest python analysis/report/plot_measures_report.py --breakdowns="sex,imd,region,age_band,ethnicity"
+    needs: [generate_measures_report]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/plot_measure*.jpeg
+        html: output/report/plot_measure*.html
+
+  event_counts_report:
+    run: >
+      python:latest python analysis/report/event_counts.py --input_dir="output/report/joined" --output_dir="output/report"
+    needs: [join_cohorts_report]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/event_counts.json
+
+  create_notebook:
+    run: python:latest python analysis/report/create_notebook.py
+    outputs:
+      moderately_sensitive:
+        notebook: output/report/report.ipynb
+
+  generate_notebook:
+    run: jupyter:latest jupyter nbconvert /workspace/output/report/report.ipynb --execute --to html --output-dir=/workspace/output/report --ExecutePreprocessor.timeout=86400 --no-input
+    needs: [create_notebook, event_counts_report, deciles_chart_report, top_5_table_report, plot_measure_report]
+    outputs:
+      moderately_sensitive:
+        notebook: output/report/report.html
