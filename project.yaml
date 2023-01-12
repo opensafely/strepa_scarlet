@@ -39,6 +39,18 @@ actions:
       moderately_sensitive:
         measure_csv: output/report/joined/measure_event_*_rate.csv
 
+  join_measures:
+      run: python:latest python analysis/join_and_round.py
+           --input-files output/report/joined/measure_*_rate.csv
+           --output-dir output/report/joined
+           --output-name "measure_all.csv"
+           --skip-round
+      needs: [generate_measures_report]
+      outputs:
+        moderately_sensitive:
+          # Only output the single summary file
+          measure_csv: output/report/joined/measure_all.csv
+
   # top_5_table_report:
   #   run: >
   #     python:latest python analysis/report/top_5_report.py
