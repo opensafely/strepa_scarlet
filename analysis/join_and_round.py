@@ -177,6 +177,11 @@ def parse_args():
         type=int,
         help="Round to the nearest",
     )
+    parser.add_argument(
+        "--skip-round",
+        action="store_true",
+        help="Just join, do not round",
+    )
     return parser.parse_args()
 
 
@@ -187,6 +192,7 @@ def main():
     output_dir = args.output_dir
     output_name = args.output_name
     round_to = args.round_to
+    skip_round = args.skip_round
 
     if not input_files and not input_list:
         raise FileNotFoundError("No files matched the input pattern provided")
@@ -195,10 +201,11 @@ def main():
     for measure_table in get_measure_tables(input_list or input_files):
         table = _reshape_data(measure_table)
         no_zeroes = _redact_zeroes(table)
-        rounded = _round_table(no_zeroes, round_to)
-        redacted_str = _redacted_string(rounded)
-        names_ensured = _ensure_names(redacted_str)
-        tables.append(names_ensured)
+        names_ensured = _ensure_names(no_zeroes)
+        if not skip_round:
+            names_ensured = _round_table(names_ensured, round_to)
+        redacted_str = _redacted_string(names_ensured)
+        tables.append(redacted_str)
 
     output = _join_tables(tables)
     _check_for_practice(output)
