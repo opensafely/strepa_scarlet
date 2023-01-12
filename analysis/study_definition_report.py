@@ -2,7 +2,7 @@ from cohortextractor import (
     StudyDefinition,
     patients,
     Measure,
-    params
+    
 )
 from codelists import *
 
@@ -16,94 +16,9 @@ def generate_expectations_codes(codelist, incidence=0.5):
     expectations[None] = incidence
     return expectations
 
-codelist_2_period_start = params["codelist_2_period_start"]
-codelist_2_period_end = params["codelist_2_period_end"]
-operator = params["operator"]
-codelist_2_comparison_date = params["codelist_2_comparison_date"]
-codelist_1_frequency = params["codelist_1_frequency"]
-population_definition = params["population"]
-breakdowns = [x for x in params["breakdowns"].split(",")]
-
-
-# codelist 1 frequency
-if codelist_1_frequency == "weekly":
-    codelist_1_date_range = ["index_date", "index_date + 7 days"]
-elif codelist_1_frequency == "monthly":
-    codelist_1_date_range = ["index_date", "last_day_of_month(index_date)"]
-
-
-#codelist 2 date range
-if codelist_2_comparison_date == "start_date":
-    codelist_2_date_range = [f"index_date {codelist_2_period_start} days", f"index_date {codelist_2_period_end} days"]
-elif codelist_2_comparison_date == "end_date":
-    codelist_2_date_range = [f"{codelist_1_date_range[1]} {codelist_2_period_start} days", f"{codelist_1_date_range[1]} {codelist_2_period_end} days"]
-elif codelist_2_comparison_date == "event_1_date":
-    codelist_2_date_range = [f"event_1_date {codelist_2_period_start} days", f"event_1_date {codelist_2_period_end} days"]
-
 start_date = "2019-01-01"
 end_date = "2022-11-01"
 # Specifiy study definition
-
-population_filters = {
-    "registered_adults": (patients.satisfying(
-        """
-        registered AND
-        NOT died AND
-        age >= 18 AND
-        age <= 120
-        """,
-
-        registered = patients.registered_as_of(
-            "index_date",
-            return_expectations={"incidence": 0.9},
-            ),
-
-        died = patients.died_from_any_cause(
-            on_or_before="index_date",
-            returning="binary_flag",
-            return_expectations={"incidence": 0.1}
-            ),
-        
-    )),
-    "registered_children": (patients.satisfying(
-        """
-        registered AND
-        NOT died AND
-        age < 18
-        """,
-
-        registered = patients.registered_as_of(
-            "index_date",
-            return_expectations={"incidence": 0.9},
-            ),
-
-        died = patients.died_from_any_cause(
-            on_or_before="index_date",
-            returning="binary_flag",
-            return_expectations={"incidence": 0.1}
-            ),
-        
-    )),
-    "all_registered": (patients.satisfying(
-        """
-        registered AND
-        NOT died
-        """,
-
-        registered = patients.registered_as_of(
-        "index_date",
-        return_expectations={"incidence": 0.9},
-        ),
-
-        died = patients.died_from_any_cause(
-        on_or_before="index_date",
-        returning="binary_flag",
-        return_expectations={"incidence": 0.1}
-        ),
-    )),
-}
-selected_population = population_filters[population_definition]
-
 
 demographics = {
     "age_band": (patients.categorised_as(
@@ -233,47 +148,41 @@ study = StudyDefinition(
         returning="code",
         return_expectations={
             "rate": "universal",
-            "category": {"ratios": generate_expectations_codes(codelist_1)},
-        },
-    ),
-
-    event_1_date = patients.with_these_clinical_events(
-        codelist=codelist_1,
-        between=codelist_1_date_range,
-        returning="date",
-        date_format="YYYY-MM-DD",
-        return_expectations={"date": {"earliest": "index_date", "latest": "last_day_of_month(index_date)"}},
-    ),
-
-    event_2=patients.with_these_medications(
-        codelist=codelist_2,
-        between=codelist_2_date_range,
-        returning="binary_flag",
-        return_expectations={"incidence": 0.5}
-    ),
-
-    event_2_code=patients.with_these_medications(
-        codelist=codelist_2,
-        between=codelist_2_date_range,
-        returning="code",
-        return_expectations={
-            "rate": "universal",
-            "category": {"ratios": generate_expectations_codes(codelist_2)},
-        },
-    ),
-
-    event_2_date = patients.with_these_medications(
-        codelist=codelist_2,
-        between=codelist_2_date_range,
-        returning="date",
-        return_expectations={"date": {"earliest": "index_date", "latest": "last_day_of_month(index_date)"}},
-    ),
-
-    event_measure = patients.satisfying(
-        f"""
-        event_1 = 1 {operator} event_2 = 1
+    population = patients.satisfying(
+        """
+        registered AND
+        NOT died AND
+        age >= 0 AND
+        age <= 120
         """,
-        return_expectations={"incidence": 0.5}
+
+        registered = patients.registered_as_of(
+            "index_date",
+            return_expectations={"incidence": 0.9},
+            ),
+
+        died = patients.died_from_any_cause(
+            on_or_before="index_date",
+            returning="binary_flag",
+            return_expectations={"incidence": 0.1}
+            ),
+        
+    ),
+
+    age=patients.age_as_of(
+            "index_date",
+            return_expectations={
+                "rate": "universal",
+                "int": {"distribution": "population_ages"},
+            },
+        ),
+    **demographics,
+    
+    # keep this in case we do want it later
+    practice=patients.registered_practice_as_of(
+        "index_date",
+        returning="pseudo_id",
+        return_expectations={"int" : {"distribution": "normal", "mean": 25, "stddev": 5}, "incidence" : 0.5}
     ),
 
 

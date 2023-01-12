@@ -15,13 +15,6 @@ actions:
   generate_study_population_report:
     run: cohortextractor:latest generate_cohort 
       --study-definition study_definition_report 
-      --param codelist_1_frequency="monthly"
-      --param codelist_2_comparison_date="event_1_date"
-      --param codelist_2_period_start="- 365"
-      --param codelist_2_period_end="+ 0"
-      --param operator="AND"
-      --param population="registered_adults"
-      --param breakdowns="sex,age_band,imd,region"
       --index-date-range "2019-01-01 to 2022-11-01 by month" 
       --output-dir=output/report
       --output-format=csv.gz
