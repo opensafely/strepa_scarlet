@@ -29,7 +29,7 @@ breakdowns = [x for x in params["breakdowns"].split(",")]
 if codelist_1_frequency == "weekly":
     codelist_1_date_range = ["index_date", "index_date + 7 days"]
 elif codelist_1_frequency == "monthly":
-    codelist_1_date_range = ["index_date", "last_day_of_month(index_date"]
+    codelist_1_date_range = ["index_date", "last_day_of_month(index_date)"]
 
 
 #codelist 2 date range
@@ -161,7 +161,7 @@ demographics = {
     "imd": (patients.categorised_as(
         {
             "0": "DEFAULT",
-            "1": """index_of_multiple_deprivation >=1 AND index_of_multiple_deprivation < 32844*1/5""",
+            "1": """index_of_multiple_deprivation >=0 AND index_of_multiple_deprivation < 32844*1/5""",
             "2": """index_of_multiple_deprivation >= 32844*1/5 AND index_of_multiple_deprivation < 32844*2/5""",
             "3": """index_of_multiple_deprivation >= 32844*2/5 AND index_of_multiple_deprivation < 32844*3/5""",
             "4": """index_of_multiple_deprivation >= 32844*3/5 AND index_of_multiple_deprivation < 32844*4/5""",
