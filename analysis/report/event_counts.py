@@ -12,42 +12,38 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--input_dir', type=str, required=True)
     parser.add_argument('--output_dir', type=str, required=True)
+    parser.add_argument('--measures', type=str, required=True)
     return parser.parse_args()
 
-def get_unique_patients(df):
-    return df.loc[:,"patient_id"].unique()
+def get_column_uniques(df, column):
+    return df.loc[:, column].unique()
 
-def get_number_of_events(df):
-    return df.loc[:,"event_measure"].sum()
-
-def get_number_practices(df):
-    return df.loc[:,"practice"].unique()
+def get_column_sum(df, column):
+    return df.loc[:, column].sum()
 
 def main():
     args = parse_args()
+    measures = args.measures.split(",")
 
-    patients = []
-    practices = []
-    events = {}
-    
-    for file in Path(args.input_dir).iterdir():
-        if match_input_files(file.name):
-            date = get_date_input_file(file.name)
-            df = pd.read_csv(file)
-            df["date"] = date
-            num_events = get_number_of_events(df)
-            events[date] = num_events
-            unique_patients = get_unique_patients(df)
-            patients.extend(unique_patients)
-            unique_practices = get_number_practices(df)
-            practices.extend(unique_practices)
+    for measure in measures:
+        patients = []
+        events = {}
+        
+        for file in Path(args.input_dir).iterdir():
+            if match_input_files(file.name):
+                date = get_date_input_file(file.name)
+                df = pd.read_csv(file)
+                df["date"] = date
+                num_events = get_column_sum(df, f"event_{measure}")
+                events[date] = num_events
+                unique_patients = get_column_uniques(df, "patient_id")
+                patients.extend(unique_patients)
 
-    total_events = round_to_nearest_100(sum(events.values()))
-    total_patients = round_to_nearest_100(len(np.unique(patients)))
-    total_practices = round_to_nearest_100(len(np.unique(practices)))
-    events_in_latest_period = round_to_nearest_100(events[max(events.keys())])
+        total_events = round_to_nearest_100(sum(events.values()))
+        total_patients = round_to_nearest_100(len(np.unique(patients)))
+        events_in_latest_period = round_to_nearest_100(events[max(events.keys())])
 
-    save_to_json({"total_events": total_events, "total_patients": total_patients, "events_in_latest_period": events_in_latest_period, "total_practices": total_practices}, f"{args.output_dir}/event_counts.json")
+        save_to_json({"total_events": total_events, "total_patients": total_patients, "events_in_latest_period": events_in_latest_period}, f"{args.output_dir}/event_counts_{measure}.json")
 
 if __name__ == "__main__":
     main()
