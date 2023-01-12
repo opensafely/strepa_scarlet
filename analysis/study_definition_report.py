@@ -29,7 +29,7 @@ breakdowns = [x for x in params["breakdowns"].split(",")]
 if codelist_1_frequency == "weekly":
     codelist_1_date_range = ["index_date", "index_date + 7 days"]
 elif codelist_1_frequency == "monthly":
-    codelist_1_date_range = ["index_date", "last_day_of_month(index_date"]
+    codelist_1_date_range = ["index_date", "last_day_of_month(index_date)"]
 
 
 #codelist 2 date range
