@@ -6,8 +6,14 @@ from cohortextractor import (
 )
 from codelists import *
 
-codelist_1 = allmed_review_codes
-codelist_2 = dmard_codes
+
+medication_codelists = {
+    "dmard": dmard_codes
+    }
+
+clinical_event_codelists = {
+    "medication_review": allmed_review_codes
+    }
 
 def generate_expectations_codes(codelist, incidence=0.5):
    
@@ -104,11 +110,58 @@ demographics = {
         
 }
 
-# if these populations are selected, age band will already be extracted
-# if population == "registered_children" or population == "registered_adults":
-#     demographics.pop("age_band", None)
 
-selected_demographics = {k: v for k, v in demographics.items() if k in breakdowns}
+medication_events = [{
+    f"event_{k}": 
+        patients.with_these_medications(
+        codelist=c,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="binary_flag",
+        include_date_of_match=True,
+        date_format="YYYY-MM",
+        return_expectations={"incidence": 0.5}
+    
+    ),
+    f"event_code_{k}": 
+        patients.with_these_medications(
+        codelist=c,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="code",
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": generate_expectations_codes(c)},
+        },
+    
+    )
+  
+} for k, c in medication_codelists.items()]
+
+clinical_events = [{
+    f"event_{k}":
+        patients.with_these_clinical_events(
+        codelist=c,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="binary_flag",
+        include_date_of_match=True,
+        date_format="YYYY-MM",
+        return_expectations={"incidence": 0.5}
+    ),
+    f"event_code_{k}":
+        patients.with_these_clinical_events(
+        codelist=c,
+        between=["index_date", "last_day_of_month(index_date)"],
+        returning="code",
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": generate_expectations_codes(c)},
+        },
+    )
+} for k, c in clinical_event_codelists.items()]
+
+
+# convert list of dicts into a single dict
+medication_variables = {k: v for d in medication_events for k, v in d.items()}
+clinical_event_variables = {k: v for d in clinical_events for k, v in d.items()}
 
 study = StudyDefinition(
     index_date="2019-01-01",
@@ -118,36 +171,6 @@ study = StudyDefinition(
         "incidence": 0.1,
     },
     
-    population= selected_population,
-    age=patients.age_as_of(
-            "index_date",
-            return_expectations={
-                "rate": "universal",
-                "int": {"distribution": "population_ages"},
-            },
-        ),
-    **selected_demographics,
-        
-  
-    practice=patients.registered_practice_as_of(
-        "index_date",
-        returning="pseudo_id",
-        return_expectations={"int" : {"distribution": "normal", "mean": 25, "stddev": 5}, "incidence" : 0.5}
-    ),
-      
-    event_1=patients.with_these_clinical_events(
-        codelist=codelist_1,
-        between=codelist_1_date_range,
-        returning="binary_flag",
-        return_expectations={"incidence": 0.5}
-    ),
-
-    event_1_code=patients.with_these_clinical_events(
-        codelist=codelist_1,
-        between=codelist_1_date_range,
-        returning="code",
-        return_expectations={
-            "rate": "universal",
     population = patients.satisfying(
         """
         registered AND
@@ -185,10 +208,11 @@ study = StudyDefinition(
         return_expectations={"int" : {"distribution": "normal", "mean": 25, "stddev": 5}, "incidence" : 0.5}
     ),
 
+    **medication_variables,
+    **clinical_event_variables,
+   
 
     
-    
-   
 )
 
 measures = [
