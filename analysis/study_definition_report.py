@@ -216,34 +216,32 @@ study = StudyDefinition(
 )
 
 measures = [
-    Measure(
-        id=f"event_rate",
-        numerator="event_measure",
-        denominator="population",
-        group_by=["practice"]
-    ),
-    Measure(
-        id=f"event_code_1_rate",
-        numerator="event_measure",
-        denominator="population",
-        group_by=["event_1_code"]
-    ),
-    Measure(
-        id=f"event_code_2_rate",
-        numerator="event_measure",
-        denominator="population",
-        group_by=["event_2_code"]
-    ),
 ]
 
-if breakdowns:
-    for b in breakdowns:
+# add measure for each codelist
+for k, c in medication_codelists.items():
+    measures.extend([
+        Measure(
+            id=f"event_{k}_rate",
+            numerator=f"event_{k}",
+            denominator="population",
+            group_by=["population"]
+        ),
+        Measure(
+            id=f"event_code_{k}_rate",
+            numerator=f"event_{k}",
+            denominator="population",
+            group_by=[f"event_code_{k}"]
+        )
+    ])
+
+    for d in demographics.keys():
         measures.append(
             Measure(
-                id=f"event_{b}_rate",
-                numerator="event_measure",
+                id=f"event_{k}_{d}_rate",
+                numerator=f"event_{k}",
                 denominator="population",
-                group_by=[b],
+                group_by=[d],
             ),
         )
 

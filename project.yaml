@@ -11,7 +11,6 @@ actions:
       highly_sensitive:
         cohort: output/report/input_ethnicity_report.csv.gz
 
-
   generate_study_population_report:
     run: cohortextractor:latest generate_cohort 
       --study-definition study_definition_report 
@@ -32,16 +31,13 @@ actions:
     outputs:
       highly_sensitive:
         cohort: output/report/joined/input_report_20*.csv.gz
-  
-  generate_measures_report:
-    run: >
-      python:latest python analysis/report/measures_report.py --breakdowns="sex,age_band,imd,region,ethnicity" --input_dir="output/report/joined" --measure="med_review"
 
+  generate_measures_report:
+    run: cohortextractor:latest generate_measures --study-definition study_definition_report --output-dir=output/report/joined
     needs: [join_cohorts_report]
     outputs:
       moderately_sensitive:
-        measure: output/report/joined/measure*rate.csv
-        decile_measure: output/report/joined/measure*rate_deciles.csv
+        measure_csv: output/report/joined/measure_event_*_rate.csv
 
   top_5_table_report:
     run: >
