@@ -34,7 +34,9 @@ def group_low_values(df, count_column, code_column, threshold):
     """
 
     # get sum of any values <= threshold
-    suppressed_count = df.loc[df[count_column] <= threshold, count_column].sum()
+    suppressed_count = df.loc[
+        df[count_column] <= threshold, count_column
+    ].sum()
     suppressed_df = df.loc[df[count_column] > threshold, count_column]
 
     # if suppressed values >0 ensure total suppressed count > threshold.
@@ -61,10 +63,16 @@ def group_low_values(df, count_column, code_column, threshold):
 
         # add suppressed count as "Other" row (if > threshold)
         if suppressed_count > threshold:
-            suppressed_count = {code_column: "Other", count_column: suppressed_count}
-            df = pd.concat([df, pd.DataFrame([suppressed_count])], ignore_index=True)
+            suppressed_count = {
+                code_column: "Other",
+                count_column: suppressed_count,
+            }
+            df = pandas.concat(
+                [df, pandas.DataFrame([suppressed_count])], ignore_index=True
+            )
 
     return df
+
 
 def round_values(x, base=5):
     rounded = x
@@ -75,10 +83,18 @@ def round_values(x, base=5):
             rounded = int(base * round(x / base))
     return rounded
 
+
 def create_top_5_code_table(
-    df, code_df, code_column, term_column, low_count_threshold, rounding_base, nrows=5
+    df,
+    code_df,
+    code_column,
+    term_column,
+    low_count_threshold,
+    rounding_base,
+    nrows=5,
 ):
-    """Creates a table of the top 5 codes recorded with the number of events and % makeup of each code.
+    """Creates a table of the top 5 codes recorded with the number of events and %
+       makeup of each code.
     Args:
         df: A measure table.
         code_df: A codelist table.
@@ -95,8 +111,6 @@ def create_top_5_code_table(
     # cast both code columns to str
     df[code_column] = df[code_column].astype(int).astype(str)
     code_df[code_column] = code_df[code_column].astype(int).astype(str)
-
-    
 
     # sum event counts over patients
     event_counts = df.sort_values(ascending=False, by="num")
@@ -117,7 +131,6 @@ def create_top_5_code_table(
         (event_counts["num"] / total_events) * 100, 2
     )
 
-  
     # Gets the human-friendly description of the code for the given row
     # e.g. "Systolic blood pressure".
     code_df[code_column] = code_df[code_column].astype(str)
@@ -125,7 +138,9 @@ def create_top_5_code_table(
         columns={term_column: "Description"}
     )
 
-    event_counts = event_counts.set_index(code_column).join(code_df).reset_index()
+    event_counts = (
+        event_counts.set_index(code_column).join(code_df).reset_index()
+    )
 
     # set description of "Other column" to something readable
     event_counts.loc[event_counts[code_column] == "Other", "Description"] = "-"
