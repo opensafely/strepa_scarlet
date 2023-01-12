@@ -6,14 +6,15 @@ from cohortextractor import (
 )
 from codelists import *
 
-
+# NOTE: temporarily duplicate review_codes to test top5 table
 medication_codelists = {
-    "dmard": dmard_codes
-    }
+    "dmard": dmard_codes,
+    "medications": allmed_review_codes,
+}
 
-clinical_event_codelists = {
-    "medication_review": allmed_review_codes
-    }
+
+clinical_event_codelists = {"medication_review": allmed_review_codes}
+
 
 def generate_expectations_codes(codelist, incidence=0.5):
    
