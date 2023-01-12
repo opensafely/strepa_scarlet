@@ -51,14 +51,15 @@ actions:
           # Only output the single summary file
           measure_csv: output/report/joined/measure_all.csv
 
-  # top_5_table_report:
-  #   run: >
-  #     python:latest python analysis/report/top_5_report.py
-  
-  #   needs: [generate_measures_report]
-  #   outputs:
-  #     moderately_sensitive:
-  #       tables: output/report/joined/top_5*.csv
+  top_5_table_report:
+    run: >
+      python:latest python analysis/report/top_5_report.py
+      --input-file output/report/joined/measure_all.csv
+      --output-dir output/report/joined
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        tables: output/report/joined/top_5*.csv
 
   # plot_measure_report:
   #   run: >
