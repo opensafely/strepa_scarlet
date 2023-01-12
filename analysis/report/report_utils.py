@@ -65,7 +65,7 @@ def plot_measures(
         bottom=0,
         top=1000
         if df[column_to_plot].isnull().values.all()
-        else df[column_to_plot].max()
+        else df[column_to_plot].max() * 1.05
     )
 
     if category:
@@ -78,64 +78,6 @@ def plot_measures(
     plt.savefig(f"output/{filename}.jpeg")
     plt.close()
 
-
-def plot_measures_interactive(df, filename, column_to_plot, category=False, y_label='Rate per 1000'):
-    fig = go.Figure()
-
-    if category:
-        for unique_category in df[category].unique():
-            
-            df_subset = df[df[category] == unique_category]
-            fig.add_trace(go.Scatter(
-                x=df_subset['date'], y=df_subset[column_to_plot], name=str(unique_category)))
-
-    else:
-        fig.add_trace(go.Scatter(
-            x=df['date'], y=df[column_to_plot]))
-
-    # Set title
-    # fig.update_layout(
-    #     title_text=title,
-    #     hovermode='x',
-    #     title_x=0.5,
-
-
-    # )
-
-    fig.update_yaxes(title=y_label)
-    fig.update_xaxes(title="Date")
-
-    # Add range slider
-    fig.update_layout(
-        xaxis=go.layout.XAxis(
-            rangeselector=dict(
-                buttons=list([
-                    dict(count=1,
-                         label="1m",
-                         step="month",
-                         stepmode="backward"),
-                    dict(count=6,
-                         label="6m",
-                         step="month",
-                         stepmode="backward"),
-
-                    dict(count=1,
-                         label="1y",
-                         step="year",
-                         stepmode="backward"),
-                    dict(step="all")
-                ])
-            ),
-            rangeslider=dict(
-                visible=True
-            ),
-            type="date"
-        )
-    )
-
-    # save plotly plot
-    fig.write_html(f"output/{filename}.html")
-   
 
 def coerce_numeric(table):
     """
