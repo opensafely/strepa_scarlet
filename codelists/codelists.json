@@ -1,3 +1,22 @@
 {
-  "files": {}
+  "files": {
+    "user-chriswood-all-medication-reviews.csv": {
+      "id": "user/chriswood/all-medication-reviews/26263b8b",
+      "url": "https://codelists.opensafely.org/codelist/user/chriswood/all-medication-reviews/26263b8b/",
+      "downloaded_at": "2023-01-11 17:25:21.361020Z",
+      "sha": "52044b82748e2b1e02d291c320f0927b16e662d5"
+    },
+    "opensafely-dmards.csv": {
+      "id": "opensafely/dmards/2020-06-23",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/dmards/2020-06-23/",
+      "downloaded_at": "2023-01-11 17:25:21.807438Z",
+      "sha": "06aae624d5a02a69c9e9e518a6d64e0a8e74e66e"
+    },
+    "opensafely-ethnicity-snomed-0removed.csv": {
+      "id": "opensafely/ethnicity-snomed-0removed/2e641f61",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/ethnicity-snomed-0removed/2e641f61/",
+      "downloaded_at": "2023-01-11 17:29:41.155409Z",
+      "sha": "8b849b5b785d80306e488d0109640c8c1d2da01b"
+    }
+  }
 }
