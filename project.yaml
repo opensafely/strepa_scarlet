@@ -61,22 +61,21 @@ actions:
       moderately_sensitive:
         tables: output/report/joined/top_5*.csv
 
-  # plot_measure_report:
-  #   run: >
-  #     python:latest python analysis/report/plot_measures_report.py --breakdowns="sex,imd,region,age_band,ethnicity"
-  #   needs: [generate_measures_report]
-  #   outputs:
-  #     moderately_sensitive:
-  #       measure: output/report/plot_measure*.jpeg
-  #       html: output/report/plot_measure*.html
+  plot_measure_report:
+    run: >
+      python:latest python analysis/report/plot_measures_report.py --measure_path="output/report/joined/measure_all.csv"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/plot_measure*.jpeg
 
-  # event_counts_report:
-  #   run: >
-  #     python:latest python analysis/report/event_counts.py --input_dir="output/report/joined" --output_dir="output/report"
-  #   needs: [join_cohorts_report]
-  #   outputs:
-  #     moderately_sensitive:
-  #       measure: output/report/event_counts.json
+  event_counts_report:
+    run: >
+      python:latest python analysis/report/event_counts.py --input_dir="output/report/joined" --output_dir="output/report" --measures="dmard,medication_review"
+    needs: [join_cohorts_report]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/event_counts_*.json
 
   # create_notebook:
   #   run: python:latest python analysis/report/create_notebook.py

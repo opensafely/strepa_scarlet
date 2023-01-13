@@ -1,57 +1,50 @@
 import pandas as pd
 import argparse
-from report_utils import plot_measures, plot_measures_interactive
+from report_utils import plot_measures
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--breakdowns", help="codelist to use")
+    parser.add_argument("--measure_path", help="path of combined measure file")
     args = parser.parse_args()
     return args
 
 def main():
     args = parse_args()
-    if args.breakdowns != "":
-
-        breakdowns = args.breakdowns.split(",")
-    else:
-        breakdowns = []
+    
     
   
-    df = pd.read_csv(f"output/report/joined/measure_total_rate.csv", parse_dates=["date"])
-    df = df.loc[df["value"] != "[Redacted]", :]
+    df = pd.read_csv(args.measure_path, parse_dates=["date"])
+    df = df.loc[df["value"] != "[REDACTED]", :]
     
-
+    # for each group, plot the measure
+    for group in df["name"].unique():
+        df_subset = df.loc[df["name"] == group, :]
+        df_subset["value"] = df_subset["value"].astype(float)
+        df_subset["rate"] = df_subset["value"] * 1000
     
-    plot_measures(
-    df,
-        filename=f"report/plot_measures",
-        column_to_plot="value",
-        y_label="Rate per 1000",
-        as_bar=False,
-        category=None,
-    )
-
-    plot_measures_interactive(df, filename=f"report/plot_measures", column_to_plot="value", category=None, y_label="Rate per 1000")
-  
-    for breakdown in breakdowns:
-        df = pd.read_csv(
-            f"output/report/joined/measure_{breakdown}_rate.csv", parse_dates=["date"]
-        )
-        df = df.loc[df["value"] != "[Redacted]", :]
-        df = df.sort_values(by=["date"])
-        
-
-    
-        plot_measures(
-            df,
-            filename=f"report/plot_measures_{breakdown}",
-            column_to_plot="value",
+        df_subset["group"] = df_subset["group"].astype(str)
+        if len(df_subset["group"].unique())==1:
+            # no breakdown
+            
+            plot_measures(
+            df_subset,
+                filename=f"report/plot_measures",
+                column_to_plot="rate",
+                y_label="Rate per 1000",
+                as_bar=False,
+                category=None,
+            )
+        else:
+            plot_measures(
+            df_subset,
+            filename=f"report/plot_measures_{group}",
+            column_to_plot="rate",
             y_label="Rate per 1000",
             as_bar=False,
-            category=breakdown,
+            category="group",
         )
-        plot_measures_interactive(df, filename=f"report/plot_measures_{breakdown}", column_to_plot="value", category=breakdown, y_label="Rate per 1000")
-  
+
+    
     
 if __name__ == "__main__":
     main()
