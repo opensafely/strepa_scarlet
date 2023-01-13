@@ -1,5 +1,6 @@
 import re
 import json
+import pandas
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
@@ -135,3 +136,21 @@ def plot_measures_interactive(df, filename, column_to_plot, category=False, y_la
     # save plotly plot
     fig.write_html(f"output/{filename}.html")
    
+
+def coerce_numeric(table):
+    """
+    The denominator and value columns should contain only numeric values
+    Other values, such as the REDACTED string, or values introduced by error,
+    should not be plotted
+    Use a copy to avoid SettingWithCopyWarning
+    Leave NaN values in df so missing data are not inferred
+    """
+    coerced = table.copy()
+    coerced["numerator"] = pandas.to_numeric(
+        coerced["numerator"], errors="coerce"
+    )
+    coerced["denominator"] = pandas.to_numeric(
+        coerced["denominator"], errors="coerce"
+    )
+    coerced["value"] = pandas.to_numeric(coerced["value"], errors="coerce")
+    return coerced

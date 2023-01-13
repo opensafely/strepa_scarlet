@@ -1,14 +1,27 @@
-import pandas as pd
+import pandas
 import numpy as np
 import argparse
+import pathlib
 
-codelist_1_path = "codelists/user-chriswood-all-medication-reviews.csv"
-codelist_2_path = "codelists/opensafely-dmards.csv"
+from report_utils import coerce_numeric
+
+
+MEASURE_TO_CODELIST = {
+    "event_code_dmard_rate": "codelists/opensafely-dmards.csv",
+    "event_code_medications_rate": "codelists/user-chriswood-all-medication-reviews.csv",
+}
+
+
+def get_measure_tables(input_file):
+    measure_table = pandas.read_csv(input_file)
+
+    return measure_table
 
 
 def write_csv(df, path, **kwargs):
     path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(path, **kwargs)
+
 
 def group_low_values(df, count_column, code_column, threshold):
     """Suppresses low values and groups suppressed values into
@@ -24,7 +37,9 @@ def group_low_values(df, count_column, code_column, threshold):
     """
 
     # get sum of any values <= threshold
-    suppressed_count = df.loc[df[count_column] <= threshold, count_column].sum()
+    suppressed_count = df.loc[
+        df[count_column] <= threshold, count_column
+    ].sum()
     suppressed_df = df.loc[df[count_column] > threshold, count_column]
 
     # if suppressed values >0 ensure total suppressed count > threshold.
@@ -51,10 +66,16 @@ def group_low_values(df, count_column, code_column, threshold):
 
         # add suppressed count as "Other" row (if > threshold)
         if suppressed_count > threshold:
-            suppressed_count = {code_column: "Other", count_column: suppressed_count}
-            df = pd.concat([df, pd.DataFrame([suppressed_count])], ignore_index=True)
+            suppressed_count = {
+                code_column: "Other",
+                count_column: suppressed_count,
+            }
+            df = pandas.concat(
+                [df, pandas.DataFrame([suppressed_count])], ignore_index=True
+            )
 
     return df
+
 
 def round_values(x, base=5):
     rounded = x
@@ -65,10 +86,18 @@ def round_values(x, base=5):
             rounded = int(base * round(x / base))
     return rounded
 
+
 def create_top_5_code_table(
-    df, code_df, code_column, term_column, low_count_threshold, rounding_base, nrows=5
+    df,
+    code_df,
+    code_column,
+    term_column,
+    low_count_threshold,
+    rounding_base,
+    nrows=5,
 ):
-    """Creates a table of the top 5 codes recorded with the number of events and % makeup of each code.
+    """Creates a table of the top 5 codes recorded with the number of events and %
+       makeup of each code.
     Args:
         df: A measure table.
         code_df: A codelist table.
@@ -85,8 +114,6 @@ def create_top_5_code_table(
     # cast both code columns to str
     df[code_column] = df[code_column].astype(int).astype(str)
     code_df[code_column] = code_df[code_column].astype(int).astype(str)
-
-    
 
     # sum event counts over patients
     event_counts = df.sort_values(ascending=False, by="num")
@@ -107,7 +134,6 @@ def create_top_5_code_table(
         (event_counts["num"] / total_events) * 100, 2
     )
 
-  
     # Gets the human-friendly description of the code for the given row
     # e.g. "Systolic blood pressure".
     code_df[code_column] = code_df[code_column].astype(str)
@@ -115,7 +141,9 @@ def create_top_5_code_table(
         columns={term_column: "Description"}
     )
 
-    event_counts = event_counts.set_index(code_column).join(code_df).reset_index()
+    event_counts = (
+        event_counts.set_index(code_column).join(code_df).reset_index()
+    )
 
     # set description of "Other column" to something readable
     event_counts.loc[event_counts[code_column] == "Other", "Description"] = "-"
@@ -131,65 +159,69 @@ def create_top_5_code_table(
     return event_counts.head(5)
 
 
-    
 def main():
-    code_df = pd.read_csv(f"output/report/joined/measure_event_1_code_rate.csv")
-    codelist = pd.read_csv(f"{codelist_1_path}")
-    
-    events_per_code = code_df.groupby("event_1_code")[["event_measure"]].sum().reset_index()
-    events_per_code.columns = ["code", "num"]
+    args = parse_args()
+    input_file = args.input_file
+    output_dir = args.output_dir
 
-   
-    top_5_code_table = create_top_5_code_table(
-        df=events_per_code,
-        code_df=codelist,
-        code_column="code",
-        term_column="term",
-        low_count_threshold=7,
-        rounding_base=7,
+    measure_table = get_measure_tables(input_file)
+    measure_table = coerce_numeric(measure_table)
+
+    for measure, codelist in MEASURE_TO_CODELIST.items():
+        codelist = pandas.read_csv(codelist)
+        code_df = measure_table[measure_table["name"] == measure]
+        # Necessary because measure table has some non-numeric groups
+        code_df["group"] = pandas.to_numeric(code_df["group"], errors="coerce")
+
+        if "vpid" in codelist.columns:
+            term_column = "bnf_name"
+            code_df = code_df.merge(
+                codelist, left_on="group", right_on="snomed_id", how="left"
+            )
+            code_df = code_df.set_index("vpid")
+            codelist = (
+                codelist.groupby("vpid")[["bnf_name"]].first().reset_index()
+            )
+            codelist = codelist.rename(columns={"vpid": "code"})
+            code_df = (
+                code_df.groupby("vpid")[["numerator"]].sum().reset_index()
+            )
+        else:
+            term_column = "term"
+            code_df = (
+                code_df.groupby("group")[["numerator"]].sum().reset_index()
+            )
+
+        # drop all columns except code and numerator
+        code_df.columns = ["code", "num"]
+
+        top_5_code_table = create_top_5_code_table(
+            df=code_df,
+            code_df=codelist,
+            code_column="code",
+            term_column=term_column,
+            low_count_threshold=7,
+            rounding_base=7,
+        )
+        top_5_code_table.to_csv(
+            output_dir / f"top_5_code_table_{measure}.csv", index=False
+        )
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--input-file",
+        required=True,
+        help="Path to single joined measures file",
     )
-    top_5_code_table.to_csv(f"output/report/joined/top_5_code_table_1.csv", index=False)
-
-
-    code_df_2 = pd.read_csv(f"output/report/joined/measure_event_2_code_rate.csv")
-
-    
-
-    codelist_2 = pd.read_csv(f"{codelist_2_path}")
-  
-    # map snomed_id to vpid using codelist_2
-    code_df_2 = code_df_2.merge(codelist_2, left_on="event_2_code",right_on="snomed_id", how="left")
-   
-
-    # set vpid to index
-    code_df_2 = code_df_2.set_index("vpid")
-
-    # group code_df_2 by vpid
-    code_df_2 = code_df_2.groupby("vpid")[["event_measure", "population"]].sum().reset_index()
-    
-    # drop all columns except event_2_code and event_measure
-    code_df_2 = code_df_2[["vpid", "event_measure"]]
-    # events_per_code = code_df_2.groupby("event_2_code")[["event_measure"]].sum().reset_index()
-    code_df_2.columns = ["code", "num"]
-
-
-    # group codelist_2 by vpid
-    codelist_2 = codelist_2.groupby("vpid")[["bnf_name"]].first().reset_index()
-
-
-    codelist_2 = codelist_2.rename(columns={"vpid": "code"})
-     
-
-    top_5_code_table = create_top_5_code_table(
-        df=code_df_2,
-        code_df=codelist_2,
-        code_column="code",
-        term_column="bnf_name",
-        low_count_threshold=7,
-        rounding_base=7,
+    parser.add_argument(
+        "--output-dir",
+        required=True,
+        type=pathlib.Path,
+        help="Path to the output directory",
     )
-   
-    top_5_code_table.to_csv(f"output/report/joined/top_5_code_table_2.csv", index=False)
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
