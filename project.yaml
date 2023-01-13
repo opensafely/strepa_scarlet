@@ -489,12 +489,6 @@ actions:
       moderately_sensitive:
         measure: output/report/weekly/results/invasive_strep_a_diagnoses_by_subgroup.png
 
-  # create_notebook:
-  #   run: python:latest python analysis/report/create_notebook.py
-  #   outputs:
-  #     moderately_sensitive:
-  #       notebook: output/report/report.ipynb
-
   # generate_notebook:
   #   run: jupyter:latest jupyter nbconvert /workspace/output/report/report.ipynb --execute --to html --output-dir=/workspace/output/report --ExecutePreprocessor.timeout=86400 --no-input
   #   needs: [create_notebook, event_counts_report, deciles_chart_report, top_5_table_report, plot_measure_report]
