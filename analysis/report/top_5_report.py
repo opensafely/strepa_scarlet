@@ -3,6 +3,9 @@ import numpy as np
 import argparse
 import pathlib
 
+from report_utils import coerce_numeric
+
+
 MEASURE_TO_CODELIST = {
     "event_code_dmard_rate": "codelists/opensafely-dmards.csv",
     "event_code_medications_rate": "codelists/user-chriswood-all-medication-reviews.csv",
@@ -162,13 +165,13 @@ def main():
     output_dir = args.output_dir
 
     measure_table = get_measure_tables(input_file)
+    measure_table = coerce_numeric(measure_table)
 
     for measure, codelist in MEASURE_TO_CODELIST.items():
         codelist = pandas.read_csv(codelist)
         code_df = measure_table[measure_table["name"] == measure]
         # Necessary because measure table has some non-numeric groups
         code_df["group"] = pandas.to_numeric(code_df["group"], errors="coerce")
-        code_df["numerator"] = pandas.to_numeric(code_df["numerator"])
 
         if "vpid" in codelist.columns:
             term_column = "bnf_name"
