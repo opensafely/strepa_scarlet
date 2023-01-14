@@ -1,34 +1,54 @@
 import pandas as pd
 import argparse
-from report_utils import plot_measures
+import pathlib
+from report_utils import plot_measures, coerce_numeric
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--measure_path", help="path of combined measure file")
+    parser.add_argument("--measure-path", help="path of combined measure file")
+    parser.add_argument(
+        "--output-dir",
+        required=True,
+        type=pathlib.Path,
+        help="Path to the output directory",
+    )
     args = parser.parse_args()
     return args
 
 
 def main():
     args = parse_args()
+    measure_path = args.measure_path
+    output_dir = args.output_dir
 
-    df = pd.read_csv(args.measure_path, parse_dates=["date"])
-    df = df.loc[df["value"] != "[REDACTED]", :]
+    df = pd.read_csv(measure_path, parse_dates=["date"])
+    df = coerce_numeric(df)
+    df["rate"] = 1000 * df["value"]
+
+    # Stacked bar chart of population measures
+    # Might have to filter for the medication measures
+    # TODO: name has extra text i.e. event_*_rate
+    population_measures = df[df.group == "population"]
+    plot_measures(
+        population_measures,
+        filename=output_dir / "bar_measures",
+        column_to_plot="rate",
+        y_label="Rate per 1000",
+        as_bar=True,
+        category="name",
+    )
 
     # for each group, plot the measure
-    for group in df["name"].unique():
-        df_subset = df.loc[df["name"] == group, :]
-        df_subset["value"] = df_subset["value"].astype(float)
+    for group, df_subset in df.groupby("name"):
         df_subset["rate"] = df_subset["value"] * 1000
 
-        df_subset["group"] = df_subset["group"].astype(str)
         if len(df_subset["group"].unique()) == 1:
             # no breakdown
 
             plot_measures(
                 df_subset,
-                filename="report/plot_measures",
+                filename=output_dir / "plot_measures",
                 column_to_plot="rate",
                 y_label="Rate per 1000",
                 as_bar=False,
@@ -37,7 +57,7 @@ def main():
         else:
             plot_measures(
                 df_subset,
-                filename=f"report/plot_measures_{group}",
+                filename=output_dir / f"plot_measures_{group}",
                 column_to_plot="rate",
                 y_label="Rate per 1000",
                 as_bar=False,
