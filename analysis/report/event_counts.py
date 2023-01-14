@@ -5,21 +5,26 @@ import pandas as pd
 import argparse
 import numpy as np
 
+
 def round_to_nearest_100(x):
     return int(round(x, -2))
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input_dir', type=str, required=True)
-    parser.add_argument('--output_dir', type=str, required=True)
-    parser.add_argument('--measures', type=str, required=True)
+    parser.add_argument("--input-dir", type=str, required=True)
+    parser.add_argument("--output-dir", type=str, required=True)
+    parser.add_argument("--measures", type=str, required=True)
     return parser.parse_args()
+
 
 def get_column_uniques(df, column):
     return df.loc[:, column].unique()
 
+
 def get_column_sum(df, column):
     return df.loc[:, column].sum()
+
 
 def main():
     args = parse_args()

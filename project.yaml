@@ -63,15 +63,17 @@ actions:
 
   plot_measure_report:
     run: >
-      python:latest python analysis/report/plot_measures_report.py --measure_path="output/report/joined/measure_all.csv"
+      python:latest python analysis/report/plot_measures_report.py
+      --measure-path output/report/joined/measure_all.csv
+      --output-dir output/report/joined
     needs: [join_measures]
     outputs:
       moderately_sensitive:
-        measure: output/report/plot_measure*.jpeg
+        measure: output/report/joined/plot_measure*.jpeg
 
   event_counts_report:
     run: >
-      python:latest python analysis/report/event_counts.py --input_dir="output/report/joined" --output_dir="output/report" --measures="dmard,medication_review"
+      python:latest python analysis/report/event_counts.py --input-dir="output/report/joined" --output-dir="output/report" --measures="amoxicillin,azithromycin,clarithromycin,erythromycin,phenoxymethypenicillin"
     needs: [join_cohorts_report]
     outputs:
       moderately_sensitive:
