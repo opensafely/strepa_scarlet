@@ -33,7 +33,7 @@ def main():
     for measure in measures:
         patients = []
         events = {}
-        
+
         for file in Path(args.input_dir).iterdir():
             if match_input_files(file.name):
                 date = get_date_input_file(file.name)
@@ -46,9 +46,19 @@ def main():
 
         total_events = round_to_nearest_100(sum(events.values()))
         total_patients = round_to_nearest_100(len(np.unique(patients)))
-        events_in_latest_period = round_to_nearest_100(events[max(events.keys())])
+        events_in_latest_period = round_to_nearest_100(
+            events[max(events.keys())]
+        )
 
-        save_to_json({"total_events": total_events, "total_patients": total_patients, "events_in_latest_period": events_in_latest_period}, f"{args.output_dir}/event_counts_{measure}.json")
+        save_to_json(
+            {
+                "total_events": total_events,
+                "total_patients": total_patients,
+                "events_in_latest_period": events_in_latest_period,
+            },
+            f"{args.output_dir}/event_counts_{measure}.json",
+        )
+
 
 if __name__ == "__main__":
     main()
