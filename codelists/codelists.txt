@@ -1,3 +1,6 @@
-user/chriswood/all-medication-reviews/26263b8b/
-opensafely/dmards/2020-06-23/
+opensafely/phenoxymethypenicillin/3a256b20/
+opensafely/amoxicillin-oral/164af813/
+opensafely/clarithromycin-oral/080684b6/
+opensafely/azithromycin-medication/2020-07-06/
+opensafely/erythromycin-oral/7d3b84dd/
 opensafely/ethnicity-snomed-0removed/2e641f61/

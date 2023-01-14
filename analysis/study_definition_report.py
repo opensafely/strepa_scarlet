@@ -3,16 +3,35 @@ from cohortextractor import (
     patients,
     Measure,
 )
-from codelists import dmard_codes, allmed_review_codes
 
-# NOTE: temporarily duplicate review_codes to test top5 table
+from codelists import (
+    amoxicillin_codes,
+    azithromycin_codes,
+    clarithromycin_codes,
+    erythromycin_codes,
+    phenoxymethypenicillin_codes,
+)
+
 medication_codelists = {
-    "dmard": dmard_codes,
-    "medications": allmed_review_codes,
+    "amoxicillin": amoxicillin_codes,
+    "azithromycin": azithromycin_codes,
+    "clarithromycin": clarithromycin_codes,
+    "erythromycin": erythromycin_codes,
+    "phenoxymethypenicillin": phenoxymethypenicillin_codes,
 }
 
 
-clinical_event_codelists = {"medication_review": allmed_review_codes}
+clinical_event_codelists = {}
+
+
+def generate_all_medications():
+    return {
+        "medication_any": patients.satisfying(
+            " OR ".join(
+                list(map(lambda x: f"event_{x}", medication_codelists.keys()))
+            )
+        )
+    }
 
 
 def generate_expectations_codes(codelist, incidence=0.5):
@@ -216,6 +235,7 @@ study = StudyDefinition(
     ),
     **medication_variables,
     **clinical_event_variables,
+    **generate_all_medications(),
 )
 
 measures = []
