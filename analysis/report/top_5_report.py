@@ -7,8 +7,11 @@ from report_utils import coerce_numeric
 
 
 MEASURE_TO_CODELIST = {
-    "event_code_dmard_rate": "codelists/opensafely-dmards.csv",
-    "event_code_medications_rate": "codelists/user-chriswood-all-medication-reviews.csv",
+    "event_code_amoxicillin_rate": "codelists/opensafely-amoxicillin-oral.csv",
+    "event_code_azithromycin_rate": "codelists/opensafely-azithromycin-medication.csv",
+    "event_code_clarithromycin_rate": "codelists/opensafely-clarithromycin-oral.csv",
+    "event_code_erythromycin_rate": "codelists/opensafely-erythromycin-oral.csv",
+    "event_code_phenomoxymethypenicillin_rate": "codelists/opensafely-phenoxymethypenicillin.csv",
 }
 
 
@@ -112,14 +115,15 @@ def create_top_5_code_table(
     """
 
     # cast both code columns to str
-    df[code_column] = df[code_column].astype(int).astype(str)
+    df_code = "code"
+    df[df_code] = df[df_code].astype(int).astype(str)
     code_df[code_column] = code_df[code_column].astype(int).astype(str)
 
     # sum event counts over patients
     event_counts = df.sort_values(ascending=False, by="num")
 
     event_counts = group_low_values(
-        event_counts, "num", code_column, low_count_threshold
+        event_counts, "num", df_code, low_count_threshold
     )
 
     # round
@@ -141,15 +145,13 @@ def create_top_5_code_table(
         columns={term_column: "Description"}
     )
 
-    event_counts = (
-        event_counts.set_index(code_column).join(code_df).reset_index()
-    )
+    event_counts = event_counts.set_index(df_code).join(code_df).reset_index()
 
     # set description of "Other column" to something readable
-    event_counts.loc[event_counts[code_column] == "Other", "Description"] = "-"
+    event_counts.loc[event_counts[df_code] == "Other", "Description"] = "-"
 
     # Rename the code column to something consistent
-    event_counts.rename(columns={code_column: "Code"}, inplace=True)
+    event_counts.rename(columns={df_code: "Code"}, inplace=True)
 
     # drop events column
     event_counts = event_counts.loc[
@@ -173,6 +175,7 @@ def main():
         # Necessary because measure table has some non-numeric groups
         code_df["group"] = pandas.to_numeric(code_df["group"], errors="coerce")
 
+        code_column = "code"
         if "vpid" in codelist.columns:
             term_column = "bnf_name"
             code_df = code_df.merge(
@@ -187,18 +190,27 @@ def main():
                 code_df.groupby("vpid")[["numerator"]].sum().reset_index()
             )
         else:
-            term_column = "term"
+            # TODO: Do we also want to group on bnf code?
+            # TODO: Can we make the codelists with consistent names?
+            # TODO: If not, is this the full list?
+            if "dmd_type" in codelist.columns:
+                term_column = "dmd_name"
+                code_column = "dmd_id"
+            elif "type" in codelist.columns:
+                term_column = "nm"
+                code_column = "id"
+            else:
+                term_column = "term"
             code_df = (
                 code_df.groupby("group")[["numerator"]].sum().reset_index()
             )
 
         # drop all columns except code and numerator
         code_df.columns = ["code", "num"]
-
         top_5_code_table = create_top_5_code_table(
             df=code_df,
             code_df=codelist,
-            code_column="code",
+            code_column=code_column,
             term_column=term_column,
             low_count_threshold=7,
             rounding_base=7,
