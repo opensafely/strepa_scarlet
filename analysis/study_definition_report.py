@@ -147,7 +147,7 @@ medication_events = [
             returning="binary_flag",
             include_date_of_match=True,
             date_format="YYYY-MM",
-            return_expectations={"incidence": 0.5},
+            return_expectations={"incidence": 0.1},
         ),
         f"event_code_{k}": patients.with_these_medications(
             codelist=c,
@@ -170,7 +170,7 @@ clinical_events = [
             returning="binary_flag",
             include_date_of_match=True,
             date_format="YYYY-MM",
-            return_expectations={"incidence": 0.5},
+            return_expectations={"incidence": 0.1},
         ),
         f"event_code_{k}": patients.with_these_clinical_events(
             codelist=c,
