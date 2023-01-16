@@ -69,7 +69,7 @@ actions:
     needs: [join_measures]
     outputs:
       moderately_sensitive:
-        measure: output/report/joined/plot_measure*.jpeg
+        measure: output/report/joined/*measures*.jpeg
 
   event_counts_report:
     run: >

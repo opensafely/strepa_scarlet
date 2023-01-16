@@ -48,7 +48,7 @@ def main():
 
             plot_measures(
                 df_subset,
-                filename=output_dir / "plot_measures",
+                filename=output_dir / f"plot_measures_{group}",
                 column_to_plot="rate",
                 y_label="Rate per 1000",
                 as_bar=False,
