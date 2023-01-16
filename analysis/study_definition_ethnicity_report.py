@@ -1,6 +1,6 @@
 from cohortextractor import StudyDefinition, patients
 
-from codelists import *
+from codelists import ethnicity_codes
 
 
 end_date = "2022-11-01"
@@ -24,15 +24,14 @@ study = StudyDefinition(
         },
         return_expectations={
             "category": {
-                "ratios":
-                    {
-                        "White": 0.2,
-                        "Mixed": 0.2,
-                        "South Asian": 0.2,
-                        "Black": 0.2,
-                        "Other": 0.2
-                    }
-                },
+                "ratios": {
+                    "White": 0.2,
+                    "Mixed": 0.2,
+                    "South Asian": 0.2,
+                    "Black": 0.2,
+                    "Other": 0.2,
+                }
+            },
             "incidence": 0.4,
         },
         ethnicity_sus=patients.with_ethnicity_from_sus(
@@ -45,7 +44,7 @@ study = StudyDefinition(
                         "2": 0.2,
                         "3": 0.2,
                         "4": 0.2,
-                        "5": 0.2
+                        "5": 0.2,
                     }
                 },
                 "incidence": 0.4,
@@ -63,7 +62,7 @@ study = StudyDefinition(
                         "2": 0.4,
                         "3": 0.2,
                         "4": 0.2,
-                        "5": 0.2
+                        "5": 0.2,
                     }
                 },
                 "incidence": 0.75,

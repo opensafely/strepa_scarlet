@@ -9,14 +9,28 @@ ethnicity_codes = codelist_from_csv(
     category_column="Grouping_6",
 )
 
-dmard_codes = codelist_from_csv(
-    "codelists/opensafely-dmards.csv",
+amoxicillin_codes = codelist_from_csv(
+    "codelists/opensafely-amoxicillin-oral.csv",
     system="snomed",
-    column="snomed_id",
+    column="dmd_id",
 )
-
-allmed_review_codes = codelist_from_csv(
-    "codelists/user-chriswood-all-medication-reviews.csv",
+azithromycin_codes = codelist_from_csv(
+    "codelists/opensafely-azithromycin-medication.csv",
     system="snomed",
-    column="code",
+    column="id",
+)
+clarithromycin_codes = codelist_from_csv(
+    "codelists/opensafely-clarithromycin-oral.csv",
+    system="snomed",
+    column="dmd_id",
+)
+erythromycin_codes = codelist_from_csv(
+    "codelists/opensafely-erythromycin-oral.csv",
+    system="snomed",
+    column="dmd_id",
+)
+phenoxymethypenicillin_codes = codelist_from_csv(
+    "codelists/opensafely-phenoxymethypenicillin.csv",
+    system="snomed",
+    column="dmd_id",
 )

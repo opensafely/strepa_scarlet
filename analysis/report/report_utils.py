@@ -4,10 +4,12 @@ import pandas
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
+
 def save_to_json(d, filename: str):
     """Saves dictionary to json file"""
     with open(filename, "w") as f:
         json.dump(d, f)
+
 
 def match_input_files(file: str) -> bool:
     """Checks if file name has format outputted by cohort extractor"""
@@ -25,6 +27,7 @@ def get_date_input_file(file: str) -> str:
         date = re.search(r"input_report_(.*).csv.gz", file)
         return date.group(1)
 
+
 def plot_measures(
     df,
     filename: str,
@@ -34,7 +37,7 @@ def plot_measures(
     category: str = None,
 ):
     """Produce time series plot from measures table.  One line is plotted for each sub
-    category within the category column. Saves output in 'output' dir as jpeg file.
+    category within the category column. Saves output as jpeg file.
     Args:
         df: A measure table
         column_to_plot: Column name for y-axis values
@@ -42,40 +45,44 @@ def plot_measures(
         as_bar: Boolean indicating if bar chart should be plotted instead of line chart. Only valid if no categories.
         category: Name of column indicating different categories
     """
-    plt.figure(figsize=(15, 8))
+    plt.figure(figsize=(18, 8))
+    y_max = df[column_to_plot].max() * 1.05
+    # Ignore timestamp - this could be done at load time
+    df["date"] = df["date"].dt.date
+    df = df.set_index("date")
     if category:
-        df[category] = df[category].fillna("Missing")
-        for unique_category in sorted(df[category].unique()):
-
-            # subset on category column and sort by date
-            df_subset = df[df[category] == unique_category].sort_values("date")
-
-            plt.plot(df_subset["date"], df_subset[column_to_plot])
+        if as_bar:
+            df.pivot(columns=category, values=column_to_plot).plot.bar(
+                stacked=True
+            )
+            y_max = df.groupby(["date"])[column_to_plot].sum().max() * 1.05
+        else:
+            df.groupby(category)[column_to_plot].plot()
     else:
         if as_bar:
-            df.plot.bar("date", column_to_plot, legend=False)
+            df[column_to_plot].bar(legend=False)
         else:
-            plt.plot(df["date"], df[column_to_plot])
+            df[column_to_plot].plot(legend=False)
 
-    x_labels = sorted(df["date"].unique())
     plt.ylabel(y_label)
     plt.xlabel("Date")
-    plt.xticks(x_labels, rotation="vertical")
+    plt.xticks(rotation="vertical")
     plt.ylim(
         bottom=0,
-        top=1000
-        if df[column_to_plot].isnull().values.all()
-        else df[column_to_plot].max() * 1.05
+        top=1000 if df[column_to_plot].isnull().values.all() else y_max,
     )
 
     if category:
         plt.legend(
-            sorted(df[category].unique()), bbox_to_anchor=(1.04, 1), loc="upper left"
+            sorted(df[category].unique()),
+            bbox_to_anchor=(1.04, 1),
+            loc="upper left",
+            prop={"size": 6},
         )
 
     plt.tight_layout()
 
-    plt.savefig(f"output/{filename}.jpeg")
+    plt.savefig(f"{filename}.jpeg")
     plt.close()
 
 
@@ -95,4 +102,5 @@ def coerce_numeric(table):
         coerced["denominator"], errors="coerce"
     )
     coerced["value"] = pandas.to_numeric(coerced["value"], errors="coerce")
+    coerced["group"] = coerced["group"].astype(str)
     return coerced
