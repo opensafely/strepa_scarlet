@@ -18,11 +18,11 @@
       "downloaded_at": "2023-01-13 12:34:47.149645Z",
       "sha": "e2dc0db934ed8791702d76ff8b698d349328083b"
     },
-    "opensafely-azithromycin-medication.csv": {
-      "id": "opensafely/azithromycin-medication/2020-07-06",
-      "url": "https://codelists.opensafely.org/codelist/opensafely/azithromycin-medication/2020-07-06/",
-      "downloaded_at": "2023-01-13 12:34:47.523431Z",
-      "sha": "8513be43dc492ac88d426e71eca63a603dd302f1"
+    "opensafely-azithromycin-oral.csv": {
+      "id": "opensafely/azithromycin-oral/42faf594",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/azithromycin-oral/42faf594/",
+      "downloaded_at": "2023-01-16 19:46:21.932697Z",
+      "sha": "4a3660b385826dda2ee428b9cd64868e904a1ea6"
     },
     "opensafely-erythromycin-oral.csv": {
       "id": "opensafely/erythromycin-oral/7d3b84dd",

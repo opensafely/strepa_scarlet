@@ -15,9 +15,9 @@ amoxicillin_codes = codelist_from_csv(
     column="dmd_id",
 )
 azithromycin_codes = codelist_from_csv(
-    "codelists/opensafely-azithromycin-medication.csv",
+    "codelists/opensafely-azithromycin-oral.csv",
     system="snomed",
-    column="id",
+    column="dmd_id",
 )
 clarithromycin_codes = codelist_from_csv(
     "codelists/opensafely-clarithromycin-oral.csv",

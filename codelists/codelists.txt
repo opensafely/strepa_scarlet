@@ -1,6 +1,6 @@
 opensafely/phenoxymethypenicillin/3a256b20/
 opensafely/amoxicillin-oral/164af813/
 opensafely/clarithromycin-oral/080684b6/
-opensafely/azithromycin-medication/2020-07-06/
+opensafely/azithromycin-oral/42faf594/
 opensafely/erythromycin-oral/7d3b84dd/
 opensafely/ethnicity-snomed-0removed/2e641f61/

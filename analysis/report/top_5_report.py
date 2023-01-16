@@ -8,7 +8,7 @@ from report_utils import coerce_numeric
 
 MEASURE_TO_CODELIST = {
     "event_code_amoxicillin_rate": "codelists/opensafely-amoxicillin-oral.csv",
-    "event_code_azithromycin_rate": "codelists/opensafely-azithromycin-medication.csv",
+    "event_code_azithromycin_rate": "codelists/opensafely-azithromycin-oral.csv",
     "event_code_clarithromycin_rate": "codelists/opensafely-clarithromycin-oral.csv",
     "event_code_erythromycin_rate": "codelists/opensafely-erythromycin-oral.csv",
     "event_code_phenomoxymethypenicillin_rate": "codelists/opensafely-phenoxymethypenicillin.csv",
@@ -191,14 +191,9 @@ def main():
             )
         else:
             # TODO: Do we also want to group on bnf code?
-            # TODO: Can we make the codelists with consistent names?
-            # TODO: If not, is this the full list?
             if "dmd_type" in codelist.columns:
                 term_column = "dmd_name"
                 code_column = "dmd_id"
-            elif "type" in codelist.columns:
-                term_column = "nm"
-                code_column = "id"
             else:
                 term_column = "term"
             code_df = (
