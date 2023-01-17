@@ -35,10 +35,8 @@ clinical_event_codelists = {
 frequency = params.get("frequency", None)
 if frequency == "weekly":
     ENDDATE = "index_date + 6 days"
-elif frequency == "monthly":
-    ENDDATE = "last_day_of_month(index_date)"
 else:
-    ENDDATE = "1900-01-01"
+    ENDDATE = "last_day_of_month(index_date)"
 
 
 def generate_all_medications():
