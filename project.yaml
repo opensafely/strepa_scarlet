@@ -129,6 +129,102 @@ actions:
       moderately_sensitive:
         measure: output/report/joined/*measures*.jpeg
 
+  panel_plots_amox:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/joined/measure_all.csv
+      --measures-pattern "event_amoxicillin*_rate"
+      --output-dir output/report/joined
+      --output-name "Amoxicillin"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/joined/Amoxicillin.png
+
+  panel_plots_azithro:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/joined/measure_all.csv
+      --measures-pattern "event_azithromycin*_rate"
+      --output-dir output/report/joined
+      --output-name "Azithromycin"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/joined/Azithromycin.png
+
+  panel_plots_clarithro:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/joined/measure_all.csv
+      --measures-pattern "event_clarithromycin*_rate"
+      --output-dir output/report/joined
+      --output-name "Clarithromycin"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/joined/Clarithromycin.png
+
+  panel_plots_pheno:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/joined/measure_all.csv
+      --measures-pattern "event_phenoxymethypenicillin*_rate"
+      --output-dir output/report/joined
+      --output-name "Phenoxymethypenicillin"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/joined/Phenoxymethypenicillin.png
+
+  panel_plots_erythro:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/joined/measure_all.csv
+      --measures-pattern "event_erythromycin*_rate"
+      --output-dir output/report/joined
+      --output-name "Erythromycin"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/joined/Erythromycin.png
+
+  panel_plots_scarlet:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/joined/measure_all.csv
+      --measures-pattern "event_scarlet_fever*_rate"
+      --output-dir output/report/joined
+      --output-name "scarlet_fever"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/joined/scarlet_fever.png
+
+  panel_plots_strp:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/joined/measure_all.csv
+      --measures-pattern "event_strep_a_sore_throat*_rate"
+      --output-dir output/report/joined
+      --output-name "strep_a_sore_throat"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/joined/strep_a_sore_throat.png
+
+  panel_plots_igas:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/joined/measure_all.csv
+      --measures-pattern "event_invasive_strep_a*_rate"
+      --output-dir output/report/joined
+      --output-name "invasive_strep_a"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/joined/invasive_strep_a.png
+
   event_counts_report:
     run: >
       python:latest python analysis/report/event_counts.py --input-dir="output/report/joined" --output-dir="output/report" --measures="amoxicillin,azithromycin,clarithromycin,erythromycin,phenoxymethypenicillin"
