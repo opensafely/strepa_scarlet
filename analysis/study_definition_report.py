@@ -275,3 +275,31 @@ for k, c in medication_codelists.items():
                 group_by=[d],
             ),
         )
+
+for k, c in clinical_event_codelists.items():
+    measures.extend(
+        [
+            Measure(
+                id=f"event_{k}_rate",
+                numerator=f"event_{k}",
+                denominator="population",
+                group_by=["population"],
+            ),
+            Measure(
+                id=f"event_code_{k}_rate",
+                numerator=f"event_{k}",
+                denominator="population",
+                group_by=[f"event_code_{k}"],
+            ),
+        ]
+    )
+
+    for d in demographics.keys():
+        measures.append(
+            Measure(
+                id=f"event_{k}_{d}_rate",
+                numerator=f"event_{k}",
+                denominator="population",
+                group_by=[d],
+            ),
+        )
