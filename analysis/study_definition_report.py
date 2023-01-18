@@ -10,6 +10,9 @@ from codelists import (
     clarithromycin_codes,
     erythromycin_codes,
     phenoxymethypenicillin_codes,
+    scarlet_fever_codes,
+    invasive_strep_a_codes,
+    strep_a_sore_throat_codes,
 )
 
 medication_codelists = {
@@ -21,7 +24,11 @@ medication_codelists = {
 }
 
 
-clinical_event_codelists = {}
+clinical_event_codelists = {
+    "scarlet_fever": scarlet_fever_codes,
+    "invasive_strep_a": invasive_strep_a_codes,
+    "strep_a_sore_throat": strep_a_sore_throat_codes,
+}
 
 
 def generate_all_medications():
