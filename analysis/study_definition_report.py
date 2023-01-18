@@ -49,14 +49,6 @@ def generate_all_medications_2_weeks(clinical_events_codelists):
         ) for clinical_key in clinical_events_codelists.keys()
     }
 
-def generate_all_clinical_events_with_medications():
-    return {
-        "all_clinical_events_with_medication": patients.satisfying(
-            " AND ".join(
-                list(map(lambda x: f"{x}_medication_any_2_weeks", clinical_event_codelists.keys()))
-            )
-        ),
-    }
 
 def generate_expectations_codes(codelist, incidence=0.5):
 
@@ -268,18 +260,10 @@ study = StudyDefinition(
     **medication_variables,
     **generate_all_medications(),
     **generate_all_medications_2_weeks(clinical_event_codelists),
-    **generate_all_clinical_events_with_medications(),
 
 )
 
-measures = [
-    Measure(
-        id="event_all_clinical_event_with_medication_rate",
-        numerator="all_clinical_events_with_medication",
-        denominator="population",
-        group_by=["population"],
-    )
-]
+measures = []
 
 # add measure for each codelist
 for medication_key in medication_codelists.keys():
