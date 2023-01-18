@@ -11,10 +11,56 @@ actions:
       highly_sensitive:
         cohort: output/report/input_ethnicity_report.csv.gz
 
+  ### Curation check ###
+  curation_monthly:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_report
+      --index-date-range "2019-01-01 to 2019-01-01 by month"
+      --param frequency=monthly
+      --output-dir=output/curation
+      --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/curation/input_report_2019-01-01.csv.gz
+
+  dataset_report_monthly:
+      run: python:latest python analysis/dataset_report.py
+           --input-files output/curation/input_report_2019-01-01.csv.gz
+           --output-dir output/curation/
+           --granularity "year"
+      needs: [curation_monthly]
+      outputs:
+        moderately_sensitive:
+          # Only output the single summary file
+          cohort_report: output/curation/input_report_2019-01-01.html
+
+  curation_weekly:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_report
+      --index-date-range "2022-07-01 to 2022-07-01 by week"
+      --param frequency=weekly
+      --output-dir=output/curation
+      --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/curation/input_report_2022-07-01.csv.gz
+
+  dataset_report_weekly:
+      run: python:latest python analysis/dataset_report.py
+           --input-files output/curation/input_report_2022-07-01.csv.gz
+           --output-dir output/curation/
+           --granularity "day"
+      needs: [curation_weekly]
+      outputs:
+        moderately_sensitive:
+          # Only output the single summary file
+          cohort_report: output/curation/input_report_2022-07-01.html
+  ### End curation check
+
   generate_study_population_report_monthly:
-    run: cohortextractor:latest generate_cohort 
-      --study-definition study_definition_report 
-      --index-date-range "2019-01-01 to 2022-06-01 by month" 
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_report
+      --index-date-range "2019-01-01 to 2022-06-01 by month"
       --param frequency=monthly
       --output-dir=output/report
       --output-format=csv.gz
@@ -22,38 +68,16 @@ actions:
       highly_sensitive:
         cohort: output/report/input_*-01.csv.gz
 
-  generate_dataset_report_monthly:
-      run: python:latest python analysis/dataset_report.py
-           --input-files output/report/input_report_2019-01-01.csv.gz
-           --output-dir output/report/
-           --granularity "year"
-      needs: [generate_study_population_report_monthly]
-      outputs:
-        moderately_sensitive:
-          # Only output the single summary file
-          cohort_report: output/report/input_report_2019-01-01.html
-
   generate_study_population_report_weekly:
-    run: cohortextractor:latest generate_cohort 
-      --study-definition study_definition_report 
-      --index-date-range "2022-07-01 to 2023-01-01 by week"
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_report
+      --index-date-range "2022-07-01 to 2023-01-08 by week"
       --param frequency=weekly
       --output-dir=output/report
       --output-format=csv.gz
     outputs:
       highly_sensitive:
         cohort: output/report/input_*.csv.gz
-
-  generate_dataset_report_weekly:
-      run: python:latest python analysis/dataset_report.py
-           --input-files output/report/input_report_2022-10-*.csv.gz
-           --output-dir output/report/
-           --granularity "day"
-      needs: [generate_study_population_report_weekly]
-      outputs:
-        moderately_sensitive:
-          # Only output the single summary file
-          cohort_report: output/report/input_report_2022-10-*.html
 
   join_cohorts_report:
     run: >
