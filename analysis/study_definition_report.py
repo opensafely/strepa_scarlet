@@ -2,6 +2,7 @@ from cohortextractor import (
     StudyDefinition,
     patients,
     Measure,
+    params,
 )
 
 from codelists import (
@@ -29,6 +30,13 @@ clinical_event_codelists = {
     "invasive_strep_a": invasive_strep_a_codes,
     "strep_a_sore_throat": strep_a_sore_throat_codes,
 }
+
+
+frequency = params.get("frequency", None)
+if frequency == "weekly":
+    ENDDATE = "index_date + 6 days"
+else:
+    ENDDATE = "last_day_of_month(index_date)"
 
 
 def generate_all_medications():
@@ -159,7 +167,7 @@ medication_events = [
     {
         f"event_{medication_key}": patients.with_these_medications(
             codelist=medication_codelist,
-            between=["index_date", "last_day_of_month(index_date)"],
+            between=["index_date", ENDDATE],
             returning="binary_flag",
             include_date_of_match=True,
             date_format="YYYY-MM",
@@ -167,7 +175,7 @@ medication_events = [
         ),
         f"event_code_{medication_key}": patients.with_these_medications(
             codelist=medication_codelist,
-            between=["index_date", "last_day_of_month(index_date)"],
+            between=["index_date", ENDDATE],
             returning="code",
             return_expectations={
                 "rate": "universal",
@@ -188,7 +196,7 @@ clinical_events = [
     {
         f"event_{clinical_key}": patients.with_these_clinical_events(
             codelist=clinical_codelist,
-            between=["index_date", "last_day_of_month(index_date)"],
+            between=["index_date", ENDDATE],
             returning="binary_flag",
             include_date_of_match=True,
             date_format="YYYY-MM",
@@ -196,7 +204,7 @@ clinical_events = [
         ),
         f"event_code_{clinical_key}": patients.with_these_clinical_events(
             codelist=clinical_codelist,
-            between=["index_date", "last_day_of_month(index_date)"],
+            between=["index_date", ENDDATE],
             returning="code",
             return_expectations={
                 "rate": "universal",
