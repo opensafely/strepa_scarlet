@@ -265,20 +265,20 @@ study = StudyDefinition(
 measures = []
 
 # add measure for each codelist
-for k, c in medication_codelists.items():
+for medication_key in medication_codelists.keys():
     measures.extend(
         [
             Measure(
-                id=f"event_{k}_rate",
-                numerator=f"event_{k}",
+                id=f"event_{medication_key}_rate",
+                numerator=f"event_{medication_key}",
                 denominator="population",
                 group_by=["population"],
             ),
             Measure(
-                id=f"event_code_{k}_rate",
-                numerator=f"event_{k}",
+                id=f"event_code_{medication_key}_rate",
+                numerator=f"event_{medication_key}",
                 denominator="population",
-                group_by=[f"event_code_{k}"],
+                group_by=[f"event_code_{medication_key}"],
             ),
         ]
     )
@@ -286,36 +286,42 @@ for k, c in medication_codelists.items():
     for d in demographics.keys():
         measures.append(
             Measure(
-                id=f"event_{k}_{d}_rate",
-                numerator=f"event_{k}",
+                id=f"event_{medication_key}_{d}_rate",
+                numerator=f"event_{medication_key}",
                 denominator="population",
                 group_by=[d],
             ),
         )
 
-for k, c in clinical_event_codelists.items():
+for clinical_key in clinical_event_codelists.keys():
     measures.extend(
         [
             Measure(
-                id=f"event_{k}_rate",
-                numerator=f"event_{k}",
+                id=f"event_{clinical_key}_rate",
+                numerator=f"event_{clinical_key}",
                 denominator="population",
                 group_by=["population"],
             ),
             Measure(
-                id=f"event_code_{k}_rate",
-                numerator=f"event_{k}",
+                id=f"event_code_{clinical_key}_rate",
+                numerator=f"event_{clinical_key}",
                 denominator="population",
-                group_by=[f"event_code_{k}"],
+                group_by=[f"event_code_{clinical_key}"],
             ),
+            Measure(
+                id=f"event_{clinical_key}_medication_any_2_weeks_rate",
+                numerator=f"{clinical_key}_medication_any_2_weeks",
+                denominator="population",
+                group_by=["population"],
+            )
         ]
     )
 
     for d in demographics.keys():
         measures.append(
             Measure(
-                id=f"event_{k}_{d}_rate",
-                numerator=f"event_{k}",
+                id=f"event_{clinical_key}_{d}_rate",
+                numerator=f"event_{clinical_key}",
                 denominator="population",
                 group_by=[d],
             ),
