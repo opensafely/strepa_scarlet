@@ -34,3 +34,21 @@ phenoxymethypenicillin_codes = codelist_from_csv(
     system="snomed",
     column="dmd_id",
 )
+
+scarlet_fever_codes = codelist_from_csv(
+    "codelists/user-chriswood-scarlet-fever.csv",
+    system="snomed",
+    column="code",
+)
+
+invasive_strep_a_codes = codelist_from_csv(
+    "codelists/user-chriswood-invasive-group-a-strep.csv",
+    system="snomed",
+    column="code",
+)
+
+strep_a_sore_throat_codes = codelist_from_csv(
+    "codelists/user-chriswood-group-a-streptococcal-sore-throat.csv",
+    system="snomed",
+    column="code",
+)
