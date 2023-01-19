@@ -279,10 +279,10 @@ actions:
 
 
 ### WEEKLY ###
-  generate_study_population_report_weekly:
+  generate_study_population_report_weekly_1:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_report
-      --index-date-range "2022-09-01 to 2023-01-08 by week"
+      --index-date-range "2022-09-01 to 2022-11-04 by week"
       --param frequency=weekly
       --output-dir=output/report/weekly
       --output-format=csv.gz
@@ -290,13 +290,24 @@ actions:
       highly_sensitive:
         cohort: output/report/weekly/input_*.csv.gz
 
+  generate_study_population_report_weekly_2:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_report
+      --index-date-range "2022-11-11 to 2023-01-08 by week"
+      --param frequency=weekly
+      --output-dir=output/report/weekly
+      --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/report/weekly/input*.csv.gz
+
   join_cohorts_report_weekly:
     run: >
       cohort-joiner:v0.0.38
         --lhs output/report/weekly/input_report_20*.csv.gz
         --rhs output/report/input_ethnicity_report.csv.gz
         --output-dir output/report/weekly/joined
-    needs: [generate_study_population_report_weekly, generate_study_population_report_ethnicity]
+    needs: [generate_study_population_report_weekly_1, generate_study_population_report_weekly_2, generate_study_population_report_ethnicity]
     outputs:
       highly_sensitive:
         cohort: output/report/weekly/joined/input_report_20*.csv.gz
