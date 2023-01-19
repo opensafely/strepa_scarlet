@@ -55,8 +55,9 @@ actions:
         moderately_sensitive:
           # Only output the single summary file
           cohort_report: output/curation/input_report_2022-07-01.html
-  ### End curation check
+  ### End curation check ###
 
+  ### MONTHLY ###
   generate_study_population_report_monthly:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_report
@@ -68,24 +69,13 @@ actions:
       highly_sensitive:
         cohort: output/report/input_*-01.csv.gz
 
-  generate_study_population_report_weekly:
-    run: cohortextractor:latest generate_cohort
-      --study-definition study_definition_report
-      --index-date-range "2022-07-01 to 2023-01-08 by week"
-      --param frequency=weekly
-      --output-dir=output/report
-      --output-format=csv.gz
-    outputs:
-      highly_sensitive:
-        cohort: output/report/input_*.csv.gz
-
   join_cohorts_report:
     run: >
       cohort-joiner:v0.0.38
         --lhs output/report/input_report_20*.csv.gz
         --rhs output/report/input_ethnicity_report.csv.gz
         --output-dir output/report/joined
-    needs: [generate_study_population_report_monthly, generate_study_population_report_weekly, generate_study_population_report_ethnicity]
+    needs: [generate_study_population_report_monthly, generate_study_population_report_ethnicity]
     outputs:
       highly_sensitive:
         cohort: output/report/joined/input_report_20*.csv.gz
@@ -232,6 +222,69 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/event_counts_*.json
+
+
+### WEEKLY ###
+  generate_study_population_report_weekly:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_report
+      --index-date-range "2022-09-01 to 2023-01-08 by week"
+      --param frequency=weekly
+      --output-dir=output/report/weekly
+      --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/report/weekly/input_*.csv.gz
+
+  join_cohorts_report_weekly:
+    run: >
+      cohort-joiner:v0.0.38
+        --lhs output/report/weekly/input_report_20*.csv.gz
+        --rhs output/report/input_ethnicity_report.csv.gz
+        --output-dir output/report/weekly/joined
+    needs: [generate_study_population_report_weekly, generate_study_population_report_ethnicity]
+    outputs:
+      highly_sensitive:
+        cohort: output/report/weekly/joined/input_report_20*.csv.gz
+
+  generate_measures_report_weekly:
+    run: cohortextractor:latest generate_measures --study-definition study_definition_report --output-dir=output/report/weekly/joined
+    needs: [join_cohorts_report_weekly]
+    outputs:
+      moderately_sensitive:
+        measure_csv: output/report/weekly/joined/measure_event_*_rate.csv
+
+  join_measures_weekly:
+      run: python:latest python analysis/join_and_round.py
+           --input-files output/report/weekly/joined/measure_*_rate.csv
+           --output-dir output/report/weekly/joined
+           --output-name "measure_weekly.csv"
+           --skip-round
+      needs: [generate_measures_report_weekly]
+      outputs:
+        moderately_sensitive:
+          # Only output the single summary file
+          measure_csv: output/report/weekly/joined/measure_weekly.csv
+
+  top_5_table_report_weekly:
+    run: >
+      python:latest python analysis/report/top_5_report.py
+      --input-file output/report/weekly/joined/measure_weekly.csv
+      --output-dir output/report/weekly/joined
+    needs: [join_measures_weekly]
+    outputs:
+      moderately_sensitive:
+        tables: output/report/weekly/joined/top_5*.csv
+
+  plot_measure_report_weekly:
+    run: >
+      python:latest python analysis/report/plot_measures_report.py
+      --measure-path output/report/weekly/joined/measure_weekly.csv
+      --output-dir output/report/weekly/joined
+    needs: [join_measures_weekly]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/joined/*measures*.jpeg
 
   # create_notebook:
   #   run: python:latest python analysis/report/create_notebook.py
