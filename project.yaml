@@ -102,7 +102,7 @@ actions:
   top_5_table_report:
     run: >
       python:latest python analysis/report/top_5_report.py
-      --input-file output/report/joined/measure_all.csv
+      --input-file output/report/results/measure_all.csv
       --output-dir output/report/results
     needs: [join_measures]
     outputs:
@@ -112,7 +112,7 @@ actions:
   plot_measure_report:
     run: >
       python:latest python analysis/report/plot_measures_report.py
-      --measure-path output/report/joined/measure_all.csv
+      --measure-path output/report/results/measure_all.csv
       --output-dir output/report/results
     needs: [join_measures]
     outputs:
@@ -122,102 +122,102 @@ actions:
   panel_plots_amox:
     run: >
       python:latest python analysis/report/panel_plots.py
-      --input-file output/report/joined/measure_all.csv
+      --input-file output/report/results/measure_all.csv
       --measures-pattern "event_amoxicillin*_rate"
-      --output-dir output/report/joined
+      --output-dir output/report/results
       --output-name "Amoxicillin"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
-        measure: output/report/joined/Amoxicillin.png
+        measure: output/report/results/Amoxicillin.png
 
   panel_plots_azithro:
     run: >
       python:latest python analysis/report/panel_plots.py
-      --input-file output/report/joined/measure_all.csv
+      --input-file output/report/results/measure_all.csv
       --measures-pattern "event_azithromycin*_rate"
-      --output-dir output/report/joined
+      --output-dir output/report/results
       --output-name "Azithromycin"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
-        measure: output/report/joined/Azithromycin.png
+        measure: output/report/results/Azithromycin.png
 
   panel_plots_clarithro:
     run: >
       python:latest python analysis/report/panel_plots.py
-      --input-file output/report/joined/measure_all.csv
+      --input-file output/report/results/measure_all.csv
       --measures-pattern "event_clarithromycin*_rate"
-      --output-dir output/report/joined
+      --output-dir output/report/results
       --output-name "Clarithromycin"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
-        measure: output/report/joined/Clarithromycin.png
+        measure: output/report/results/Clarithromycin.png
 
   panel_plots_pheno:
     run: >
       python:latest python analysis/report/panel_plots.py
-      --input-file output/report/joined/measure_all.csv
+      --input-file output/report/results/measure_all.csv
       --measures-pattern "event_phenoxymethypenicillin*_rate"
-      --output-dir output/report/joined
+      --output-dir output/report/results
       --output-name "Phenoxymethypenicillin"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
-        measure: output/report/joined/Phenoxymethypenicillin.png
+        measure: output/report/results/Phenoxymethypenicillin.png
 
   panel_plots_erythro:
     run: >
       python:latest python analysis/report/panel_plots.py
-      --input-file output/report/joined/measure_all.csv
+      --input-file output/report/results/measure_all.csv
       --measures-pattern "event_erythromycin*_rate"
-      --output-dir output/report/joined
+      --output-dir output/report/results
       --output-name "Erythromycin"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
-        measure: output/report/joined/Erythromycin.png
+        measure: output/report/results/Erythromycin.png
 
   panel_plots_scarlet:
     run: >
       python:latest python analysis/report/panel_plots.py
-      --input-file output/report/joined/measure_all.csv
+      --input-file output/report/results/measure_all.csv
       --measures-pattern "event_scarlet_fever*_rate"
-      --output-dir output/report/joined
+      --output-dir output/report/results
       --output-name "scarlet_fever"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
-        measure: output/report/joined/scarlet_fever.png
+        measure: output/report/results/scarlet_fever.png
 
   panel_plots_strp:
     run: >
       python:latest python analysis/report/panel_plots.py
-      --input-file output/report/joined/measure_all.csv
+      --input-file output/report/results/measure_all.csv
       --measures-pattern "event_strep_a_sore_throat*_rate"
-      --output-dir output/report/joined
+      --output-dir output/report/results
       --output-name "strep_a_sore_throat"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
-        measure: output/report/joined/strep_a_sore_throat.png
+        measure: output/report/results/strep_a_sore_throat.png
 
   panel_plots_igas:
     run: >
       python:latest python analysis/report/panel_plots.py
-      --input-file output/report/joined/measure_all.csv
+      --input-file output/report/results/measure_all.csv
       --measures-pattern "event_invasive_strep_a*_rate"
-      --output-dir output/report/joined
+      --output-dir output/report/results
       --output-name "invasive_strep_a"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
-        measure: output/report/joined/invasive_strep_a.png
+        measure: output/report/results/invasive_strep_a.png
 
   event_counts_report:
     run: >
-      python:latest python analysis/report/event_counts.py --input-dir="output/report/results" --output-dir="output/report" --measures="amoxicillin,azithromycin,clarithromycin,erythromycin,phenoxymethypenicillin"
+      python:latest python analysis/report/event_counts.py --input-dir="output/report/joined/" --output-dir="output/report/results" --measures="amoxicillin,azithromycin,clarithromycin,erythromycin,phenoxymethypenicillin,scarlet_fever,strep_a_sore_throat,invasive_strep_a"
     needs: [join_cohorts_report]
     outputs:
       moderately_sensitive:
@@ -269,7 +269,7 @@ actions:
   top_5_table_report_weekly:
     run: >
       python:latest python analysis/report/top_5_report.py
-      --input-file output/report/weekly/joined/measure_weekly.csv
+      --input-file output/report/weekly/results/measure_weekly.csv
       --output-dir output/report/weekly/results
     needs: [join_measures_weekly]
     outputs:
@@ -279,7 +279,7 @@ actions:
   plot_measure_report_weekly:
     run: >
       python:latest python analysis/report/plot_measures_report.py
-      --measure-path output/report/weekly/joined/measure_weekly.csv
+      --measure-path output/report/weekly/results/measure_weekly.csv
       --output-dir output/report/weekly/results
     needs: [join_measures_weekly]
     outputs:
@@ -378,6 +378,102 @@ actions:
       --output-dir output/report/weekly/results
       --output-name "invasive_strep_a"
     needs: [join_measures_weekly]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/results/invasive_strep_a.png
+
+  panel_plots_amox_weekly:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/weekly/results/measure_weekly.csv
+      --measures-pattern "event_amoxicillin*_rate"
+      --output-dir output/report/weekly/results
+      --output-name "Amoxicillin"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/results/Amoxicillin.png
+
+  panel_plots_azithro_weekly:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/weekly/results/measure_weekly.csv
+      --measures-pattern "event_azithromycin*_rate"
+      --output-dir output/report/weekly/results
+      --output-name "Azithromycin"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/results/Azithromycin.png
+
+  panel_plots_clarithro_weekly:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/weekly/results/measure_weekly.csv
+      --measures-pattern "event_clarithromycin*_rate"
+      --output-dir output/report/weekly/results
+      --output-name "Clarithromycin"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/results/Clarithromycin.png
+
+  panel_plots_pheno_weekly:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/weekly/results/measure_weekly.csv
+      --measures-pattern "event_phenoxymethypenicillin*_rate"
+      --output-dir output/report/weekly/results
+      --output-name "Phenoxymethypenicillin"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/results/Phenoxymethypenicillin.png
+
+  panel_plots_erythro_weekly:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/weekly/results/measure_weekly.csv
+      --measures-pattern "event_erythromycin*_rate"
+      --output-dir output/report/weekly/results
+      --output-name "Erythromycin"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/results/Erythromycin.png
+
+  panel_plots_scarlet_weekly:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/weekly/results/measure_weekly.csv
+      --measures-pattern "event_scarlet_fever*_rate"
+      --output-dir output/report/weekly/results
+      --output-name "scarlet_fever"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/results/scarlet_fever.png
+
+  panel_plots_strp_weekly:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/weekly/results/measure_weekly.csv
+      --measures-pattern "event_strep_a_sore_throat*_rate"
+      --output-dir output/report/weekly/results
+      --output-name "strep_a_sore_throat"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/results/strep_a_sore_throat.png
+
+  panel_plots_igas_weekly:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/weekly/results/measure_weekly.csv
+      --measures-pattern "event_invasive_strep_a*_rate"
+      --output-dir output/report/weekly/results
+      --output-name "invasive_strep_a"
+    needs: [join_measures]
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/invasive_strep_a.png
