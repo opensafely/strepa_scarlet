@@ -126,6 +126,8 @@ actions:
       --measures-pattern "event_amoxicillin*_rate"
       --output-dir output/report/results
       --output-name "Amoxicillin"
+      --scale "rate"
+      --first "event_amoxicillin_rate"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
@@ -138,6 +140,8 @@ actions:
       --measures-pattern "event_azithromycin*_rate"
       --output-dir output/report/results
       --output-name "Azithromycin"
+      --scale "rate"
+      --first "event_azithromycin_rate"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
@@ -150,6 +154,8 @@ actions:
       --measures-pattern "event_clarithromycin*_rate"
       --output-dir output/report/results
       --output-name "Clarithromycin"
+      --scale "rate"
+      --first "event_clarithromycin_rate"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
@@ -162,6 +168,8 @@ actions:
       --measures-pattern "event_phenoxymethypenicillin*_rate"
       --output-dir output/report/results
       --output-name "Phenoxymethypenicillin"
+      --scale "rate"
+      --first "event_phenoxymethypenicillin_rate"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
@@ -174,6 +182,8 @@ actions:
       --measures-pattern "event_erythromycin*_rate"
       --output-dir output/report/results
       --output-name "Erythromycin"
+      --scale "rate"
+      --first "event_erythromycin_rate"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
@@ -186,6 +196,8 @@ actions:
       --measures-pattern "event_scarlet_fever*_rate"
       --output-dir output/report/results
       --output-name "scarlet_fever"
+      --scale "rate"
+      --first "event_scarlet_fever_rate"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
@@ -198,6 +210,8 @@ actions:
       --measures-pattern "event_strep_a_sore_throat*_rate"
       --output-dir output/report/results
       --output-name "strep_a_sore_throat"
+      --scale "rate"
+      --first "event_strep_a_sore_throat_rate"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
@@ -210,6 +224,8 @@ actions:
       --measures-pattern "event_invasive_strep_a*_rate"
       --output-dir output/report/results
       --output-name "invasive_strep_a"
+      --scale "rate"
+      --first "event_invasive_strep_a_rate"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
@@ -293,6 +309,8 @@ actions:
       --measures-pattern "event_amoxicillin*_rate"
       --output-dir output/report/weekly/results
       --output-name "Amoxicillin"
+      --scale "rate"
+      --first "event_amoxicillin_rate"
     needs: [join_measures_weekly]
     outputs:
       moderately_sensitive:
@@ -305,6 +323,8 @@ actions:
       --measures-pattern "event_azithromycin*_rate"
       --output-dir output/report/weekly/results
       --output-name "Azithromycin"
+      --scale "rate"
+      --first "event_azithromycin_rate"
     needs: [join_measures_weekly]
     outputs:
       moderately_sensitive:
@@ -317,6 +337,8 @@ actions:
       --measures-pattern "event_clarithromycin*_rate"
       --output-dir output/report/weekly/results
       --output-name "Clarithromycin"
+      --scale "rate"
+      --first "event_clarithromycin_rate"
     needs: [join_measures_weekly]
     outputs:
       moderately_sensitive:
@@ -329,6 +351,8 @@ actions:
       --measures-pattern "event_phenoxymethypenicillin*_rate"
       --output-dir output/report/weekly/results
       --output-name "Phenoxymethypenicillin"
+      --scale "rate"
+      --first "event_phenoxymethypenicillin_rate"
     needs: [join_measures_weekly]
     outputs:
       moderately_sensitive:
@@ -341,6 +365,8 @@ actions:
       --measures-pattern "event_erythromycin*_rate"
       --output-dir output/report/weekly/results
       --output-name "Erythromycin"
+      --scale "rate"
+      --first "event_erythromycin_rate"
     needs: [join_measures_weekly]
     outputs:
       moderately_sensitive:
@@ -353,6 +379,8 @@ actions:
       --measures-pattern "event_scarlet_fever*_rate"
       --output-dir output/report/weekly/results
       --output-name "scarlet_fever"
+      --scale "rate"
+      --first "event_scarlet_fever_rate"
     needs: [join_measures_weekly]
     outputs:
       moderately_sensitive:
@@ -365,6 +393,8 @@ actions:
       --measures-pattern "event_strep_a_sore_throat*_rate"
       --output-dir output/report/weekly/results
       --output-name "strep_a_sore_throat"
+      --scale "rate"
+      --first "event_strep_a_sore_throat_rate"
     needs: [join_measures_weekly]
     outputs:
       moderately_sensitive:
@@ -377,6 +407,8 @@ actions:
       --measures-pattern "event_invasive_strep_a*_rate"
       --output-dir output/report/weekly/results
       --output-name "invasive_strep_a"
+      --scale "rate"
+      --first "event_invasive_strep_a_rate"
     needs: [join_measures_weekly]
     outputs:
       moderately_sensitive:

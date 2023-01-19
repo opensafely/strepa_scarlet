@@ -72,15 +72,16 @@ def translate_group(group_var, label, repeated, autolabel=False):
     """
     Translate a measure name into a plot label
     Autolabel uses the 'name' column, but removes words that appear in every
-    item in the group
+    item in the group. If there are no unique strings, it falls back to group
     The alternative labeling uses the 'group' column
     """
-    if autolabel:
-        return " ".join(
-            [x for x in label.split("_") if x not in repeated]
-        ).title()
-    else:
+    title = " ".join(
+        [x for x in label.split("_") if x not in repeated]
+    ).title()
+    if not title or not autolabel:
         return filename_to_title(group_var)
+    else:
+        return title
 
 
 def filename_to_title(filename):
@@ -124,20 +125,35 @@ def is_bool_as_int(series):
         return False
 
 
+def reorder_dataframe(measure_table, first):
+    """Reorder the dataframe with rows with name matching 'first' first"""
+    copy = measure_table.copy()
+    copy["sorter"] = measure_table.name == first
+    copy = copy.sort_values("sorter", ascending=False)
+    copy = copy.drop("sorter", axis=1)
+    return copy
+
+
 def get_group_chart(
     measure_table,
+    first=None,
     columns=2,
     date_lines=None,
     scale=None,
     ci=False,
     exclude_group=None,
 ):
+    # NOTE: constrained_layout=True available in matplotlib>=3.5
     figure = plt.figure(figsize=(columns * 6, columns * 5))
-    measure_table.set_index("date", inplace=True)
+    if first:
+        # NOTE: key param is in pandas>1.0
+        # measure_table = measure_table.sort_values(
+        #     by="name", key=lambda x: x == first, ascending=False
+        # )
+        measure_table = reorder_dataframe(measure_table, first)
 
     repeated = autoselect_labels(measure_table["name"])
-
-    groups = measure_table.groupby("name")
+    groups = measure_table.groupby("name", sort=False)
     total_plots = len(groups)
 
     if total_plots > 10:
@@ -151,6 +167,10 @@ def get_group_chart(
     lgds = []
     for index, panel in enumerate(groups):
         panel_group, panel_group_data = panel
+        # We need to sort by date before setting it as index
+        # If a 'first' group was specified, date could be out of order
+        panel_group_data = panel_group_data.sort_values("date")
+        panel_group_data = panel_group_data.set_index("date")
         is_bool = is_bool_as_int(panel_group_data.group)
         if is_bool:
             panel_group_data.group = panel_group_data.group.astype(int).astype(
@@ -173,7 +193,6 @@ def get_group_chart(
             )
             if ci:
                 plot_cis(ax, plot_group_data)
-            # TODO: determine whether tight_layout is sufficient
             lgd = ax.legend(
                 bbox_to_anchor=(1, 1),
                 loc="upper left",
@@ -181,7 +200,6 @@ def get_group_chart(
                 ncol=1,
             )
             lgds.append(lgd)
-        # plt.legend(fontsize="x-small", ncol=4)
         ax.set_xlabel("")
         ax.tick_params(axis="x", labelsize=7)
         if date_lines:
@@ -240,6 +258,11 @@ def parse_args():
         help="A list of one or more measure names",
     )
     parser.add_argument(
+        "--first",
+        required=False,
+        help="Measures pattern for plot that should appear first",
+    )
+    parser.add_argument(
         "--output-dir",
         required=True,
         type=pathlib.Path,
@@ -277,6 +300,7 @@ def main():
     input_file = args.input_file
     measures_pattern = args.measures_pattern
     measures_list = args.measures_list
+    first = args.first
     output_dir = args.output_dir
     output_name = args.output_name
     date_lines = args.date_lines
@@ -292,6 +316,7 @@ def main():
     subset = subset_table(measure_table, measures_pattern, measures_list)
     chart, lgds = get_group_chart(
         subset,
+        first=first,
         columns=2,
         date_lines=date_lines,
         scale=scale,
