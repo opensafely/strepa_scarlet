@@ -12,8 +12,8 @@ def round_to_nearest_100(x):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input-dir", type=str, required=True)
-    parser.add_argument("--output-dir", type=str, required=True)
+    parser.add_argument("--input-dir", type=Path, required=True)
+    parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--measures", type=str, required=True)
     return parser.parse_args()
 
@@ -34,7 +34,7 @@ def main():
         patients = []
         events = {}
 
-        for file in Path(args.input_dir).iterdir():
+        for file in args.input_dir.iterdir():
             if match_input_files(file.name):
                 date = get_date_input_file(file.name)
                 df = pd.read_csv(file)
@@ -50,13 +50,14 @@ def main():
             events[max(events.keys())]
         )
 
+        args.output_dir.mkdir(parents=True, exist_ok=True)
         save_to_json(
             {
                 "total_events": total_events,
                 "total_patients": total_patients,
                 "events_in_latest_period": events_in_latest_period,
             },
-            f"{args.output_dir}/event_counts_{measure}.json",
+            args.output_dir / f"event_counts_{measure}.json",
         )
 
 

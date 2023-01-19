@@ -67,7 +67,7 @@ def generate_expectations_codes(codelist, incidence=0.5):
 
 
 start_date = "2019-01-01"
-end_date = "2022-11-01"
+end_date = "2022-12-01"
 # Specifiy study definition
 
 demographics = {
