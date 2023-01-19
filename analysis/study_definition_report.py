@@ -271,6 +271,12 @@ study = StudyDefinition(
 
 )
 
+# Ethnicity isn't in the demographics dict because it's extracted in a separate
+# study definition. We add it here because we want to calculate a measure using it.
+# We only care about the key.
+
+demographics["ethnicity"] = ""
+
 measures = []
 
 # add measure for each codelist
