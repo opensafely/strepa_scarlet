@@ -193,7 +193,6 @@ def get_group_chart(
             )
             if ci:
                 plot_cis(ax, plot_group_data)
-            # TODO: determine whether tight_layout is sufficient
             lgd = ax.legend(
                 bbox_to_anchor=(1, 1),
                 loc="upper left",
@@ -201,7 +200,6 @@ def get_group_chart(
                 ncol=1,
             )
             lgds.append(lgd)
-        # plt.legend(fontsize="x-small", ncol=4)
         ax.set_xlabel("")
         ax.tick_params(axis="x", labelsize=7)
         if date_lines:
