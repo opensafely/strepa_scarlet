@@ -72,15 +72,16 @@ def translate_group(group_var, label, repeated, autolabel=False):
     """
     Translate a measure name into a plot label
     Autolabel uses the 'name' column, but removes words that appear in every
-    item in the group
+    item in the group. If there are no unique strings, it falls back to group
     The alternative labeling uses the 'group' column
     """
-    if autolabel:
-        return " ".join(
-            [x for x in label.split("_") if x not in repeated]
-        ).title()
-    else:
+    title = " ".join(
+        [x for x in label.split("_") if x not in repeated]
+    ).title()
+    if not title or not autolabel:
         return filename_to_title(group_var)
+    else:
+        return title
 
 
 def filename_to_title(filename):
