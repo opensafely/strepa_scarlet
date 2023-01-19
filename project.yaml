@@ -60,7 +60,7 @@ actions:
   generate_study_population_report_monthly:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_report
-      --index-date-range "2019-01-01 to 2022-06-01 by month"
+      --index-date-range "2019-01-01 to 2022-12-01 by month"
       --param frequency=monthly
       --output-dir=output/report
       --output-format=csv.gz
