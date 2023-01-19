@@ -2,7 +2,20 @@ import re
 import json
 import pandas
 import matplotlib.pyplot as plt
-import plotly.graph_objects as go
+
+MEDICATION_TO_CODELIST = {
+    "amoxicillin": "codelists/opensafely-amoxicillin-oral.csv",
+    "azithromycin": "codelists/opensafely-azithromycin-oral.csv",
+    "clarithromycin": "codelists/opensafely-clarithromycin-oral.csv",
+    "erythromycin": "codelists/opensafely-erythromycin-oral.csv",
+    "phenomoxymethypenicillin": "codelists/opensafely-phenoxymethypenicillin.csv",
+}
+
+CLINICAL_TO_CODELIST = {
+    "scarlet_fever": "codelists/user-chriswood-scarlet-fever.csv",
+    "strep_a_sore_throat": "codelists/user-chriswood-invasive-group-a-strep.csv",
+    "invasive_strep_a": "codelists/user-chriswood-invasive-group-a-strep.csv",
+}
 
 
 def save_to_json(d, filename: str):

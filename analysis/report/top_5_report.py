@@ -3,16 +3,11 @@ import numpy as np
 import argparse
 import pathlib
 
-from report_utils import coerce_numeric
-
-
-MEASURE_TO_CODELIST = {
-    "event_code_amoxicillin_rate": "codelists/opensafely-amoxicillin-oral.csv",
-    "event_code_azithromycin_rate": "codelists/opensafely-azithromycin-oral.csv",
-    "event_code_clarithromycin_rate": "codelists/opensafely-clarithromycin-oral.csv",
-    "event_code_erythromycin_rate": "codelists/opensafely-erythromycin-oral.csv",
-    "event_code_phenomoxymethypenicillin_rate": "codelists/opensafely-phenoxymethypenicillin.csv",
-}
+from report_utils import (
+    coerce_numeric,
+    MEDICATION_TO_CODELIST,
+    CLINICAL_TO_CODELIST,
+)
 
 
 def get_measure_tables(input_file):
@@ -169,7 +164,10 @@ def main():
     measure_table = get_measure_tables(input_file)
     measure_table = coerce_numeric(measure_table)
 
-    for measure, codelist in MEASURE_TO_CODELIST.items():
+    all_codes = {**MEDICATION_TO_CODELIST, **CLINICAL_TO_CODELIST}
+
+    for key, codelist in all_codes.items():
+        measure = f"event_code_{key}_rate"
         codelist = pandas.read_csv(codelist)
         code_df = measure_table[measure_table["name"] == measure]
         # Necessary because measure table has some non-numeric groups
