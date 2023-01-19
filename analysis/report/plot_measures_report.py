@@ -1,7 +1,12 @@
 import pandas as pd
 import argparse
 import pathlib
-from report_utils import plot_measures, coerce_numeric
+from report_utils import (
+    plot_measures,
+    coerce_numeric,
+    MEDICATION_TO_CODELIST,
+    CLINICAL_TO_CODELIST,
+)
 
 
 def parse_args():
@@ -27,12 +32,32 @@ def main():
     df["rate"] = 1000 * df["value"]
 
     # Stacked bar chart of population measures
-    # Might have to filter for the medication measures
     # TODO: name has extra text i.e. event_*_rate
     population_measures = df[df.group == "population"]
+    # Medications
+    medications = population_measures[
+        population_measures.name.str.contains(
+            "|".join(MEDICATION_TO_CODELIST.keys())
+        )
+    ]
     plot_measures(
-        population_measures,
-        filename=output_dir / "bar_measures",
+        medications,
+        filename=output_dir / "medications_bar_measures",
+        column_to_plot="rate",
+        y_label="Rate per 1000",
+        as_bar=True,
+        category="name",
+    )
+    # Clinical
+    clinical_measures = [
+        f"event_{x}_rate" for x in list(CLINICAL_TO_CODELIST.keys())
+    ]
+    clinical = population_measures[
+        population_measures.name.str.contains("|".join(clinical_measures))
+    ]
+    plot_measures(
+        clinical,
+        filename=output_dir / "clinical_bar_measures",
         column_to_plot="rate",
         y_label="Rate per 1000",
         as_bar=True,
