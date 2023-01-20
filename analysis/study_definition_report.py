@@ -48,13 +48,20 @@ def generate_all_medications():
         ),
     }
 
+
 def generate_all_medications_2_weeks(clinical_events_codelists):
     return {
         f"{clinical_key}_medication_any_2_weeks": patients.satisfying(
             " OR ".join(
-                list(map(lambda medication_key: f"event_{clinical_key}_with_{medication_key}", medication_codelists.keys()))
+                list(
+                    map(
+                        lambda medication_key: f"event_{clinical_key}_with_{medication_key}",
+                        medication_codelists.keys(),
+                    )
+                )
             )
-        ) for clinical_key in clinical_events_codelists.keys()
+        )
+        for clinical_key in clinical_events_codelists.keys()
     }
 
 
@@ -178,15 +185,22 @@ medication_events = [
             returning="code",
             return_expectations={
                 "rate": "universal",
-                "category": {"ratios": generate_expectations_codes(medication_codelist)},
+                "category": {
+                    "ratios": generate_expectations_codes(medication_codelist)
+                },
             },
         ),
-        **{f"event_{clinical_key}_with_{medication_key}": patients.with_these_medications(
-            codelist=medication_codelist,
-            between=[f"event_{clinical_key}_date - 7 days", f"event_{clinical_key}_date + 14 days"],
-            returning="binary_flag",
-        ) for clinical_key in clinical_event_codelists.keys()},
-
+        **{
+            f"event_{clinical_key}_with_{medication_key}": patients.with_these_medications(
+                codelist=medication_codelist,
+                between=[
+                    f"event_{clinical_key}_date - 7 days",
+                    f"event_{clinical_key}_date + 14 days",
+                ],
+                returning="binary_flag",
+            )
+            for clinical_key in clinical_event_codelists.keys()
+        },
     }
     for medication_key, medication_codelist in medication_codelists.items()
 ]
@@ -207,10 +221,11 @@ clinical_events = [
             returning="code",
             return_expectations={
                 "rate": "universal",
-                "category": {"ratios": generate_expectations_codes(clinical_codelist)},
+                "category": {
+                    "ratios": generate_expectations_codes(clinical_codelist)
+                },
             },
         ),
-
     }
     for clinical_key, clinical_codelist in clinical_event_codelists.items()
 ]
@@ -269,7 +284,6 @@ study = StudyDefinition(
     **medication_variables,
     **generate_all_medications(),
     **generate_all_medications_2_weeks(clinical_event_codelists),
-
 )
 
 # Ethnicity isn't in the demographics dict because it's extracted in a separate
@@ -356,7 +370,7 @@ for clinical_key in clinical_event_codelists.keys():
                 denominator="population",
                 group_by=["population"],
                 small_number_suppression=True,
-            )
+            ),
         ]
     )
 
