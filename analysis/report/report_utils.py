@@ -8,7 +8,7 @@ MEDICATION_TO_CODELIST = {
     "azithromycin": "codelists/opensafely-azithromycin-oral.csv",
     "clarithromycin": "codelists/opensafely-clarithromycin-oral.csv",
     "erythromycin": "codelists/opensafely-erythromycin-oral.csv",
-    "phenomoxymethypenicillin": "codelists/opensafely-phenoxymethypenicillin.csv",
+    "phenoxymethypenicillin": "codelists/opensafely-phenoxymethypenicillin.csv",
 }
 
 CLINICAL_TO_CODELIST = {
