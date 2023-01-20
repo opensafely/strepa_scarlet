@@ -372,7 +372,7 @@ actions:
       --output-name "medication_any_prescribing_by_subgroup"
       --scale "rate"
       --first "event_medication_any_rate"
-    needs: [join_measures]
+    needs: [join_measures_weekly]
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/medication_any_prescribing_by_subgroup.png

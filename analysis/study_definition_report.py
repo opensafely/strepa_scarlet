@@ -41,7 +41,7 @@ else:
 
 def generate_all_medications():
     return {
-        "medication_any": patients.satisfying(
+        "event_medication_any": patients.satisfying(
             " OR ".join(
                 list(map(lambda x: f"event_{x}", medication_codelists.keys()))
             )
@@ -311,6 +311,27 @@ for medication_key in medication_codelists.keys():
                 small_number_suppression=True,
             ),
         )
+
+# Any medication
+measures.append(
+    Measure(
+        id="event_medication_any_rate",
+        numerator="event_medication_any",
+        denominator="population",
+        group_by=["population"],
+        small_number_suppression=True,
+    )
+)
+for d in demographics.keys():
+    measures.append(
+        Measure(
+            id=f"event_medication_any_{d}_rate",
+            numerator="event_medication_any",
+            denominator="population",
+            group_by=[d],
+            small_number_suppression=True,
+        ),
+    )
 
 for clinical_key in clinical_event_codelists.keys():
     measures.extend(
