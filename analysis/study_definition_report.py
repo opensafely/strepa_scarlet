@@ -75,7 +75,7 @@ demographics = {
         patients.categorised_as(
             {
                 "missing": "DEFAULT",
-                "18-19": """ age >= 0 AND age < 20""",
+                "0-19": """ age >= 0 AND age < 20""",
                 "20-29": """ age >=  20 AND age < 30""",
                 "30-39": """ age >=  30 AND age < 40""",
                 "40-49": """ age >=  40 AND age < 50""",
@@ -88,15 +88,14 @@ demographics = {
                 "rate": "universal",
                 "category": {
                     "ratios": {
-                        "missing": 0.005,
-                        "18-19": 0.125,
+                        "0-19": 0.125,
                         "20-29": 0.125,
                         "30-39": 0.125,
                         "40-49": 0.125,
                         "50-59": 0.125,
                         "60-69": 0.125,
                         "70-79": 0.125,
-                        "80+": 0.12,
+                        "80+": 0.125,
                     }
                 },
             },
@@ -106,7 +105,7 @@ demographics = {
         patients.sex(
             return_expectations={
                 "rate": "universal",
-                "category": {"ratios": {"M": 0.49, "F": 0.5, "U": 0.01}},
+                "category": {"ratios": {"M": 0.5, "F": 0.5}},
             }
         )
     ),
@@ -235,7 +234,9 @@ study = StudyDefinition(
         registered AND
         NOT died AND
         age >= 0 AND
-        age <= 120
+        age < 120 AND
+        age_band != "missing" AND
+        (sex = "M" OR sex = "F")
         """,
         registered=patients.registered_as_of(
             "index_date",
