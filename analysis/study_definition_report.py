@@ -52,7 +52,7 @@ def generate_all_medications_2_weeks(clinical_events_codelists):
     return {
         f"{clinical_key}_medication_any_2_weeks": patients.satisfying(
             " OR ".join(
-                list(map(lambda medication_key: f"event_code_{clinical_key}_with_{medication_key}", medication_codelists.keys()))
+                list(map(lambda medication_key: f"event_{clinical_key}_with_{medication_key}", medication_codelists.keys()))
             )
         ) for clinical_key in clinical_events_codelists.keys()
     }
@@ -182,7 +182,7 @@ medication_events = [
                 "category": {"ratios": generate_expectations_codes(medication_codelist)},
             },
         ),
-        **{f"event_code_{clinical_key}_with_{medication_key}": patients.with_these_medications(
+        **{f"event_{clinical_key}_with_{medication_key}": patients.with_these_medications(
             codelist=medication_codelist,
             between=[f"event_{clinical_key}_date", f"event_{clinical_key}_date + 14 days"],
             returning="binary_flag",
