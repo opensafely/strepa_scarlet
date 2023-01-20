@@ -183,7 +183,7 @@ medication_events = [
         ),
         **{f"event_{clinical_key}_with_{medication_key}": patients.with_these_medications(
             codelist=medication_codelist,
-            between=[f"event_{clinical_key}_date", f"event_{clinical_key}_date + 14 days"],
+            between=[f"event_{clinical_key}_date - 7 days", f"event_{clinical_key}_date + 14 days"],
             returning="binary_flag",
         ) for clinical_key in clinical_event_codelists.keys()},
 
