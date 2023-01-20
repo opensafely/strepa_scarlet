@@ -41,20 +41,27 @@ else:
 
 def generate_all_medications():
     return {
-        "medication_any": patients.satisfying(
+        "event_medication_any": patients.satisfying(
             " OR ".join(
                 list(map(lambda x: f"event_{x}", medication_codelists.keys()))
             )
         ),
     }
 
+
 def generate_all_medications_2_weeks(clinical_events_codelists):
     return {
         f"{clinical_key}_medication_any_2_weeks": patients.satisfying(
             " OR ".join(
-                list(map(lambda medication_key: f"event_code_{clinical_key}_with_{medication_key}", medication_codelists.keys()))
+                list(
+                    map(
+                        lambda medication_key: f"event_{clinical_key}_with_{medication_key}",
+                        medication_codelists.keys(),
+                    )
+                )
             )
-        ) for clinical_key in clinical_events_codelists.keys()
+        )
+        for clinical_key in clinical_events_codelists.keys()
     }
 
 
@@ -75,7 +82,7 @@ demographics = {
         patients.categorised_as(
             {
                 "missing": "DEFAULT",
-                "18-19": """ age >= 0 AND age < 20""",
+                "0-19": """ age >= 0 AND age < 20""",
                 "20-29": """ age >=  20 AND age < 30""",
                 "30-39": """ age >=  30 AND age < 40""",
                 "40-49": """ age >=  40 AND age < 50""",
@@ -88,15 +95,14 @@ demographics = {
                 "rate": "universal",
                 "category": {
                     "ratios": {
-                        "missing": 0.005,
-                        "18-19": 0.125,
+                        "0-19": 0.125,
                         "20-29": 0.125,
                         "30-39": 0.125,
                         "40-49": 0.125,
                         "50-59": 0.125,
                         "60-69": 0.125,
                         "70-79": 0.125,
-                        "80+": 0.12,
+                        "80+": 0.125,
                     }
                 },
             },
@@ -106,7 +112,7 @@ demographics = {
         patients.sex(
             return_expectations={
                 "rate": "universal",
-                "category": {"ratios": {"M": 0.49, "F": 0.5, "U": 0.01}},
+                "category": {"ratios": {"M": 0.5, "F": 0.5}},
             }
         )
     ),
@@ -179,15 +185,22 @@ medication_events = [
             returning="code",
             return_expectations={
                 "rate": "universal",
-                "category": {"ratios": generate_expectations_codes(medication_codelist)},
+                "category": {
+                    "ratios": generate_expectations_codes(medication_codelist)
+                },
             },
         ),
-        **{f"event_code_{clinical_key}_with_{medication_key}": patients.with_these_medications(
-            codelist=medication_codelist,
-            between=[f"event_{clinical_key}_date", f"event_{clinical_key}_date + 14 days"],
-            returning="binary_flag",
-        ) for clinical_key in clinical_event_codelists.keys()},
-
+        **{
+            f"event_{clinical_key}_with_{medication_key}": patients.with_these_medications(
+                codelist=medication_codelist,
+                between=[
+                    f"event_{clinical_key}_date - 7 days",
+                    f"event_{clinical_key}_date + 14 days",
+                ],
+                returning="binary_flag",
+            )
+            for clinical_key in clinical_event_codelists.keys()
+        },
     }
     for medication_key, medication_codelist in medication_codelists.items()
 ]
@@ -208,10 +221,11 @@ clinical_events = [
             returning="code",
             return_expectations={
                 "rate": "universal",
-                "category": {"ratios": generate_expectations_codes(clinical_codelist)},
+                "category": {
+                    "ratios": generate_expectations_codes(clinical_codelist)
+                },
             },
         ),
-
     }
     for clinical_key, clinical_codelist in clinical_event_codelists.items()
 ]
@@ -235,7 +249,9 @@ study = StudyDefinition(
         registered AND
         NOT died AND
         age >= 0 AND
-        age <= 120
+        age < 120 AND
+        age_band != "missing" AND
+        (sex = "M" OR sex = "F")
         """,
         registered=patients.registered_as_of(
             "index_date",
@@ -268,7 +284,6 @@ study = StudyDefinition(
     **medication_variables,
     **generate_all_medications(),
     **generate_all_medications_2_weeks(clinical_event_codelists),
-
 )
 
 # Ethnicity isn't in the demographics dict because it's extracted in a separate
@@ -288,12 +303,14 @@ for medication_key in medication_codelists.keys():
                 numerator=f"event_{medication_key}",
                 denominator="population",
                 group_by=["population"],
+                small_number_suppression=True,
             ),
             Measure(
                 id=f"event_code_{medication_key}_rate",
                 numerator=f"event_{medication_key}",
                 denominator="population",
                 group_by=[f"event_code_{medication_key}"],
+                small_number_suppression=True,
             ),
         ]
     )
@@ -305,8 +322,30 @@ for medication_key in medication_codelists.keys():
                 numerator=f"event_{medication_key}",
                 denominator="population",
                 group_by=[d],
+                small_number_suppression=True,
             ),
         )
+
+# Any medication
+measures.append(
+    Measure(
+        id="event_medication_any_rate",
+        numerator="event_medication_any",
+        denominator="population",
+        group_by=["population"],
+        small_number_suppression=True,
+    )
+)
+for d in demographics.keys():
+    measures.append(
+        Measure(
+            id=f"event_medication_any_{d}_rate",
+            numerator="event_medication_any",
+            denominator="population",
+            group_by=[d],
+            small_number_suppression=True,
+        ),
+    )
 
 for clinical_key in clinical_event_codelists.keys():
     measures.extend(
@@ -316,19 +355,22 @@ for clinical_key in clinical_event_codelists.keys():
                 numerator=f"event_{clinical_key}",
                 denominator="population",
                 group_by=["population"],
+                small_number_suppression=True,
             ),
             Measure(
                 id=f"event_code_{clinical_key}_rate",
                 numerator=f"event_{clinical_key}",
                 denominator="population",
                 group_by=[f"event_code_{clinical_key}"],
+                small_number_suppression=True,
             ),
             Measure(
                 id=f"event_{clinical_key}_medication_any_2_weeks_rate",
                 numerator=f"{clinical_key}_medication_any_2_weeks",
                 denominator="population",
                 group_by=["population"],
-            )
+                small_number_suppression=True,
+            ),
         ]
     )
 
@@ -339,5 +381,6 @@ for clinical_key in clinical_event_codelists.keys():
                 numerator=f"event_{clinical_key}",
                 denominator="population",
                 group_by=[d],
+                small_number_suppression=True,
             ),
         )
