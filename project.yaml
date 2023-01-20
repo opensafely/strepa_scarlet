@@ -58,10 +58,10 @@ actions:
   ### End curation check ###
 
   ### MONTHLY ###
-  generate_study_population_report_monthly:
+  generate_study_population_report_monthly_1:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_report
-      --index-date-range "2019-01-01 to 2022-12-01 by month"
+      --index-date-range "2019-01-01 to 2019-12-01 by month"
       --param frequency=monthly
       --output-dir=output/report
       --output-format=csv.gz
@@ -69,13 +69,51 @@ actions:
       highly_sensitive:
         cohort: output/report/input_*-01.csv.gz
 
+  generate_study_population_report_monthly_2:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_report
+      --index-date-range "2020-01-01 to 2020-12-01 by month"
+      --param frequency=monthly
+      --output-dir=output/report
+      --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/report/input*-01.csv.gz
+  
+  generate_study_population_report_monthly_3:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_report
+      --index-date-range "2021-01-01 to 2021-12-01 by month"
+      --param frequency=monthly
+      --output-dir=output/report
+      --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/report/inpu*-01.csv.gz
+
+  generate_study_population_report_monthly_4:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_report
+      --index-date-range "2022-01-01 to 2022-12-01 by month"
+      --param frequency=monthly
+      --output-dir=output/report
+      --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/report/inp*-01.csv.gz
+
   join_cohorts_report:
     run: >
       cohort-joiner:v0.0.38
         --lhs output/report/input_report_20*.csv.gz
         --rhs output/report/input_ethnicity_report.csv.gz
         --output-dir output/report/joined
-    needs: [generate_study_population_report_monthly, generate_study_population_report_ethnicity]
+    needs: [
+      generate_study_population_report_monthly_1, 
+      generate_study_population_report_monthly_2,
+      generate_study_population_report_monthly_3,
+      generate_study_population_report_monthly_4,
+      generate_study_population_report_ethnicity]
     outputs:
       highly_sensitive:
         cohort: output/report/joined/input_report_20*.csv.gz
@@ -241,10 +279,10 @@ actions:
 
 
 ### WEEKLY ###
-  generate_study_population_report_weekly:
+  generate_study_population_report_weekly_1:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_report
-      --index-date-range "2022-09-01 to 2023-01-08 by week"
+      --index-date-range "2022-09-01 to 2022-11-04 by week"
       --param frequency=weekly
       --output-dir=output/report/weekly
       --output-format=csv.gz
@@ -252,13 +290,24 @@ actions:
       highly_sensitive:
         cohort: output/report/weekly/input_*.csv.gz
 
+  generate_study_population_report_weekly_2:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_report
+      --index-date-range "2022-11-11 to 2023-01-08 by week"
+      --param frequency=weekly
+      --output-dir=output/report/weekly
+      --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/report/weekly/input*.csv.gz
+
   join_cohorts_report_weekly:
     run: >
       cohort-joiner:v0.0.38
         --lhs output/report/weekly/input_report_20*.csv.gz
         --rhs output/report/input_ethnicity_report.csv.gz
         --output-dir output/report/weekly/joined
-    needs: [generate_study_population_report_weekly, generate_study_population_report_ethnicity]
+    needs: [generate_study_population_report_weekly_1, generate_study_population_report_weekly_2, generate_study_population_report_ethnicity]
     outputs:
       highly_sensitive:
         cohort: output/report/weekly/joined/input_report_20*.csv.gz
