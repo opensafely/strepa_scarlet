@@ -130,7 +130,6 @@ actions:
            --input-files output/report/joined/measure_*_rate.csv
            --output-dir output/report/results
            --output-name "measure_all.csv"
-           --skip-round
       needs: [generate_measures_report]
       outputs:
         moderately_sensitive:
@@ -324,7 +323,6 @@ actions:
            --input-files output/report/weekly/joined/measure_*_rate.csv
            --output-dir output/report/weekly/results
            --output-name "measure_weekly.csv"
-           --skip-round
       needs: [generate_measures_report_weekly]
       outputs:
         moderately_sensitive:
