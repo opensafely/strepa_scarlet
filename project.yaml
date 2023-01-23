@@ -244,7 +244,12 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/results/measure_all.csv
-      --measures-pattern "event_scarlet_fever*_rate"
+      --measures-list "event_scarlet_fever_rate"
+      --measures-list "event_scarlet_fever_age_band_rate"
+      --measures-list "event_scarlet_fever_imd_rate"
+      --measures-list "event_scarlet_fever_ethnicity_rate"
+      --measures-list "event_scarlet_fever_region_rate"
+      --measures-list "event_scarlet_fever_sex_rate"
       --output-dir output/report/results
       --output-name "scarlet_fever_diagnoses_by_subgroup"
       --scale "rate"
@@ -258,7 +263,12 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/results/measure_all.csv
-      --measures-pattern "event_strep_a_sore_throat*_rate"
+      --measures-list "event_strep_a_sore_throat_rate"
+      --measures-list "event_strep_a_sore_throat_age_band_rate"
+      --measures-list "event_strep_a_sore_throat_imd_rate"
+      --measures-list "event_strep_a_sore_throat_ethnicity_rate"
+      --measures-list "event_strep_a_sore_throat_region_rate"
+      --measures-list "event_strep_a_sore_throat_sex_rate"
       --output-dir output/report/results
       --output-name "strep_a_sore_throat_diagnoses_by_subgroup"
       --scale "rate"
@@ -272,7 +282,12 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/results/measure_all.csv
-      --measures-pattern "event_invasive_strep_a*_rate"
+      --measures-list "event_invasive_strep_a_rate"
+      --measures-list "event_invasive_strep_a_age_band_rate"
+      --measures-list "event_invasive_strep_a_imd_rate"
+      --measures-list "event_invasive_strep_a_ethnicity_rate"
+      --measures-list "event_invasive_strep_a_region_rate"
+      --measures-list "event_invasive_strep_a_sex_rate"
       --output-dir output/report/results
       --output-name "invasive_strep_a_diagnoses_by_subgroup"
       --scale "rate"
@@ -281,6 +296,49 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/results/invasive_strep_a_diagnoses_by_subgroup.png
+
+  panel_plots_event_plus_medication_scarlet:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_all.csv
+      --measures-pattern "event_scarlet_fever_medication_any_2_weeks*rate"
+      --output-dir output/report/results
+      --output-name "scarlet_fever_plus_medication_prescribing_by_subgroup"
+      --scale "rate"
+      --first "event_scarlet_fever_medication_any_2_weeks_rate"
+      
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/scarlet_fever_plus_medication_prescribing_by_subgroup.png
+
+  panel_plots_event_plus_medication_igas:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_all.csv
+      --measures-pattern "event_invasive_strep_a_medication_any_2_weeks*rate"
+      --output-dir output/report/results
+      --output-name "invasive_strep_a_plus_medication_prescribing_by_subgroup"
+      --scale "rate"
+      --first "event_invasive_strep_a_medication_any_2_weeks_rate"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/invasive_strep_a_plus_medication_prescribing_by_subgroup.png
+
+  panel_plots_event_plus_medication_strp:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_all.csv
+      --measures-pattern "event_strep_a_sore_throat_medication_any_2_weeks*rate"
+      --output-dir output/report/results
+      --output-name "strep_a_sore_throat_plus_medication_prescribing_by_subgroup"
+      --scale "rate"
+      --first "event_strep_a_sore_throat_medication_any_2_weeks_rate"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/strep_a_sore_throat_plus_medication_prescribing_by_subgroup.png
 
   event_counts_report:
     run: >
@@ -451,7 +509,12 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/weekly/results/measure_weekly.csv
-      --measures-pattern "event_scarlet_fever*_rate"
+      --measures-list "event_scarlet_fever_rate"
+      --measures-list "event_scarlet_fever_age_band_rate"
+      --measures-list "event_scarlet_fever_imd_rate"
+      --measures-list "event_scarlet_fever_ethnicity_rate"
+      --measures-list "event_scarlet_fever_region_rate"
+      --measures-list "event_scarlet_fever_sex_rate"
       --output-dir output/report/weekly/results
       --output-name "scarlet_fever_diagnoses_by_subgroup"
       --scale "rate"
@@ -465,7 +528,12 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/weekly/results/measure_weekly.csv
-      --measures-pattern "event_strep_a_sore_throat*_rate"
+      --measures-list "event_strep_a_sore_throat_rate"
+      --measures-list "event_strep_a_sore_throat_age_band_rate"
+      --measures-list "event_strep_a_sore_throat_imd_rate"
+      --measures-list "event_strep_a_sore_throat_ethnicity_rate"
+      --measures-list "event_strep_a_sore_throat_region_rate"
+      --measures-list "event_strep_a_sore_throat_sex_rate"
       --output-dir output/report/weekly/results
       --output-name "strep_a_sore_throat_diagnoses_by_subgroup"
       --scale "rate"
@@ -479,7 +547,12 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/weekly/results/measure_weekly.csv
-      --measures-pattern "event_invasive_strep_a*_rate"
+      --measures-list "event_invasive_strep_a_rate"
+      --measures-list "event_invasive_strep_a_age_band_rate"
+      --measures-list "event_invasive_strep_a_imd_rate"
+      --measures-list "event_invasive_strep_a_ethnicity_rate"
+      --measures-list "event_invasive_strep_a_region_rate"
+      --measures-list "event_invasive_strep_a_sex_rate"
       --output-dir output/report/weekly/results
       --output-name "invasive_strep_a_diagnoses_by_subgroup"
       --scale "rate"
@@ -488,16 +561,100 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/invasive_strep_a_diagnoses_by_subgroup.png
+  
+  panel_plots_event_plus_medication_scarlet_weekly:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/weekly/results/measure_weekly.csv
+      --measures-pattern "event_scarlet_fever_medication_any_2_weeks*rate"
+      --output-dir output/report/weekly/results
+      --output-name "scarlet_fever_plus_medication_prescribing_by_subgroup"
+      --scale "rate"
+      --first "event_scarlet_fever_medication_any_2_weeks_rate"
+    needs: [join_measures_weekly]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/results/scarlet_fever_plus_medication_prescribing_by_subgroup.png
 
-  # create_notebook:
-  #   run: python:latest python analysis/report/create_notebook.py
-  #   outputs:
-  #     moderately_sensitive:
-  #       notebook: output/report/report.ipynb
+  panel_plots_event_plus_medication_igas_weekly:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/weekly/results/measure_weekly.csv
+      --measures-pattern "event_invasive_strep_a_medication_any_2_weeks*rate"
+      --output-dir output/report/weekly/results
+      --output-name "invasive_strep_a_plus_medication_prescribing_by_subgroup"
+      --scale "rate"
+      --first "event_invasive_strep_a_medication_any_2_weeks_rate"
+    needs: [join_measures_weekly]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/results/invasive_strep_a_plus_medication_prescribing_by_subgroup.png
 
-  # generate_notebook:
-  #   run: jupyter:latest jupyter nbconvert /workspace/output/report/report.ipynb --execute --to html --output-dir=/workspace/output/report --ExecutePreprocessor.timeout=86400 --no-input
-  #   needs: [create_notebook, event_counts_report, deciles_chart_report, top_5_table_report, plot_measure_report]
-  #   outputs:
-  #     moderately_sensitive:
-  #       notebook: output/report/report.html
+  panel_plots_event_plus_medication_strp_weekly:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/weekly/results/measure_weekly.csv
+      --measures-pattern "event_strep_a_sore_throat_medication_any_2_weeks*rate"
+      --output-dir output/report/weekly/results
+      --output-name "strep_a_sore_throat_plus_medication_prescribing_by_subgroup"
+      --scale "rate"
+      --first "event_strep_a_sore_throat_medication_any_2_weeks_rate"
+    needs: [join_measures_weekly]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/results/strep_a_sore_throat_plus_medication_prescribing_by_subgroup.png
+
+
+  event_counts_report_weekly:
+    run: >
+      python:latest python analysis/report/event_counts.py --input-dir="output/report/weekly/joined/" --output-dir="output/report/weekly/results" --measures="amoxicillin,azithromycin,clarithromycin,erythromycin,phenoxymethypenicillin,scarlet_fever,strep_a_sore_throat,invasive_strep_a"
+    needs: [join_cohorts_report_weekly]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/results/event_counts_*.json
+
+  generate_notebook:
+    run: jupyter:latest jupyter nbconvert /workspace/analysis/report/report.ipynb --execute --to html --output-dir=/workspace/output/report --ExecutePreprocessor.timeout=86400 --no-input
+    needs: [
+      event_counts_report,
+      top_5_table_report, 
+      plot_measure_report,
+      panel_plots_any,
+      panel_plots_amox,
+      panel_plots_azithro,
+      panel_plots_clarithro,
+      panel_plots_pheno,
+      panel_plots_erythro,
+      panel_plots_scarlet,
+      panel_plots_strp,
+      panel_plots_igas,
+      panel_plots_event_plus_medication_scarlet,
+      panel_plots_event_plus_medication_igas,
+      panel_plots_event_plus_medication_strp
+      ]
+    outputs:
+      moderately_sensitive:
+        notebook: output/report/report.html
+
+  generate_notebook_weekly:
+    run: jupyter:latest jupyter nbconvert /workspace/analysis/report/report_weekly.ipynb --execute --to html --output-dir=/workspace/output/report --ExecutePreprocessor.timeout=86400 --no-input
+    needs: [
+      event_counts_report_weekly,
+      top_5_table_report_weekly, 
+      plot_measure_report_weekly,
+      panel_plots_any_weekly,
+      panel_plots_amox_weekly,
+      panel_plots_azithro_weekly,
+      panel_plots_clarithro_weekly,
+      panel_plots_pheno_weekly,
+      panel_plots_erythro_weekly,
+      panel_plots_scarlet_weekly,
+      panel_plots_strp_weekly,
+      panel_plots_igas_weekly,
+      panel_plots_event_plus_medication_scarlet_weekly,
+      panel_plots_event_plus_medication_igas_weekly,
+      panel_plots_event_plus_medication_strp_weekly
+      ]
+    outputs:
+      moderately_sensitive:
+        notebook: output/report/report_weekly.html
