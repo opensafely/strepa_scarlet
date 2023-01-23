@@ -69,7 +69,9 @@ def get_measure_tables(input_files):
         measure_fname_match = re.match(MEASURE_FNAME_REGEX, input_file.name)
         if measure_fname_match is not None:
             # The `date` column is assigned by the measures framework.
-            measure_table = pandas.read_csv(input_file, parse_dates=["date"])
+            measure_table = pandas.read_csv(
+                input_file, dtype="str", parse_dates=["date"]
+            )
 
             # We can reconstruct the parameters passed to `Measure` without
             # the study definition.

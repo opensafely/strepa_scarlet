@@ -11,7 +11,7 @@ from report_utils import (
 
 
 def get_measure_tables(input_file):
-    measure_table = pandas.read_csv(input_file)
+    measure_table = pandas.read_csv(input_file, dtype=str)
 
     return measure_table
 
@@ -111,8 +111,6 @@ def create_top_5_code_table(
 
     # cast both code columns to str
     df_code = "code"
-    df[df_code] = df[df_code].astype(int).astype(str)
-    code_df[code_column] = code_df[code_column].astype(int).astype(str)
 
     # sum event counts over patients
     event_counts = df.sort_values(ascending=False, by="num")
@@ -168,10 +166,8 @@ def main():
 
     for key, codelist in all_codes.items():
         measure = f"event_code_{key}_rate"
-        codelist = pandas.read_csv(codelist)
+        codelist = pandas.read_csv(codelist, dtype="str")
         code_df = measure_table[measure_table["name"] == measure]
-        # Necessary because measure table has some non-numeric groups
-        code_df["group"] = pandas.to_numeric(code_df["group"], errors="coerce")
 
         code_column = "code"
         if "vpid" in codelist.columns:
