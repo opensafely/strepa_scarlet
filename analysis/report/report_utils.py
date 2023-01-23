@@ -16,7 +16,7 @@ MEDICATION_TO_CODELIST = {
 
 CLINICAL_TO_CODELIST = {
     "scarlet_fever": "codelists/user-chriswood-scarlet-fever.csv",
-    "strep_a_sore_throat": "codelists/user-chriswood-invasive-group-a-strep.csv",
+    "strep_a_sore_throat": "codelists/user-chriswood-group-a-streptococcal-sore-throat.csv",
     "invasive_strep_a": "codelists/user-chriswood-invasive-group-a-strep.csv",
 }
 
