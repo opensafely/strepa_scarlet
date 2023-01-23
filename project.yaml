@@ -104,7 +104,7 @@ actions:
 
   join_cohorts_report:
     run: >
-      cohort-joiner:v0.0.38
+      python:latest python analysis/cohort_joiner.py
         --lhs output/report/input_report_20*.csv.gz
         --rhs output/report/input_ethnicity_report.csv.gz
         --output-dir output/report/joined
@@ -164,7 +164,7 @@ actions:
       --output-dir output/report/results
       --output-name "medication_any_prescribing_by_subgroup"
       --scale "rate"
-      --first "medication_event_any_rate"
+      --first "event_medication_any_rate"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
@@ -374,7 +374,7 @@ actions:
 
   join_cohorts_report_weekly:
     run: >
-      cohort-joiner:v0.0.38
+      python:latest python analysis/cohort_joiner.py
         --lhs output/report/weekly/input_report_20*.csv.gz
         --rhs output/report/input_ethnicity_report.csv.gz
         --output-dir output/report/weekly/joined
