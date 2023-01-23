@@ -488,6 +488,14 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/invasive_strep_a_diagnoses_by_subgroup.png
+  
+  event_counts_report_weekly:
+    run: >
+      python:latest python analysis/report/event_counts.py --input-dir="output/report/weekly/joined/" --output-dir="output/report/weekly/results" --measures="amoxicillin,azithromycin,clarithromycin,erythromycin,phenoxymethypenicillin,scarlet_fever,strep_a_sore_throat,invasive_strep_a"
+    needs: [join_cohorts_report_weekly]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/results/event_counts_*.json
 
   generate_notebook:
     run: jupyter:latest jupyter nbconvert /workspace/analysis/report/report.ipynb --execute --to html --output-dir=/workspace/output/report --ExecutePreprocessor.timeout=86400 --no-input
@@ -512,6 +520,7 @@ actions:
   generate_notebook_weekly:
     run: jupyter:latest jupyter nbconvert /workspace/analysis/report/report_weekly.ipynb --execute --to html --output-dir=/workspace/output/report --ExecutePreprocessor.timeout=86400 --no-input
     needs: [
+      event_counts_report_weekly,
       top_5_table_report_weekly, 
       plot_measure_report_weekly,
       panel_plots_any_weekly,
