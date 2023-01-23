@@ -156,7 +156,7 @@ def get_group_chart(
     groups = measure_table.groupby("name", sort=False)
     total_plots = len(groups)
 
-    if total_plots > 10:
+    if total_plots > 15:
         raise Exception(f"Trying to plot more than 10 plots ({total_plots})")
 
     # Compute Rows required
