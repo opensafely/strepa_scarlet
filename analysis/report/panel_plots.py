@@ -255,6 +255,7 @@ def parse_args():
     measures_group.add_argument(
         "--measures-list",
         required=False,
+        action="append",
         help="A list of one or more measure names",
     )
     parser.add_argument(
