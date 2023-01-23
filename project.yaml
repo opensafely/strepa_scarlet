@@ -301,7 +301,7 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/results/measure_all.csv
-      --measures-pattern "event_scarlet_fever_medication_any_2_weeks_rate"
+      --measures-pattern "event_scarlet_fever_medication_any_2_weeks*rate"
       --output-dir output/report/results
       --output-name "scarlet_fever_plus_medication_prescribing_by_subgroup"
       --scale "rate"
@@ -316,7 +316,7 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/results/measure_all.csv
-      --measures-pattern "event_invasive_strep_a_medication_any_2_weeks_rate"
+      --measures-pattern "event_invasive_strep_a_medication_any_2_weeks*rate"
       --output-dir output/report/results
       --output-name "invasive_strep_a_plus_medication_prescribing_by_subgroup"
       --scale "rate"
@@ -330,7 +330,7 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/results/measure_all.csv
-      --measures-pattern "event_strep_a_sore_throat_medication_any_2_weeks_rate"
+      --measures-pattern "event_strep_a_sore_throat_medication_any_2_weeks*rate"
       --output-dir output/report/results
       --output-name "strep_a_sore_throat_plus_medication_prescribing_by_subgroup"
       --scale "rate"
