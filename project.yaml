@@ -164,7 +164,7 @@ actions:
       --output-dir output/report/results
       --output-name "medication_any_prescribing_by_subgroup"
       --scale "rate"
-      --first "medication_event_any_rate"
+      --first "event_medication_any_rate"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
