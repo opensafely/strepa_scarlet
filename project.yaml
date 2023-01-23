@@ -491,7 +491,39 @@ actions:
 
   generate_notebook:
     run: jupyter:latest jupyter nbconvert /workspace/analysis/report/report.ipynb --execute --to html --output-dir=/workspace/output/report --ExecutePreprocessor.timeout=86400 --no-input
-    needs: [event_counts_report, top_5_table_report, plot_measure_report]
+    needs: [
+      event_counts_report,
+      top_5_table_report, 
+      plot_measure_report,
+      panel_plots_any,
+      panel_plots_amox,
+      panel_plots_azithro,
+      panel_plots_clarithro,
+      panel_plots_pheno,
+      panel_plots_erythro,
+      panel_plots_scarlet,
+      panel_plots_strp,
+      panel_plots_igas
+      ]
     outputs:
       moderately_sensitive:
         notebook: output/report/report.html
+
+  generate_notebook_weekly:
+    run: jupyter:latest jupyter nbconvert /workspace/analysis/report/report_weekly.ipynb --execute --to html --output-dir=/workspace/output/report --ExecutePreprocessor.timeout=86400 --no-input
+    needs: [
+      top_5_table_report_weekly, 
+      plot_measure_report_weekly,
+      panel_plots_any_weekly,
+      panel_plots_amox_weekly,
+      panel_plots_azithro_weekly,
+      panel_plots_clarithro_weekly,
+      panel_plots_pheno_weekly,
+      panel_plots_erythro_weekly,
+      panel_plots_scarlet_weekly,
+      panel_plots_strp_weekly,
+      panel_plots_igas_weekly
+      ]
+    outputs:
+      moderately_sensitive:
+        notebook: output/report/report_weekly.html
