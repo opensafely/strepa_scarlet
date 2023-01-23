@@ -1,7 +1,10 @@
 import re
 import json
-import pandas
+import pandas as pd
 import matplotlib.pyplot as plt
+from pathlib import Path
+from IPython.display import display, HTML, Image
+
 
 MEDICATION_TO_CODELIST = {
     "amoxicillin": "codelists/opensafely-amoxicillin-oral.csv",
@@ -108,12 +111,41 @@ def coerce_numeric(table):
     Leave NaN values in df so missing data are not inferred
     """
     coerced = table.copy()
-    coerced["numerator"] = pandas.to_numeric(
+    coerced["numerator"] = pd.to_numeric(
         coerced["numerator"], errors="coerce"
     )
-    coerced["denominator"] = pandas.to_numeric(
+    coerced["denominator"] = pd.to_numeric(
         coerced["denominator"], errors="coerce"
     )
-    coerced["value"] = pandas.to_numeric(coerced["value"], errors="coerce")
+    coerced["value"] = pd.to_numeric(coerced["value"], errors="coerce")
     coerced["group"] = coerced["group"].astype(str)
     return coerced
+
+
+REPORT_DIR = Path.cwd().parent.parent / "output/report"
+RESULTS_DIR = REPORT_DIR / "results"
+WEEKLY_RESULTS_DIR = REPORT_DIR / "weekly/results"
+
+def display_event_counts(file, dir=RESULTS_DIR):
+    """
+    Displays event counts table. Input is a json file containing a dictionary
+    of event counts.
+    """
+    with open(f'{dir}/{file}') as f:
+        event_summary = json.load(f)
+        event_summary_table = pd.DataFrame(event_summary, index=[0])
+
+    display(HTML(event_summary_table.to_html()))
+
+def display_image(file, dir=RESULTS_DIR):
+    """
+    Displays image in file
+    """
+    display(Image(filename=f'{dir}/{file}'))
+
+def display_top_5(file, dir=RESULTS_DIR):
+    """
+    Displays a pandas dataframe in a table. Input is a csv file.
+    """
+    df = pd.read_csv(f'{dir}/{file}')
+    display(HTML(df.to_html()))
