@@ -111,12 +111,13 @@ def reorder_dataframe(measure_table, first):
 
 def get_group_chart(
     measure_table,
-    first=None,
-    columns=2,
-    date_lines=None,
-    scale=None,
-    ci=False,
-    exclude_group=None,
+    first,
+    column_to_plot,
+    columns,
+    date_lines,
+    scale,
+    ci,
+    exclude_group,
 ):
     # NOTE: constrained_layout=True available in matplotlib>=3.5
     figure = plt.figure(figsize=(columns * 6, columns * 5))
@@ -164,7 +165,9 @@ def get_group_chart(
         numeric = coerce_numeric(filtered)
         for plot_group, plot_group_data in numeric.groupby("group"):
             ax.plot(
-                plot_group_data.index, plot_group_data.value, label=plot_group
+                plot_group_data.index,
+                plot_group_data[column_to_plot],
+                label=plot_group,
             )
             if ci:
                 plot_cis(ax, plot_group_data)
@@ -185,6 +188,8 @@ def get_group_chart(
             scale_hundred(ax)
         elif scale == "rate":
             scale_thousand(ax)
+        if column_to_plot == "numerator":
+            ax.set_ylabel("Count")
     plt.subplots_adjust(wspace=0.5, hspace=0.4)
     return (plt, lgds)
 
@@ -239,6 +244,12 @@ def parse_args():
         help="Measures pattern for plot that should appear first",
     )
     parser.add_argument(
+        "--column-to-plot",
+        choices=["numerator", "value"],
+        default="value",
+        help="Which measure column to plot",
+    )
+    parser.add_argument(
         "--output-dir",
         required=True,
         type=pathlib.Path,
@@ -277,6 +288,7 @@ def main():
     measures_pattern = args.measures_pattern
     measures_list = args.measures_list
     first = args.first
+    column_to_plot = args.column_to_plot
     output_dir = args.output_dir
     output_name = args.output_name
     date_lines = args.date_lines
@@ -293,6 +305,7 @@ def main():
     chart, lgds = get_group_chart(
         subset,
         first=first,
+        column_to_plot=column_to_plot,
         columns=2,
         date_lines=date_lines,
         scale=scale,
