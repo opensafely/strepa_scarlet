@@ -42,6 +42,14 @@ def main():
     ]
     plot_measures(
         medications,
+        filename=output_dir / "medications_bar_measures_count",
+        column_to_plot="numerator",
+        y_label="Count of patients",
+        as_bar=True,
+        category="name",
+    )
+    plot_measures(
+        medications,
         filename=output_dir / "medications_bar_measures",
         column_to_plot="rate",
         y_label="Rate per 1000",
@@ -55,6 +63,14 @@ def main():
     clinical = population_measures[
         population_measures.name.str.contains("|".join(clinical_measures))
     ]
+    plot_measures(
+        clinical,
+        filename=output_dir / "clinical_bar_measures_count",
+        column_to_plot="numerator",
+        y_label="Count of patients",
+        as_bar=True,
+        category="name",
+    )
     plot_measures(
         clinical,
         filename=output_dir / "clinical_bar_measures",
