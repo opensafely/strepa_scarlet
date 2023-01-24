@@ -170,6 +170,22 @@ actions:
       moderately_sensitive:
         measure: output/report/results/medication_any_prescribing_by_subgroup.png
 
+  panel_plots_any_count:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_all.csv
+      --measures-list "event_medication_any_rate"
+      --measures-list "event_medication_any_age_band_rate"
+      --measures-list "event_medication_any_region_rate"
+      --output-dir output/report/results
+      --output-name "medication_any_prescribing_by_subgroup_count"
+      --column-to-plot "numerator"
+      --first "event_medication_any_rate"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/medication_any_prescribing_by_subgroup_count.png
+
   panel_plots_amox:
     run: >
       python:latest python analysis/report/panel_plots.py
@@ -183,6 +199,22 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/results/amoxicillin_prescribing_by_subgroup.png
+
+  panel_plots_amox_count:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_all.csv
+      --measures-list "event_amoxicillin_rate"
+      --measures-list "event_amoxicillin_age_band_rate"
+      --measures-list "event_amoxicillin_region_rate"
+      --output-dir output/report/results
+      --output-name "amoxicillin_prescribing_by_subgroup_count"
+      --column-to-plot "numerator"
+      --first "event_amoxicillin_rate"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/amoxicillin_prescribing_by_subgroup_count.png
 
   panel_plots_azithro:
     run: >
@@ -198,6 +230,22 @@ actions:
       moderately_sensitive:
         measure: output/report/results/azithromycin_prescribing_by_subgroup.png
 
+  panel_plots_azithro_count:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_all.csv
+      --measures-list "event_azithromycin_rate"
+      --measures-list "event_azithromycin_age_band_rate"
+      --measures-list "event_azithromycin_region_rate"
+      --output-dir output/report/results
+      --output-name "azithromycin_prescribing_by_subgroup_count"
+      --column-to-plot "numerator"
+      --first "event_azithromycin_rate"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/azithromycin_prescribing_by_subgroup_count.png
+
   panel_plots_clarithro:
     run: >
       python:latest python analysis/report/panel_plots.py
@@ -211,6 +259,22 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/results/clarithromycin_prescribing_by_subgroup.png
+
+  panel_plots_clarithro_count:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_all.csv
+      --measures-list "event_clarithromycin_rate"
+      --measures-list "event_clarithromycin_age_band_rate"
+      --measures-list "event_clarithromycin_region_rate"
+      --output-dir output/report/results
+      --output-name "clarithromycin_prescribing_by_subgroup_count"
+      --column-to-plot "numerator"
+      --first "event_clarithromycin_rate"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/clarithromycin_prescribing_by_subgroup_count.png
 
   panel_plots_pheno:
     run: >
@@ -226,6 +290,22 @@ actions:
       moderately_sensitive:
         measure: output/report/results/phenoxymethypenicillin_prescribing_by_subgroup.png
 
+  panel_plots_pheno_count:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_all.csv
+      --measures-list "event_phenoxymethypenicillin_rate"
+      --measures-list "event_phenoxymethypenicillin_age_band_rate"
+      --measures-list "event_phenoxymethypenicillin_region_rate"
+      --output-dir output/report/results
+      --output-name "phenoxymethypenicillin_prescribing_by_subgroup_count"
+      --column-to-plot "numerator"
+      --first "event_phenoxymethypenicillin_rate"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/phenoxymethypenicillin_prescribing_by_subgroup_count.png
+
   panel_plots_erythro:
     run: >
       python:latest python analysis/report/panel_plots.py
@@ -239,6 +319,22 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/results/erythromycin_prescribing_by_subgroup.png
+
+  panel_plots_erythro_count:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_all.csv
+      --measures-list "event_erythromycin_rate"
+      --measures-list "event_erythromycin_age_band_rate"
+      --measures-list "event_erythromycin_region_rate"
+      --output-dir output/report/results
+      --output-name "erythromycin_prescribing_by_subgroup_count"
+      --column-to-plot "numerator"
+      --first "event_erythromycin_rate"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/erythromycin_prescribing_by_subgroup_count.png
 
   panel_plots_scarlet:
     run: >
@@ -259,6 +355,22 @@ actions:
       moderately_sensitive:
         measure: output/report/results/scarlet_fever_diagnoses_by_subgroup.png
 
+  panel_plots_scarlet_count:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_all.csv
+      --measures-list "event_scarlet_fever_rate"
+      --measures-list "event_scarlet_fever_age_band_rate"
+      --measures-list "event_scarlet_fever_region_rate"
+      --output-dir output/report/results
+      --output-name "scarlet_fever_diagnoses_by_subgroup_count"
+      --column-to-plot "numerator"
+      --first "event_scarlet_fever_rate"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/scarlet_fever_diagnoses_by_subgroup_count.png
+
   panel_plots_strp:
     run: >
       python:latest python analysis/report/panel_plots.py
@@ -278,6 +390,22 @@ actions:
       moderately_sensitive:
         measure: output/report/results/strep_a_sore_throat_diagnoses_by_subgroup.png
 
+  panel_plots_strp_count:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_all.csv
+      --measures-list "event_strep_a_sore_throat_rate"
+      --measures-list "event_strep_a_sore_throat_age_band_rate"
+      --measures-list "event_strep_a_sore_throat_region_rate"
+      --output-dir output/report/results
+      --output-name "strep_a_sore_throat_diagnoses_by_subgroup_count"
+      --column-to-plot "numerator"
+      --first "event_strep_a_sore_throat_rate"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/strep_a_sore_throat_diagnoses_by_subgroup_count.png
+
   panel_plots_igas:
     run: >
       python:latest python analysis/report/panel_plots.py
@@ -296,6 +424,22 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/results/invasive_strep_a_diagnoses_by_subgroup.png
+
+  panel_plots_igas_count:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_all.csv
+      --measures-list "event_invasive_strep_a_rate"
+      --measures-list "event_invasive_strep_a_age_band_rate"
+      --measures-list "event_invasive_strep_a_region_rate"
+      --output-dir output/report/results
+      --output-name "invasive_strep_a_diagnoses_by_subgroup_count"
+      --column-to-plot "numerator"
+      --first "event_invasive_strep_a_rate"
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/invasive_strep_a_diagnoses_by_subgroup_count.png
 
   panel_plots_event_plus_medication_scarlet:
     run: >
@@ -617,7 +761,7 @@ actions:
     run: jupyter:latest jupyter nbconvert /workspace/analysis/report/report.ipynb --execute --to html --output-dir=/workspace/output/report --ExecutePreprocessor.timeout=86400 --no-input
     needs: [
       event_counts_report,
-      top_5_table_report, 
+      top_5_table_report,
       plot_measure_report,
       panel_plots_any,
       panel_plots_amox,
@@ -628,6 +772,15 @@ actions:
       panel_plots_scarlet,
       panel_plots_strp,
       panel_plots_igas,
+      panel_plots_any_count,
+      panel_plots_amox_count,
+      panel_plots_azithro_count,
+      panel_plots_clarithro_count,
+      panel_plots_pheno_count,
+      panel_plots_erythro_count,
+      panel_plots_scarlet_count,
+      panel_plots_strp_count,
+      panel_plots_igas_count,
       panel_plots_event_plus_medication_scarlet,
       panel_plots_event_plus_medication_igas,
       panel_plots_event_plus_medication_strp
