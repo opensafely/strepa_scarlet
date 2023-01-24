@@ -7,8 +7,12 @@ import numpy
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 from dateutil import parser
-from collections import Counter
-from report_utils import coerce_numeric
+from report_utils import (
+    coerce_numeric,
+    filename_to_title,
+    autoselect_labels,
+    translate_group,
+)
 
 
 def get_measure_tables(input_file):
@@ -57,35 +61,6 @@ def scale_hundred(ax):
 
     ax.yaxis.set_major_formatter(FuncFormatter(hundred_formatter))
     ax.set_ylabel("Percentage")
-
-
-def autoselect_labels(measures_list):
-    measures_set = set(measures_list)
-    counts = Counter(
-        numpy.concatenate([item.split("_") for item in measures_set])
-    )
-    remove = [k for k, v in counts.items() if v == len(measures_set)]
-    return remove
-
-
-def translate_group(group_var, label, repeated, autolabel=False):
-    """
-    Translate a measure name into a plot label
-    Autolabel uses the 'name' column, but removes words that appear in every
-    item in the group. If there are no unique strings, it falls back to group
-    The alternative labeling uses the 'group' column
-    """
-    title = " ".join(
-        [x for x in label.split("_") if x not in repeated]
-    ).title()
-    if not title or not autolabel:
-        return filename_to_title(group_var)
-    else:
-        return title
-
-
-def filename_to_title(filename):
-    return filename.replace("_", " ").title()
 
 
 def plot_cis(ax, data):

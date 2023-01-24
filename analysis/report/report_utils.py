@@ -1,7 +1,9 @@
 import re
 import json
 import pandas as pd
+import numpy
 import matplotlib.pyplot as plt
+from collections import Counter
 from pathlib import Path
 from IPython.display import display, HTML, Image
 
@@ -61,36 +63,56 @@ def plot_measures(
         as_bar: Boolean indicating if bar chart should be plotted instead of line chart. Only valid if no categories.
         category: Name of column indicating different categories
     """
+    df_copy = df.copy()
     plt.figure(figsize=(18, 8))
     y_max = df[column_to_plot].max() * 1.05
     # Ignore timestamp - this could be done at load time
-    df["date"] = df["date"].dt.date
-    df = df.set_index("date")
+    df_copy["date"] = df_copy["date"].dt.date
+    df_copy = df_copy.set_index("date")
     if category:
+        # Set up category to have clean labels
+        repeated = autoselect_labels(df_copy[category])
+        df_copy[category] = df_copy.apply(
+            lambda x: translate_group(
+                x[category], x[category], repeated, True
+            ),
+            axis=1,
+        )
         if as_bar:
-            df.pivot(columns=category, values=column_to_plot).plot.bar(
-                stacked=True
+            ax = df_copy.pivot(
+                columns=category, values=column_to_plot
+            ).plot.bar(stacked=True)
+            y_max = (
+                df_copy.groupby(["date"])[column_to_plot].sum().max() * 1.05
             )
-            y_max = df.groupby(["date"])[column_to_plot].sum().max() * 1.05
         else:
-            df.groupby(category)[column_to_plot].plot()
+            ax = df_copy.groupby(category)[column_to_plot].plot()
     else:
         if as_bar:
-            df[column_to_plot].bar(legend=False)
+            df_copy[column_to_plot].bar(legend=False)
         else:
-            df[column_to_plot].plot(legend=False)
+            df_copy[column_to_plot].plot(legend=False)
+
+    if as_bar:
+        # Matplotlib treats bar labels as necessary categories
+        # So we force it to use only every third label
+        labels = ax.get_xticklabels()
+        skipped_labels = [
+            x if index % 3 == 0 else "" for index, x in enumerate(labels)
+        ]
+        ax.set_xticklabels(skipped_labels)
 
     plt.ylabel(y_label)
     plt.xlabel("Date")
     plt.xticks(rotation="vertical")
     plt.ylim(
         bottom=0,
-        top=1000 if df[column_to_plot].isnull().values.all() else y_max,
+        top=1000 if df_copy[column_to_plot].isnull().values.all() else y_max,
     )
 
     if category:
         plt.legend(
-            sorted(df[category].unique()),
+            sorted(df_copy[category].unique()),
             bbox_to_anchor=(1.04, 1),
             loc="upper left",
             prop={"size": 6},
@@ -111,9 +133,7 @@ def coerce_numeric(table):
     Leave NaN values in df so missing data are not inferred
     """
     coerced = table.copy()
-    coerced["numerator"] = pd.to_numeric(
-        coerced["numerator"], errors="coerce"
-    )
+    coerced["numerator"] = pd.to_numeric(coerced["numerator"], errors="coerce")
     coerced["denominator"] = pd.to_numeric(
         coerced["denominator"], errors="coerce"
     )
@@ -122,30 +142,62 @@ def coerce_numeric(table):
     return coerced
 
 
+def filename_to_title(filename):
+    return filename.replace("_", " ").title()
+
+
+def autoselect_labels(measures_list):
+    measures_set = set(measures_list)
+    counts = Counter(
+        numpy.concatenate([item.split("_") for item in measures_set])
+    )
+    remove = [k for k, v in counts.items() if v == len(measures_set)]
+    return remove
+
+
+def translate_group(group_var, label, repeated, autolabel=False):
+    """
+    Translate a measure name into a plot label
+    Autolabel uses the 'name' column, but removes words that appear in every
+    item in the group. If there are no unique strings, it falls back to group
+    The alternative labeling uses the 'group' column
+    """
+    title = " ".join(
+        [x for x in label.split("_") if x not in repeated]
+    ).title()
+    if not title or not autolabel:
+        return filename_to_title(group_var)
+    else:
+        return title
+
+
 REPORT_DIR = Path.cwd().parent.parent / "output/report"
 RESULTS_DIR = REPORT_DIR / "results"
 WEEKLY_RESULTS_DIR = REPORT_DIR / "weekly/results"
+
 
 def display_event_counts(file, dir=RESULTS_DIR):
     """
     Displays event counts table. Input is a json file containing a dictionary
     of event counts.
     """
-    with open(f'{dir}/{file}') as f:
+    with open(f"{dir}/{file}") as f:
         event_summary = json.load(f)
         event_summary_table = pd.DataFrame(event_summary, index=[0])
 
     display(HTML(event_summary_table.to_html()))
 
+
 def display_image(file, dir=RESULTS_DIR):
     """
     Displays image in file
     """
-    display(Image(filename=f'{dir}/{file}'))
+    display(Image(filename=f"{dir}/{file}"))
+
 
 def display_top_5(file, dir=RESULTS_DIR):
     """
     Displays a pandas dataframe in a table. Input is a csv file.
     """
-    df = pd.read_csv(f'{dir}/{file}')
+    df = pd.read_csv(f"{dir}/{file}")
     display(HTML(df.to_html()))
