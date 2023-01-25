@@ -124,6 +124,9 @@ def plot_measures(
     plt.savefig(f"{filename}.jpeg")
     plt.close()
 
+    # Save the underlying data as a csv
+    df_copy.to_csv(f"{filename}.csv")
+
 
 def coerce_numeric(table):
     """

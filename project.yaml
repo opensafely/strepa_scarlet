@@ -155,6 +155,7 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/results/*measures*.jpeg
+        csv: output/report/results/*measures*.csv
 
   panel_plots:
     run: >
@@ -313,6 +314,7 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/*measures*.jpeg
+        csv: output/report/weekly/results/*measures*.csv
 
   panel_plots_weekly:
     run: >
