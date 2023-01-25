@@ -158,7 +158,7 @@ def get_group_chart(
             )
             lgds.append(lgd)
         ax.set_xlabel("")
-        ax.tick_params(axis="x", labelsize=7)
+        ax.tick_params(axis="x", labelsize=7, rotation=45)
         if date_lines:
             min_date = min(measure_table.index)
             max_date = max(measure_table.index)
