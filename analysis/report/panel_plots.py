@@ -23,7 +23,7 @@ def scale_thousand(ax):
     """
 
     def thousand_formatter(x, pos):
-        return f"{x*1000: .0f}"
+        return f"{x*1000: .1f}"
 
     ax.yaxis.set_major_formatter(FuncFormatter(thousand_formatter))
     ax.set_ylabel("Rate per thousand")
