@@ -72,7 +72,7 @@ def panels_loop(measure_table, output_dir):
             column_to_plot=column_to_plot,
             columns=2,
             date_lines=None,
-            scale=None,
+            scale="rate",
             ci=None,
             exclude_group="missing",
         )
