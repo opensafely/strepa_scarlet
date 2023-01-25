@@ -370,7 +370,7 @@ actions:
   event_counts_report_weekly:
     run: >
       python:latest python analysis/report/event_counts.py --input-dir="output/report/weekly/joined/" --output-dir="output/report/weekly/results" --measures="amoxicillin,azithromycin,clarithromycin,erythromycin,phenoxymethypenicillin,scarlet_fever,strep_a_sore_throat,invasive_strep_a"
-    needs: [join_cohorts_report_weekly]
+    needs: [join_cohorts_report_weekly, join_cohorts_report_weekly_2]
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/event_counts_*.json
