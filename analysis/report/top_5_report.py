@@ -144,11 +144,11 @@ def create_top_5_code_table(
     event_counts.loc[event_counts[df_code] == "Other", "Description"] = "-"
 
     # Rename the code column to something consistent
-    event_counts.rename(columns={df_code: "Code"}, inplace=True)
+    event_counts.rename(columns={df_code: "Code", "num": "Count"}, inplace=True)
 
-    # drop events column
+    
     event_counts = event_counts.loc[
-        :, ["Code", "Description", "Proportion of codes (%)"]
+        :, ["Code", "Description", "Count", "Proportion of codes (%)"]
     ]
     # return top n rows
     return event_counts.head(5)
