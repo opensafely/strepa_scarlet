@@ -1,9 +1,7 @@
 import argparse
 import pathlib
-import fnmatch
 import pandas
 import numpy
-
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 from dateutil import parser
@@ -12,29 +10,10 @@ from report_utils import (
     filename_to_title,
     autoselect_labels,
     translate_group,
+    get_measure_tables,
+    subset_table,
+    write_group_chart,
 )
-
-
-def get_measure_tables(input_file):
-    # The `date` column is assigned by the measures framework.
-    measure_table = pandas.read_csv(input_file, parse_dates=["date"])
-
-    return measure_table
-
-
-def subset_table(measure_table, measures_pattern, measures_list):
-    """
-    Given either a pattern of list of names, extract the subset of a joined
-    measures file based on the 'name' column
-    """
-    if measures_pattern:
-        measures_list = match_paths(measure_table["name"], measures_pattern)
-        if len(measures_list) == 0:
-            raise ValueError("Pattern did not match any files")
-
-    if not measures_list:
-        return measure_table
-    return measure_table[measure_table["name"].isin(measures_list)]
 
 
 def scale_thousand(ax):
@@ -194,19 +173,8 @@ def get_group_chart(
     return (plt, lgds)
 
 
-def write_group_chart(group_chart, lgds, path, plot_title):
-    suptitle = plt.suptitle(plot_title)
-    group_chart.savefig(
-        path, bbox_extra_artists=tuple(lgds) + (suptitle,), bbox_inches="tight"
-    )
-
-
 def get_path(*args):
     return pathlib.Path(*args).resolve()
-
-
-def match_paths(files, pattern):
-    return fnmatch.filter(files, pattern)
 
 
 def add_date_lines(plt, vlines, min_date, max_date):
