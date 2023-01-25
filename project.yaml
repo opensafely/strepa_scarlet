@@ -156,146 +156,16 @@ actions:
       moderately_sensitive:
         measure: output/report/results/*measures*.jpeg
 
-  panel_plots_any:
+  panel_plots:
     run: >
-      python:latest python analysis/report/panel_plots.py
+      python:latest python analysis/report/create_panels.py
       --input-file output/report/results/measure_all.csv
-      --measures-pattern "event_medication_any*_rate"
       --output-dir output/report/results
-      --output-name "medication_any_prescribing_by_subgroup"
-      --scale "rate"
-      --first "event_medication_any_rate"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
-        measure: output/report/results/medication_any_prescribing_by_subgroup.png
+        measure: output/report/results/*.png
 
-  panel_plots_amox:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/results/measure_all.csv
-      --measures-pattern "event_amoxicillin*_rate"
-      --output-dir output/report/results
-      --output-name "amoxicillin_prescribing_by_subgroup"
-      --scale "rate"
-      --first "event_amoxicillin_rate"
-    needs: [join_measures]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/results/amoxicillin_prescribing_by_subgroup.png
-
-  panel_plots_azithro:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/results/measure_all.csv
-      --measures-pattern "event_azithromycin*_rate"
-      --output-dir output/report/results
-      --output-name "azithromycin_prescribing_by_subgroup"
-      --scale "rate"
-      --first "event_azithromycin_rate"
-    needs: [join_measures]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/results/azithromycin_prescribing_by_subgroup.png
-
-  panel_plots_clarithro:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/results/measure_all.csv
-      --measures-pattern "event_clarithromycin*_rate"
-      --output-dir output/report/results
-      --output-name "clarithromycin_prescribing_by_subgroup"
-      --scale "rate"
-      --first "event_clarithromycin_rate"
-    needs: [join_measures]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/results/clarithromycin_prescribing_by_subgroup.png
-
-  panel_plots_pheno:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/results/measure_all.csv
-      --measures-pattern "event_phenoxymethypenicillin*_rate"
-      --output-dir output/report/results
-      --output-name "phenoxymethypenicillin_prescribing_by_subgroup"
-      --scale "rate"
-      --first "event_phenoxymethypenicillin_rate"
-    needs: [join_measures]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/results/phenoxymethypenicillin_prescribing_by_subgroup.png
-
-  panel_plots_erythro:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/results/measure_all.csv
-      --measures-pattern "event_erythromycin*_rate"
-      --output-dir output/report/results
-      --output-name "erythromycin_prescribing_by_subgroup"
-      --scale "rate"
-      --first "event_erythromycin_rate"
-    needs: [join_measures]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/results/erythromycin_prescribing_by_subgroup.png
-
-  panel_plots_scarlet:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/results/measure_all.csv
-      --measures-list "event_scarlet_fever_rate"
-      --measures-list "event_scarlet_fever_age_band_rate"
-      --measures-list "event_scarlet_fever_imd_rate"
-      --measures-list "event_scarlet_fever_ethnicity_rate"
-      --measures-list "event_scarlet_fever_region_rate"
-      --measures-list "event_scarlet_fever_sex_rate"
-      --output-dir output/report/results
-      --output-name "scarlet_fever_diagnoses_by_subgroup"
-      --scale "rate"
-      --first "event_scarlet_fever_rate"
-    needs: [join_measures]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/results/scarlet_fever_diagnoses_by_subgroup.png
-
-  panel_plots_strp:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/results/measure_all.csv
-      --measures-list "event_strep_a_sore_throat_rate"
-      --measures-list "event_strep_a_sore_throat_age_band_rate"
-      --measures-list "event_strep_a_sore_throat_imd_rate"
-      --measures-list "event_strep_a_sore_throat_ethnicity_rate"
-      --measures-list "event_strep_a_sore_throat_region_rate"
-      --measures-list "event_strep_a_sore_throat_sex_rate"
-      --output-dir output/report/results
-      --output-name "strep_a_sore_throat_diagnoses_by_subgroup"
-      --scale "rate"
-      --first "event_strep_a_sore_throat_rate"
-    needs: [join_measures]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/results/strep_a_sore_throat_diagnoses_by_subgroup.png
-
-  panel_plots_igas:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/results/measure_all.csv
-      --measures-list "event_invasive_strep_a_rate"
-      --measures-list "event_invasive_strep_a_age_band_rate"
-      --measures-list "event_invasive_strep_a_imd_rate"
-      --measures-list "event_invasive_strep_a_ethnicity_rate"
-      --measures-list "event_invasive_strep_a_region_rate"
-      --measures-list "event_invasive_strep_a_sex_rate"
-      --output-dir output/report/results
-      --output-name "invasive_strep_a_diagnoses_by_subgroup"
-      --scale "rate"
-      --first "event_invasive_strep_a_rate"
-    needs: [join_measures]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/results/invasive_strep_a_diagnoses_by_subgroup.png
 
   panel_plots_event_plus_medication_scarlet:
     run: >
@@ -303,14 +173,13 @@ actions:
       --input-file output/report/results/measure_all.csv
       --measures-pattern "event_scarlet_fever_medication_any_2_weeks*rate"
       --output-dir output/report/results
-      --output-name "scarlet_fever_plus_medication_prescribing_by_subgroup"
+      --output-name "scarlet_fever_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_scarlet_fever_medication_any_2_weeks_rate"
-      
     needs: [join_measures]
     outputs:
       moderately_sensitive:
-        measure: output/report/results/scarlet_fever_plus_medication_prescribing_by_subgroup.png
+        measure: output/report/results/scarlet_fever_plus_medication_by_subgroup.png
 
   panel_plots_event_plus_medication_igas:
     run: >
@@ -318,13 +187,13 @@ actions:
       --input-file output/report/results/measure_all.csv
       --measures-pattern "event_invasive_strep_a_medication_any_2_weeks*rate"
       --output-dir output/report/results
-      --output-name "invasive_strep_a_plus_medication_prescribing_by_subgroup"
+      --output-name "invasive_strep_a_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_invasive_strep_a_medication_any_2_weeks_rate"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
-        measure: output/report/results/invasive_strep_a_plus_medication_prescribing_by_subgroup.png
+        measure: output/report/results/invasive_strep_a_plus_medication_by_subgroup.png
 
   panel_plots_event_plus_medication_strp:
     run: >
@@ -332,13 +201,13 @@ actions:
       --input-file output/report/results/measure_all.csv
       --measures-pattern "event_strep_a_sore_throat_medication_any_2_weeks*rate"
       --output-dir output/report/results
-      --output-name "strep_a_sore_throat_plus_medication_prescribing_by_subgroup"
+      --output-name "strep_a_sore_throat_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_strep_a_sore_throat_medication_any_2_weeks_rate"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
-        measure: output/report/results/strep_a_sore_throat_plus_medication_prescribing_by_subgroup.png
+        measure: output/report/results/strep_a_sore_throat_plus_medication_by_subgroup.png
 
   event_counts_report:
     run: >
@@ -445,160 +314,29 @@ actions:
       moderately_sensitive:
         measure: output/report/weekly/results/*measures*.jpeg
 
-  panel_plots_any_weekly:
+  panel_plots_weekly:
     run: >
-      python:latest python analysis/report/panel_plots.py
+      python:latest python analysis/report/create_panels.py
       --input-file output/report/weekly/results/measure_weekly.csv
-      --measures-pattern "event_medication_any*_rate"
       --output-dir output/report/weekly/results
-      --output-name "medication_any_prescribing_by_subgroup"
-      --scale "rate"
-      --first "event_medication_any_rate"
     needs: [join_measures_weekly]
     outputs:
       moderately_sensitive:
-        measure: output/report/weekly/results/medication_any_prescribing_by_subgroup.png
+        measure: output/report/weekly/results/*.png
 
-  panel_plots_amox_weekly:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/weekly/results/measure_weekly.csv
-      --measures-pattern "event_amoxicillin*_rate"
-      --output-dir output/report/weekly/results
-      --output-name "amoxicillin_prescribing_by_subgroup"
-      --scale "rate"
-      --first "event_amoxicillin_rate"
-    needs: [join_measures_weekly]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/weekly/results/amoxicillin_prescribing_by_subgroup.png
-
-  panel_plots_azithro_weekly:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/weekly/results/measure_weekly.csv
-      --measures-pattern "event_azithromycin*_rate"
-      --output-dir output/report/weekly/results
-      --output-name "azithromycin_prescribing_by_subgroup"
-      --scale "rate"
-      --first "event_azithromycin_rate"
-    needs: [join_measures_weekly]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/weekly/results/azithromycin_prescribing_by_subgroup.png
-
-  panel_plots_clarithro_weekly:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/weekly/results/measure_weekly.csv
-      --measures-pattern "event_clarithromycin*_rate"
-      --output-dir output/report/weekly/results
-      --output-name "clarithromycin_prescribing_by_subgroup"
-      --scale "rate"
-      --first "event_clarithromycin_rate"
-    needs: [join_measures_weekly]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/weekly/results/clarithromycin_prescribing_by_subgroup.png
-
-  panel_plots_pheno_weekly:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/weekly/results/measure_weekly.csv
-      --measures-pattern "event_phenoxymethypenicillin*_rate"
-      --output-dir output/report/weekly/results
-      --output-name "phenoxymethypenicillin_prescribing_by_subgroup"
-      --scale "rate"
-      --first "event_phenoxymethypenicillin_rate"
-    needs: [join_measures_weekly]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/weekly/results/phenoxymethypenicillin_prescribing_by_subgroup.png
-
-  panel_plots_erythro_weekly:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/weekly/results/measure_weekly.csv
-      --measures-pattern "event_erythromycin*_rate"
-      --output-dir output/report/weekly/results
-      --output-name "erythromycin_prescribing_by_subgroup"
-      --scale "rate"
-      --first "event_erythromycin_rate"
-    needs: [join_measures_weekly]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/weekly/results/erythromycin_prescribing_by_subgroup.png
-
-  panel_plots_scarlet_weekly:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/weekly/results/measure_weekly.csv
-      --measures-list "event_scarlet_fever_rate"
-      --measures-list "event_scarlet_fever_age_band_rate"
-      --measures-list "event_scarlet_fever_imd_rate"
-      --measures-list "event_scarlet_fever_ethnicity_rate"
-      --measures-list "event_scarlet_fever_region_rate"
-      --measures-list "event_scarlet_fever_sex_rate"
-      --output-dir output/report/weekly/results
-      --output-name "scarlet_fever_diagnoses_by_subgroup"
-      --scale "rate"
-      --first "event_scarlet_fever_rate"
-    needs: [join_measures_weekly]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/weekly/results/scarlet_fever_diagnoses_by_subgroup.png
-
-  panel_plots_strp_weekly:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/weekly/results/measure_weekly.csv
-      --measures-list "event_strep_a_sore_throat_rate"
-      --measures-list "event_strep_a_sore_throat_age_band_rate"
-      --measures-list "event_strep_a_sore_throat_imd_rate"
-      --measures-list "event_strep_a_sore_throat_ethnicity_rate"
-      --measures-list "event_strep_a_sore_throat_region_rate"
-      --measures-list "event_strep_a_sore_throat_sex_rate"
-      --output-dir output/report/weekly/results
-      --output-name "strep_a_sore_throat_diagnoses_by_subgroup"
-      --scale "rate"
-      --first "event_strep_a_sore_throat_rate"
-    needs: [join_measures_weekly]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/weekly/results/strep_a_sore_throat_diagnoses_by_subgroup.png
-
-  panel_plots_igas_weekly:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/weekly/results/measure_weekly.csv
-      --measures-list "event_invasive_strep_a_rate"
-      --measures-list "event_invasive_strep_a_age_band_rate"
-      --measures-list "event_invasive_strep_a_imd_rate"
-      --measures-list "event_invasive_strep_a_ethnicity_rate"
-      --measures-list "event_invasive_strep_a_region_rate"
-      --measures-list "event_invasive_strep_a_sex_rate"
-      --output-dir output/report/weekly/results
-      --output-name "invasive_strep_a_diagnoses_by_subgroup"
-      --scale "rate"
-      --first "event_invasive_strep_a_rate"
-    needs: [join_measures_weekly]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/weekly/results/invasive_strep_a_diagnoses_by_subgroup.png
-  
   panel_plots_event_plus_medication_scarlet_weekly:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/weekly/results/measure_weekly.csv
       --measures-pattern "event_scarlet_fever_medication_any_2_weeks*rate"
       --output-dir output/report/weekly/results
-      --output-name "scarlet_fever_plus_medication_prescribing_by_subgroup"
+      --output-name "scarlet_fever_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_scarlet_fever_medication_any_2_weeks_rate"
     needs: [join_measures_weekly]
     outputs:
       moderately_sensitive:
-        measure: output/report/weekly/results/scarlet_fever_plus_medication_prescribing_by_subgroup.png
+        measure: output/report/weekly/results/scarlet_fever_plus_medication_by_subgroup.png
 
   panel_plots_event_plus_medication_igas_weekly:
     run: >
@@ -606,13 +344,13 @@ actions:
       --input-file output/report/weekly/results/measure_weekly.csv
       --measures-pattern "event_invasive_strep_a_medication_any_2_weeks*rate"
       --output-dir output/report/weekly/results
-      --output-name "invasive_strep_a_plus_medication_prescribing_by_subgroup"
+      --output-name "invasive_strep_a_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_invasive_strep_a_medication_any_2_weeks_rate"
     needs: [join_measures_weekly]
     outputs:
       moderately_sensitive:
-        measure: output/report/weekly/results/invasive_strep_a_plus_medication_prescribing_by_subgroup.png
+        measure: output/report/weekly/results/invasive_strep_a_plus_medication_by_subgroup.png
 
   panel_plots_event_plus_medication_strp_weekly:
     run: >
@@ -620,13 +358,13 @@ actions:
       --input-file output/report/weekly/results/measure_weekly.csv
       --measures-pattern "event_strep_a_sore_throat_medication_any_2_weeks*rate"
       --output-dir output/report/weekly/results
-      --output-name "strep_a_sore_throat_plus_medication_prescribing_by_subgroup"
+      --output-name "strep_a_sore_throat_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_strep_a_sore_throat_medication_any_2_weeks_rate"
     needs: [join_measures_weekly]
     outputs:
       moderately_sensitive:
-        measure: output/report/weekly/results/strep_a_sore_throat_plus_medication_prescribing_by_subgroup.png
+        measure: output/report/weekly/results/strep_a_sore_throat_plus_medication_by_subgroup.png
 
 
   event_counts_report_weekly:
@@ -641,17 +379,9 @@ actions:
     run: jupyter:latest jupyter nbconvert /workspace/analysis/report/report.ipynb --execute --to html --output-dir=/workspace/output/report --ExecutePreprocessor.timeout=86400 --no-input
     needs: [
       event_counts_report,
-      top_5_table_report, 
+      top_5_table_report,
       plot_measure_report,
-      panel_plots_any,
-      panel_plots_amox,
-      panel_plots_azithro,
-      panel_plots_clarithro,
-      panel_plots_pheno,
-      panel_plots_erythro,
-      panel_plots_scarlet,
-      panel_plots_strp,
-      panel_plots_igas,
+      panel_plots,
       panel_plots_event_plus_medication_scarlet,
       panel_plots_event_plus_medication_igas,
       panel_plots_event_plus_medication_strp
@@ -666,15 +396,7 @@ actions:
       event_counts_report_weekly,
       top_5_table_report_weekly, 
       plot_measure_report_weekly,
-      panel_plots_any_weekly,
-      panel_plots_amox_weekly,
-      panel_plots_azithro_weekly,
-      panel_plots_clarithro_weekly,
-      panel_plots_pheno_weekly,
-      panel_plots_erythro_weekly,
-      panel_plots_scarlet_weekly,
-      panel_plots_strp_weekly,
-      panel_plots_igas_weekly,
+      panel_plots_weekly,
       panel_plots_event_plus_medication_scarlet_weekly,
       panel_plots_event_plus_medication_igas_weekly,
       panel_plots_event_plus_medication_strp_weekly

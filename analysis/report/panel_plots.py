@@ -1,36 +1,19 @@
 import argparse
 import pathlib
-import fnmatch
 import pandas
 import numpy
-
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 from dateutil import parser
-from collections import Counter
-from report_utils import coerce_numeric
-
-
-def get_measure_tables(input_file):
-    # The `date` column is assigned by the measures framework.
-    measure_table = pandas.read_csv(input_file, parse_dates=["date"])
-
-    return measure_table
-
-
-def subset_table(measure_table, measures_pattern, measures_list):
-    """
-    Given either a pattern of list of names, extract the subset of a joined
-    measures file based on the 'name' column
-    """
-    if measures_pattern:
-        measures_list = match_paths(measure_table["name"], measures_pattern)
-        if len(measures_list) == 0:
-            raise ValueError("Pattern did not match any files")
-
-    if not measures_list:
-        return measure_table
-    return measure_table[measure_table["name"].isin(measures_list)]
+from report_utils import (
+    coerce_numeric,
+    filename_to_title,
+    autoselect_labels,
+    translate_group,
+    get_measure_tables,
+    subset_table,
+    write_group_chart,
+)
 
 
 def scale_thousand(ax):
@@ -40,7 +23,7 @@ def scale_thousand(ax):
     """
 
     def thousand_formatter(x, pos):
-        return f"{x*1000: .0f}"
+        return f"{x*1000: .1f}"
 
     ax.yaxis.set_major_formatter(FuncFormatter(thousand_formatter))
     ax.set_ylabel("Rate per thousand")
@@ -57,35 +40,6 @@ def scale_hundred(ax):
 
     ax.yaxis.set_major_formatter(FuncFormatter(hundred_formatter))
     ax.set_ylabel("Percentage")
-
-
-def autoselect_labels(measures_list):
-    measures_set = set(measures_list)
-    counts = Counter(
-        numpy.concatenate([item.split("_") for item in measures_set])
-    )
-    remove = [k for k, v in counts.items() if v == len(measures_set)]
-    return remove
-
-
-def translate_group(group_var, label, repeated, autolabel=False):
-    """
-    Translate a measure name into a plot label
-    Autolabel uses the 'name' column, but removes words that appear in every
-    item in the group. If there are no unique strings, it falls back to group
-    The alternative labeling uses the 'group' column
-    """
-    title = " ".join(
-        [x for x in label.split("_") if x not in repeated]
-    ).title()
-    if not title or not autolabel:
-        return filename_to_title(group_var)
-    else:
-        return title
-
-
-def filename_to_title(filename):
-    return filename.replace("_", " ").title()
 
 
 def plot_cis(ax, data):
@@ -136,12 +90,13 @@ def reorder_dataframe(measure_table, first):
 
 def get_group_chart(
     measure_table,
-    first=None,
-    columns=2,
-    date_lines=None,
-    scale=None,
-    ci=False,
-    exclude_group=None,
+    first,
+    column_to_plot,
+    columns,
+    date_lines,
+    scale,
+    ci,
+    exclude_group,
 ):
     # NOTE: constrained_layout=True available in matplotlib>=3.5
     figure = plt.figure(figsize=(columns * 6, columns * 5))
@@ -189,7 +144,9 @@ def get_group_chart(
         numeric = coerce_numeric(filtered)
         for plot_group, plot_group_data in numeric.groupby("group"):
             ax.plot(
-                plot_group_data.index, plot_group_data.value, label=plot_group
+                plot_group_data.index,
+                plot_group_data[column_to_plot],
+                label=plot_group,
             )
             if ci:
                 plot_cis(ax, plot_group_data)
@@ -201,7 +158,7 @@ def get_group_chart(
             )
             lgds.append(lgd)
         ax.set_xlabel("")
-        ax.tick_params(axis="x", labelsize=7)
+        ax.tick_params(axis="x", labelsize=7, rotation=45)
         if date_lines:
             min_date = min(measure_table.index)
             max_date = max(measure_table.index)
@@ -210,23 +167,14 @@ def get_group_chart(
             scale_hundred(ax)
         elif scale == "rate":
             scale_thousand(ax)
+        if column_to_plot == "numerator":
+            ax.set_ylabel("Count")
     plt.subplots_adjust(wspace=0.5, hspace=0.4)
     return (plt, lgds)
 
 
-def write_group_chart(group_chart, lgds, path, plot_title):
-    suptitle = plt.suptitle(plot_title)
-    group_chart.savefig(
-        path, bbox_extra_artists=tuple(lgds) + (suptitle,), bbox_inches="tight"
-    )
-
-
 def get_path(*args):
     return pathlib.Path(*args).resolve()
-
-
-def match_paths(files, pattern):
-    return fnmatch.filter(files, pattern)
 
 
 def add_date_lines(plt, vlines, min_date, max_date):
@@ -262,6 +210,12 @@ def parse_args():
         "--first",
         required=False,
         help="Measures pattern for plot that should appear first",
+    )
+    parser.add_argument(
+        "--column-to-plot",
+        choices=["numerator", "value"],
+        default="value",
+        help="Which measure column to plot",
     )
     parser.add_argument(
         "--output-dir",
@@ -302,6 +256,7 @@ def main():
     measures_pattern = args.measures_pattern
     measures_list = args.measures_list
     first = args.first
+    column_to_plot = args.column_to_plot
     output_dir = args.output_dir
     output_name = args.output_name
     date_lines = args.date_lines
@@ -318,6 +273,7 @@ def main():
     chart, lgds = get_group_chart(
         subset,
         first=first,
+        column_to_plot=column_to_plot,
         columns=2,
         date_lines=date_lines,
         scale=scale,
