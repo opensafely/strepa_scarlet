@@ -74,7 +74,7 @@ def panels_loop(measure_table, output_dir):
             date_lines=None,
             scale="rate",
             ci=None,
-            exclude_group="missing",
+            exclude_group="Missing",
         )
         output_name = f"{key}_by_subgroup"
         plot_title = filename_to_title(output_name)
@@ -95,7 +95,7 @@ def panels_loop(measure_table, output_dir):
             date_lines=None,
             scale=None,
             ci=None,
-            exclude_group="missing",
+            exclude_group="Missing",
         )
         output_name_count = f"{key}_by_subgroup_count"
         plot_title_count = filename_to_title(output_name_count)

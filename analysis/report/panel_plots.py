@@ -169,6 +169,10 @@ def get_group_chart(
             scale_thousand(ax)
         if column_to_plot == "numerator":
             ax.set_ylabel("Count")
+    if exclude_group:
+        plt.xlabel(
+            f"*Those with '{exclude_group}' category excluded from each plot"
+        )
     plt.subplots_adjust(wspace=0.5, hspace=0.4)
     return (plt, lgds)
 
