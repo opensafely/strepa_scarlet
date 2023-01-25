@@ -177,6 +177,7 @@ actions:
       --output-name "scarlet_fever_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_scarlet_fever_medication_any_2_weeks_rate"
+      --exclude-group "Missing"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
@@ -191,6 +192,7 @@ actions:
       --output-name "invasive_strep_a_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_invasive_strep_a_medication_any_2_weeks_rate"
+      --exclude-group "Missing"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
@@ -205,6 +207,7 @@ actions:
       --output-name "strep_a_sore_throat_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_strep_a_sore_throat_medication_any_2_weeks_rate"
+      --exclude-group "Missing"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
@@ -349,6 +352,7 @@ actions:
       --output-name "invasive_strep_a_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_invasive_strep_a_medication_any_2_weeks_rate"
+      --exclude-group "Missing"
     needs: [join_measures_weekly]
     outputs:
       moderately_sensitive:
@@ -363,6 +367,7 @@ actions:
       --output-name "strep_a_sore_throat_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_strep_a_sore_throat_medication_any_2_weeks_rate"
+      --exclude-group "Missing"
     needs: [join_measures_weekly]
     outputs:
       moderately_sensitive:
