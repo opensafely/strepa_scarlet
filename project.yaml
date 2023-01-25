@@ -135,6 +135,7 @@ actions:
         moderately_sensitive:
           # Only output the single summary file
           measure_csv: output/report/results/measure_all.csv
+          measure_csv_checking: output/report/results/checking_measure_all.csv
 
   top_5_table_report:
     run: >
@@ -155,7 +156,6 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/results/*measures*.jpeg
-        csv: output/report/results/*measures*.csv
 
   panel_plots:
     run: >
@@ -317,7 +317,6 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/*measures*.jpeg
-        csv: output/report/weekly/results/*measures*.csv
 
   panel_plots_weekly:
     run: >
