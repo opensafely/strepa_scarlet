@@ -298,12 +298,24 @@ actions:
           # Only output the single summary file
           measure_csv: output/report/weekly/results/measure_weekly.csv
 
+### NOTE: Short term fix utility ###
+  remove_last_date:
+    run: >
+      python:latest python analysis/report/delete_latest.py
+      --measures-files output/report/weekly/results/measure_weekly.csv
+    needs: [join_measures_weekly]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/results/*.csv
+
+#################
+
   top_5_table_report_weekly:
     run: >
       python:latest python analysis/report/top_5_report.py
       --input-file output/report/weekly/results/measure_weekly.csv
       --output-dir output/report/weekly/results
-    needs: [join_measures_weekly]
+    needs: [remove_last_date]
     outputs:
       moderately_sensitive:
         tables: output/report/weekly/results/top_5*.csv
@@ -313,7 +325,7 @@ actions:
       python:latest python analysis/report/plot_measures_report.py
       --measure-path output/report/weekly/results/measure_weekly.csv
       --output-dir output/report/weekly/results
-    needs: [join_measures_weekly]
+    needs: [remove_last_date]
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/*measures*.jpeg
@@ -323,7 +335,7 @@ actions:
       python:latest python analysis/report/create_panels.py
       --input-file output/report/weekly/results/measure_weekly.csv
       --output-dir output/report/weekly/results
-    needs: [join_measures_weekly]
+    needs: [remove_last_date]
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/*.png
@@ -338,7 +350,7 @@ actions:
       --scale "rate"
       --first "event_scarlet_fever_medication_any_2_weeks_rate"
       --exclude-group "Missing"
-    needs: [join_measures_weekly]
+    needs: [remove_last_date]
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/scarlet_fever_plus_medication_by_subgroup.png
@@ -353,7 +365,7 @@ actions:
       --scale "rate"
       --first "event_invasive_strep_a_medication_any_2_weeks_rate"
       --exclude-group "Missing"
-    needs: [join_measures_weekly]
+    needs: [remove_last_date]
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/invasive_strep_a_plus_medication_by_subgroup.png
@@ -368,7 +380,7 @@ actions:
       --scale "rate"
       --first "event_strep_a_sore_throat_medication_any_2_weeks_rate"
       --exclude-group "Missing"
-    needs: [join_measures_weekly]
+    needs: [remove_last_date]
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/strep_a_sore_throat_plus_medication_by_subgroup.png
@@ -412,14 +424,3 @@ actions:
       moderately_sensitive:
         notebook: output/report/report_weekly.html
 
-### UTILITIES ###
-  remove_last_date:
-    run: >
-      python:latest python analysis/report/delete_latest.py
-      --measures-files output/report/weekly/results/measure_weekly.csv
-    needs: [join_measures_weekly]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/weekly/results/*.csv
-
-#################
