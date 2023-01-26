@@ -411,3 +411,15 @@ actions:
     outputs:
       moderately_sensitive:
         notebook: output/report/report_weekly.html
+
+### UTILITIES ###
+  remove_last_date:
+    run: >
+      python:latest python analysis/report/delete_latest.py
+      --measures-files output/report/weekly/results/measure_weekly.csv
+    needs: [join_measures_weekly]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/results/*.csv
+
+#################
