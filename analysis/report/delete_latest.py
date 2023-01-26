@@ -1,6 +1,7 @@
 import argparse
 import pathlib
 import itertools
+import pandas
 import glob
 from report_utils import (
     get_measure_tables,
@@ -34,9 +35,9 @@ def main():
     all_files = list(itertools.chain(*measures_files))
     for measure_file in all_files:
         measure_table = get_measure_tables(measure_file)
-        max_date = measure_table["date"].max()
-        filtered = measure_table[measure_table["date"] != max_date]
-        filtered.to_csv(measure_file, index=False, header=True)
+        filtered_min = measure_table[measure_table["date"] >= pandas.to_datetime("2022-11-11")]
+        filtered_max = filtered_min[filtered_min["date"] <= pandas.to_datetime("2023-01-13")]
+        filtered_max.to_csv(measure_file, index=False, header=True)
 
 
 if __name__ == "__main__":
