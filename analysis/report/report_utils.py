@@ -69,6 +69,8 @@ def plot_measures(
     """
     df_copy = df.copy()
     plt.figure(figsize=(18, 8))
+    plt.style.use("seaborn")
+    
     y_max = df[column_to_plot].max() * 1.05
     # Ignore timestamp - this could be done at load time
     df_copy["date"] = df_copy["date"].dt.date

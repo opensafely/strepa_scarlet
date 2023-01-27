@@ -145,6 +145,7 @@ def get_group_chart(
 
     lgds = []
     for index, panel in enumerate(groups):
+
         panel_group, panel_group_data = panel
         # We need to sort by date before setting it as index
         # If a 'first' group was specified, date could be out of order
@@ -156,6 +157,7 @@ def get_group_chart(
                 bool
             )
         ax = figure.add_subplot(rows, columns, index + 1)
+        plt.style.use("seaborn")
         ax.autoscale(enable=True, axis="y")
         title = translate_group(
             panel_group_data.category[0],
