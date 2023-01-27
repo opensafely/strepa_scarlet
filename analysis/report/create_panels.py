@@ -39,7 +39,6 @@ def get_pattern_and_list(key, column_to_plot, first):
                 "imd",
                 "ethnicity",
                 "region",
-                "sex",
             ]
             return (
                 None,

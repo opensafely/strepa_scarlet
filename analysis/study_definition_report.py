@@ -107,14 +107,6 @@ demographics = {
             },
         )
     ),
-    "sex": (
-        patients.sex(
-            return_expectations={
-                "rate": "universal",
-                "category": {"ratios": {"M": 0.5, "F": 0.5}},
-            }
-        )
-    ),
     "region": (
         patients.registered_practice_as_of(
             "index_date",
@@ -249,8 +241,7 @@ study = StudyDefinition(
         NOT died AND
         age >= 0 AND
         age < 120 AND
-        age_band != "missing" AND
-        (sex = "M" OR sex = "F")
+        age_band != "missing"
         """,
         registered=patients.registered_as_of(
             "index_date",
