@@ -238,7 +238,7 @@ actions:
   generate_study_population_report_weekly_1:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_report
-      --index-date-range "2022-09-01 to 2022-11-04 by week"
+      --index-date-range "2022-09-01 to 2022-11-09 by week"
       --param frequency=weekly
       --output-dir=output/report/weekly
       --output-format=csv.gz
@@ -249,7 +249,7 @@ actions:
   generate_study_population_report_weekly_2:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_report
-      --index-date-range "2022-11-11 to 2023-01-06 by week"
+      --index-date-range "2022-11-10 to 2023-01-18 by week"
       --param frequency=weekly
       --output-dir=output/report/weekly
       --output-format=csv.gz
