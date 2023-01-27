@@ -24,6 +24,8 @@ CLINICAL_TO_CODELIST = {
     "scarlet_fever": "codelists/user-chriswood-scarlet-fever.csv",
     "strep_a_sore_throat": "codelists/user-chriswood-group-a-streptococcal-sore-throat.csv",
     "invasive_strep_a": "codelists/user-chriswood-invasive-group-a-strep.csv",
+    "sore_throat_prediction": "codelists/user-chriswood-sore-throat-clinical-prediction-rules.csv",
+    "throat_swab": "codelists/user-chriswood-throat-swab.csv",
 }
 
 
