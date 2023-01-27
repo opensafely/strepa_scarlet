@@ -14,6 +14,8 @@ from codelists import (
     scarlet_fever_codes,
     invasive_strep_a_codes,
     strep_a_sore_throat_codes,
+    sore_throat_prediction_codes,
+    throat_swab_codes,
 )
 
 medication_codelists = {
@@ -29,6 +31,8 @@ clinical_event_codelists = {
     "scarlet_fever": scarlet_fever_codes,
     "invasive_strep_a": invasive_strep_a_codes,
     "strep_a_sore_throat": strep_a_sore_throat_codes,
+    "sore_throat_prediction": sore_throat_prediction_codes,
+    "throat_swab": throat_swab_codes,
 }
 
 
