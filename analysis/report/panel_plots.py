@@ -140,7 +140,8 @@ def get_group_chart(
             autolabel=True,
         )
         ax.set_title(title)
-        filtered = panel_group_data[panel_group_data.group != exclude_group]
+        # Filter out group, but ignore case
+        filtered = panel_group_data[panel_group_data.group.str.lower() != exclude_group.lower()]
         numeric = coerce_numeric(filtered)
         for plot_group, plot_group_data in numeric.groupby("group"):
             ax.plot(
