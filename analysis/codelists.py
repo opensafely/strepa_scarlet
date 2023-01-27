@@ -67,3 +67,13 @@ strep_a_sore_throat_codes = codelist_from_csv(
     system="snomed",
     column="code",
 )
+sore_throat_prediction_codes = codelist_from_csv(
+    "codelists/user-chriswood-sore-throat-clinical-prediction-rules.csv",
+    system="snomed",
+    column="code",
+)
+throat_swab_codes = codelist_from_csv(
+    "codelists/user-chriswood-throat-swab.csv",
+    system="snomed",
+    column="code",
+)
