@@ -258,3 +258,15 @@ def display_top_5(file, dir=RESULTS_DIR):
     df = pd.read_csv(f"{dir}/{file}")
     df["Count"] = df["Count"].apply(lambda x: "{:,}".format(x))
     display(HTML(df.to_html(index=False)))
+
+def display_side_by_side(img1, img2, size=(15, 10)):
+    """
+    Displays two images side by side.
+    """
+    fig, ax = plt.subplots(1, 2, figsize=size)
+    ax[0].imshow(img1)
+    ax[1].imshow(img2)
+    for a in ax:
+        a.axis("off")
+
+    plt.show()
