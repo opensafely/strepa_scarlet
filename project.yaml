@@ -250,7 +250,17 @@ actions:
       python:latest python analysis/report/event_counts.py
       --input-dir="output/report/joined/"
       --output-dir="output/report/results"
-      --measures="amoxicillin,azithromycin,clarithromycin,erythromycin,phenoxymethylpenicillin,flucloxacillin,cefalexin,co_amoxiclav,scarlet_fever,strep_a_sore_throat,invasive_strep_a"
+      --measures-list="amoxicillin"
+      --measures-list="azithromycin"
+      --measures-list="clarithromycin"
+      --measures-list="erythromycin"
+      --measures-list="phenoxymethylpenicillin"
+      --measures-list="flucloxacillin"
+      --measures-list="cefalexin"
+      --measures-list="co_amoxiclav"
+      --measures-list="scarlet_fever"
+      --measures-list="strep_a_sore_throat"
+      --measures-list="invasive_strep_a"
     needs: [join_cohorts_report]
     outputs:
       moderately_sensitive:
@@ -411,7 +421,20 @@ actions:
 
   event_counts_report_weekly:
     run: >
-      python:latest python analysis/report/event_counts.py --input-dir="output/report/weekly/joined/" --output-dir="output/report/weekly/results" --measures="amoxicillin,azithromycin,clarithromycin,erythromycin,phenoxymethylpenicillin,flucloxacillin,cefalexin,co_amoxiclav,scarlet_fever,strep_a_sore_throat,invasive_strep_a"
+      python:latest python analysis/report/event_counts.py
+      --input-dir="output/report/weekly/joined/"
+      --output-dir="output/report/weekly/results"
+      --measures-list="amoxicillin"
+      --measures-list="azithromycin"
+      --measures-list="clarithromycin"
+      --measures-list="erythromycin"
+      --measures-list="phenoxymethylpenicillin"
+      --measures-list="flucloxacillin"
+      --measures-list="cefalexin"
+      --measures-list="co_amoxiclav"
+      --measures-list="scarlet_fever"
+      --measures-list="strep_a_sore_throat"
+      --measures-list="invasive_strep_a"
     needs: [join_cohorts_report_weekly, join_cohorts_report_weekly_2]
     outputs:
       moderately_sensitive:

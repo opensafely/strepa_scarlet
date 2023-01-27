@@ -14,7 +14,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument("--measures", type=str, required=True)
+    parser.add_argument("--measures-list", required=True, action="append", help="A list of one or more measure names")
     return parser.parse_args()
 
 
@@ -28,7 +28,8 @@ def get_column_sum(df, column):
 
 def main():
     args = parse_args()
-    measures = args.measures.split(",")
+    measures = args.measures_list
+    measures = [measure.strip() for measure in measures]
 
     for measure in measures:
         patients = []
