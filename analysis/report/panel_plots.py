@@ -2,6 +2,9 @@ import argparse
 import pathlib
 import pandas
 import numpy
+import re
+import operator
+import math
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 from dateutil import parser
@@ -88,6 +91,27 @@ def reorder_dataframe(measure_table, first):
     return copy
 
 
+def reorder_labels(labels):
+    """
+    If a list of categories has dashes, there may be numbers
+    Numbers with dashes could be out of order
+    Assuming a dash implies a range, sort the list by the max number
+    contained in each string
+    Strings with no numbers will be sorted last
+    """
+    max_val = {}
+    if any("-" in label for label in labels):
+        for label in labels:
+            matches = re.findall(r"\d+", label)
+            if matches:
+                highest = max([int(m) for m in matches])
+            else:
+                highest = math.inf
+            max_val[label] = highest
+        return dict(sorted(max_val.items(), key=operator.itemgetter(1))).keys()
+    return labels
+
+
 def get_group_chart(
     measure_table,
     first,
@@ -141,8 +165,11 @@ def get_group_chart(
         )
         ax.set_title(title)
         # Filter out group, but ignore case
-        filtered = panel_group_data[panel_group_data.group.str.lower() != exclude_group.lower()]
-        numeric = coerce_numeric(filtered)
+        if exclude_group:
+            panel_group_data = panel_group_data[
+                panel_group_data.group.str.lower() != exclude_group.lower()
+            ]
+        numeric = coerce_numeric(panel_group_data)
         for plot_group, plot_group_data in numeric.groupby("group"):
             ax.plot(
                 plot_group_data.index,
@@ -151,13 +178,15 @@ def get_group_chart(
             )
             if ci:
                 plot_cis(ax, plot_group_data)
-            lgd = ax.legend(
-                bbox_to_anchor=(1, 1),
-                loc="upper left",
-                fontsize="x-small",
-                ncol=1,
-            )
-            lgds.append(lgd)
+        labels = reorder_labels(list(panel_group_data.group.unique()))
+        lgd = ax.legend(
+            labels,
+            bbox_to_anchor=(1, 1),
+            loc="upper left",
+            fontsize="x-small",
+            ncol=1,
+        )
+        lgds.append(lgd)
         ax.set_xlabel("")
         ax.tick_params(axis="x", labelsize=7, rotation=45)
         if date_lines:
