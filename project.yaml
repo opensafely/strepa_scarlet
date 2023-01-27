@@ -58,6 +58,17 @@ actions:
   ### End curation check ###
 
   ### MONTHLY ###
+  generate_study_population_report_monthly_0:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_report
+      --index-date-range "2018-01-01 to 2018-12-01 by month"
+      --param frequency=monthly
+      --output-dir=output/report
+      --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/report/input_*-01.csv.gz
+
   generate_study_population_report_monthly_1:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_report
@@ -67,7 +78,7 @@ actions:
       --output-format=csv.gz
     outputs:
       highly_sensitive:
-        cohort: output/report/input_*-01.csv.gz
+        cohort: output/report/input*-01.csv.gz
 
   generate_study_population_report_monthly_2:
     run: cohortextractor:latest generate_cohort
@@ -78,7 +89,7 @@ actions:
       --output-format=csv.gz
     outputs:
       highly_sensitive:
-        cohort: output/report/input*-01.csv.gz
+        cohort: output/report/inpu*-01.csv.gz
   
   generate_study_population_report_monthly_3:
     run: cohortextractor:latest generate_cohort
@@ -89,7 +100,7 @@ actions:
       --output-format=csv.gz
     outputs:
       highly_sensitive:
-        cohort: output/report/inpu*-01.csv.gz
+        cohort: output/report/inp*-01.csv.gz
 
   generate_study_population_report_monthly_4:
     run: cohortextractor:latest generate_cohort
@@ -100,7 +111,7 @@ actions:
       --output-format=csv.gz
     outputs:
       highly_sensitive:
-        cohort: output/report/inp*-01.csv.gz
+        cohort: output/report/in*-01.csv.gz
 
   join_cohorts_report:
     run: >
@@ -109,7 +120,8 @@ actions:
         --rhs output/report/input_ethnicity_report.csv.gz
         --output-dir output/report/joined
     needs: [
-      generate_study_population_report_monthly_1, 
+      generate_study_population_report_monthly_0,
+      generate_study_population_report_monthly_1,
       generate_study_population_report_monthly_2,
       generate_study_population_report_monthly_3,
       generate_study_population_report_monthly_4,
