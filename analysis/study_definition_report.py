@@ -10,7 +10,10 @@ from codelists import (
     azithromycin_codes,
     clarithromycin_codes,
     erythromycin_codes,
-    phenoxymethypenicillin_codes,
+    phenoxymethylpenicillin_codes,
+    cefalexin_codes,
+    co_amoxiclav_codes,
+    flucloxacillin_codes,
     scarlet_fever_codes,
     invasive_strep_a_codes,
     strep_a_sore_throat_codes,
@@ -23,7 +26,10 @@ medication_codelists = {
     "azithromycin": azithromycin_codes,
     "clarithromycin": clarithromycin_codes,
     "erythromycin": erythromycin_codes,
-    "phenoxymethypenicillin": phenoxymethypenicillin_codes,
+    "phenoxymethylpenicillin": phenoxymethylpenicillin_codes,
+    "cefalexin": cefalexin_codes,
+    "co_amoxiclav": co_amoxiclav_codes,
+    "flucloxacillin": flucloxacillin_codes,
 }
 
 
@@ -379,20 +385,21 @@ for clinical_key in clinical_event_codelists.keys():
     )
 
     for d in demographics.keys():
-        measures.extend([
-            Measure(
-                id=f"event_{clinical_key}_{d}_rate",
-                numerator=f"event_{clinical_key}",
-                denominator="population",
-                group_by=[d],
-                small_number_suppression=True,
-            ),
-            Measure(
-                id=f"event_{clinical_key}_medication_any_2_weeks_{d}_rate",
-                numerator=f"{clinical_key}_medication_any_2_weeks",
-                denominator="population",
-                group_by=[d],
-                small_number_suppression=True,
-            ),
+        measures.extend(
+            [
+                Measure(
+                    id=f"event_{clinical_key}_{d}_rate",
+                    numerator=f"event_{clinical_key}",
+                    denominator="population",
+                    group_by=[d],
+                    small_number_suppression=True,
+                ),
+                Measure(
+                    id=f"event_{clinical_key}_medication_any_2_weeks_{d}_rate",
+                    numerator=f"{clinical_key}_medication_any_2_weeks",
+                    denominator="population",
+                    group_by=[d],
+                    small_number_suppression=True,
+                ),
             ]
         )

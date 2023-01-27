@@ -1,9 +1,9 @@
 {
   "files": {
-    "opensafely-phenoxymethypenicillin.csv": {
-      "id": "opensafely/phenoxymethypenicillin/3a256b20",
-      "url": "https://codelists.opensafely.org/codelist/opensafely/phenoxymethypenicillin/3a256b20/",
-      "downloaded_at": "2023-01-13 12:34:46.368693Z",
+    "opensafely-phenoxymethylpenicillin-oral-preparations-only.csv": {
+      "id": "opensafely/phenoxymethylpenicillin-oral-preparations-only/14b427f8",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/phenoxymethylpenicillin-oral-preparations-only/14b427f8/",
+      "downloaded_at": "2023-01-24 08:32:31.668470Z",
       "sha": "2dd9bec38a2c11a77a623ecd5bc16ab582d52747"
     },
     "opensafely-amoxicillin-oral.csv": {
@@ -30,6 +30,18 @@
       "downloaded_at": "2023-01-13 12:34:47.909911Z",
       "sha": "de4e692bfa44e0b22d1a7b90d846d53cfb999b72"
     },
+    "opensafely-co-amoxiclav-oral.csv": {
+      "id": "opensafely/co-amoxiclav-oral/67fac179",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/co-amoxiclav-oral/67fac179/",
+      "downloaded_at": "2023-01-24 08:32:33.337097Z",
+      "sha": "155896466cdce51f206939aa764a4285c9218ca5"
+    },
+    "opensafely-cefalexin-oral.csv": {
+      "id": "opensafely/cefalexin-oral/4eeb4e44",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/cefalexin-oral/4eeb4e44/",
+      "downloaded_at": "2023-01-24 08:32:33.688297Z",
+      "sha": "58110cadac18210ab135550a76d20a4ba274038f"
+    },
     "user-chriswood-sore-throat-clinical-prediction-rules.csv": {
       "id": "user/chriswood/sore-throat-clinical-prediction-rules/5df67530",
       "url": "https://codelists.opensafely.org/codelist/user/chriswood/sore-throat-clinical-prediction-rules/5df67530/",
@@ -41,6 +53,12 @@
       "url": "https://codelists.opensafely.org/codelist/user/chriswood/throat-swab/4c388e4e/",
       "downloaded_at": "2023-01-24 08:32:34.323742Z",
       "sha": "25587585e83e50b676db0c5878f6e9b01fafe7c9"
+    },
+    "opensafely-flucloxacillin-oral.csv": {
+      "id": "opensafely/flucloxacillin-oral/35dbdb0f",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/flucloxacillin-oral/35dbdb0f/",
+      "downloaded_at": "2023-01-24 08:32:34.643604Z",
+      "sha": "9f092380ca340398ee1fcb905577bb75c2677c85"
     },
     "opensafely-ethnicity-snomed-0removed.csv": {
       "id": "opensafely/ethnicity-snomed-0removed/2e641f61",

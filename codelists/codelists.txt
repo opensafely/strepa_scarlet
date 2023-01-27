@@ -1,10 +1,13 @@
-opensafely/phenoxymethypenicillin/3a256b20/
+opensafely/phenoxymethylpenicillin-oral-preparations-only/14b427f8
 opensafely/amoxicillin-oral/164af813/
 opensafely/clarithromycin-oral/080684b6/
 opensafely/azithromycin-oral/42faf594/
 opensafely/erythromycin-oral/7d3b84dd/
+opensafely/co-amoxiclav-oral/67fac179
+opensafely/cefalexin-oral/4eeb4e44/
 user/chriswood/sore-throat-clinical-prediction-rules/5df67530/
 user/chriswood/throat-swab/4c388e4e/
+opensafely/flucloxacillin-oral/35dbdb0f/
 opensafely/ethnicity-snomed-0removed/2e641f61/
 user/chriswood/scarlet-fever/1ba70f02/
 user/chriswood/invasive-group-a-strep/42344205/

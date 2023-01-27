@@ -216,15 +216,15 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/results/measure_all.csv
-      --measures-pattern "event_phenoxymethypenicillin*_rate"
+      --measures-pattern "event_phenoxymethylpenicillin*_rate"
       --output-dir output/report/results
-      --output-name "phenoxymethypenicillin_prescribing_by_subgroup"
+      --output-name "phenoxymethylpenicillin_prescribing_by_subgroup"
       --scale "rate"
-      --first "event_phenoxymethypenicillin_rate"
+      --first "event_phenoxymethylpenicillin_rate"
     needs: [join_measures]
     outputs:
       moderately_sensitive:
-        measure: output/report/results/phenoxymethypenicillin_prescribing_by_subgroup.png
+        measure: output/report/results/phenoxymethylpenicillin_prescribing_by_subgroup.png
 
   panel_plots_erythro:
     run: >
@@ -342,7 +342,7 @@ actions:
 
   event_counts_report:
     run: >
-      python:latest python analysis/report/event_counts.py --input-dir="output/report/joined/" --output-dir="output/report/results" --measures="amoxicillin,azithromycin,clarithromycin,erythromycin,phenoxymethypenicillin,scarlet_fever,strep_a_sore_throat,invasive_strep_a"
+      python:latest python analysis/report/event_counts.py --input-dir="output/report/joined/" --output-dir="output/report/results" --measures="amoxicillin,azithromycin,clarithromycin,erythromycin,phenoxymethylpenicillin,scarlet_fever,strep_a_sore_throat,invasive_strep_a"
     needs: [join_cohorts_report]
     outputs:
       moderately_sensitive:
@@ -481,15 +481,15 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/weekly/results/measure_weekly.csv
-      --measures-pattern "event_phenoxymethypenicillin*_rate"
+      --measures-pattern "event_phenoxymethylpenicillin*_rate"
       --output-dir output/report/weekly/results
-      --output-name "phenoxymethypenicillin_prescribing_by_subgroup"
+      --output-name "phenoxymethylpenicillin_prescribing_by_subgroup"
       --scale "rate"
-      --first "event_phenoxymethypenicillin_rate"
+      --first "event_phenoxymethylpenicillin_rate"
     needs: [join_measures_weekly]
     outputs:
       moderately_sensitive:
-        measure: output/report/weekly/results/phenoxymethypenicillin_prescribing_by_subgroup.png
+        measure: output/report/weekly/results/phenoxymethylpenicillin_prescribing_by_subgroup.png
 
   panel_plots_erythro_weekly:
     run: >
@@ -607,7 +607,7 @@ actions:
 
   event_counts_report_weekly:
     run: >
-      python:latest python analysis/report/event_counts.py --input-dir="output/report/weekly/joined/" --output-dir="output/report/weekly/results" --measures="amoxicillin,azithromycin,clarithromycin,erythromycin,phenoxymethypenicillin,scarlet_fever,strep_a_sore_throat,invasive_strep_a"
+      python:latest python analysis/report/event_counts.py --input-dir="output/report/weekly/joined/" --output-dir="output/report/weekly/results" --measures="amoxicillin,azithromycin,clarithromycin,erythromycin,phenoxymethylpenicillin,scarlet_fever,strep_a_sore_throat,invasive_strep_a"
     needs: [join_cohorts_report_weekly]
     outputs:
       moderately_sensitive:

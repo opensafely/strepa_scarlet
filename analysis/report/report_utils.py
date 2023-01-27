@@ -11,7 +11,10 @@ MEDICATION_TO_CODELIST = {
     "azithromycin": "codelists/opensafely-azithromycin-oral.csv",
     "clarithromycin": "codelists/opensafely-clarithromycin-oral.csv",
     "erythromycin": "codelists/opensafely-erythromycin-oral.csv",
-    "phenoxymethypenicillin": "codelists/opensafely-phenoxymethypenicillin.csv",
+    "phenoxymethylpenicillin": "codelists/opensafely-phenoxymethylpenicillin-oral-preparations-only.csv",
+    "cefalexin": "codelists/opensafely-cefalexin-oral.csv",
+    "co_amoxiclav": "codelists/opensafely-co-amoxiclav-oral.csv",
+    "flucloxacillin": "codelists/opensafely-flucloxacillin-oral.csv",
 }
 
 CLINICAL_TO_CODELIST = {
@@ -113,9 +116,7 @@ def coerce_numeric(table):
     Leave NaN values in df so missing data are not inferred
     """
     coerced = table.copy()
-    coerced["numerator"] = pd.to_numeric(
-        coerced["numerator"], errors="coerce"
-    )
+    coerced["numerator"] = pd.to_numeric(coerced["numerator"], errors="coerce")
     coerced["denominator"] = pd.to_numeric(
         coerced["denominator"], errors="coerce"
     )
@@ -128,26 +129,29 @@ REPORT_DIR = Path.cwd().parent.parent / "output/report"
 RESULTS_DIR = REPORT_DIR / "results"
 WEEKLY_RESULTS_DIR = REPORT_DIR / "weekly/results"
 
+
 def display_event_counts(file, dir=RESULTS_DIR):
     """
     Displays event counts table. Input is a json file containing a dictionary
     of event counts.
     """
-    with open(f'{dir}/{file}') as f:
+    with open(f"{dir}/{file}") as f:
         event_summary = json.load(f)
         event_summary_table = pd.DataFrame(event_summary, index=[0])
 
     display(HTML(event_summary_table.to_html()))
 
+
 def display_image(file, dir=RESULTS_DIR):
     """
     Displays image in file
     """
-    display(Image(filename=f'{dir}/{file}'))
+    display(Image(filename=f"{dir}/{file}"))
+
 
 def display_top_5(file, dir=RESULTS_DIR):
     """
     Displays a pandas dataframe in a table. Input is a csv file.
     """
-    df = pd.read_csv(f'{dir}/{file}')
+    df = pd.read_csv(f"{dir}/{file}")
     display(HTML(df.to_html()))

@@ -29,8 +29,23 @@ erythromycin_codes = codelist_from_csv(
     system="snomed",
     column="dmd_id",
 )
-phenoxymethypenicillin_codes = codelist_from_csv(
-    "codelists/opensafely-phenoxymethypenicillin.csv",
+phenoxymethylpenicillin_codes = codelist_from_csv(
+    "codelists/opensafely-phenoxymethylpenicillin-oral-preparations-only.csv",
+    system="snomed",
+    column="dmd_id",
+)
+cefalexin_codes = codelist_from_csv(
+    "codelists/opensafely-cefalexin-oral.csv",
+    system="snomed",
+    column="dmd_id",
+)
+co_amoxiclav_codes = codelist_from_csv(
+    "codelists/opensafely-co-amoxiclav-oral.csv",
+    system="snomed",
+    column="dmd_id",
+)
+flucloxacillin_codes = codelist_from_csv(
+    "codelists/opensafely-flucloxacillin-oral.csv",
     system="snomed",
     column="dmd_id",
 )
