@@ -130,12 +130,12 @@ demographics = {
     "imd": (
         patients.categorised_as(
             {
-                "0": "DEFAULT",
-                "1": """index_of_multiple_deprivation >=0 AND index_of_multiple_deprivation < 32844*1/5""",
+                "missing": "DEFAULT",
+                "1 - most deprived": """index_of_multiple_deprivation >=0 AND index_of_multiple_deprivation < 32844*1/5""",
                 "2": """index_of_multiple_deprivation >= 32844*1/5 AND index_of_multiple_deprivation < 32844*2/5""",
                 "3": """index_of_multiple_deprivation >= 32844*2/5 AND index_of_multiple_deprivation < 32844*3/5""",
                 "4": """index_of_multiple_deprivation >= 32844*3/5 AND index_of_multiple_deprivation < 32844*4/5""",
-                "5": """index_of_multiple_deprivation >= 32844*4/5 AND index_of_multiple_deprivation < 32844""",
+                "5 - least deprived": """index_of_multiple_deprivation >= 32844*4/5 AND index_of_multiple_deprivation < 32844""",
             },
             index_of_multiple_deprivation=patients.address_as_of(
                 "index_date",
@@ -146,12 +146,12 @@ demographics = {
                 "rate": "universal",
                 "category": {
                     "ratios": {
-                        "0": 0.05,
-                        "1": 0.19,
+                        "missing": 0.05,
+                        "1 - most deprived": 0.19,
                         "2": 0.19,
                         "3": 0.19,
                         "4": 0.19,
-                        "5": 0.19,
+                        "5 - least deprived": 0.19,
                     }
                 },
             },
