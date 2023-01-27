@@ -222,7 +222,7 @@ def display_event_counts(file, dir=RESULTS_DIR):
         event_summary = json.load(f)
         event_summary_table = pd.DataFrame(event_summary, index=[0])
 
-    display(HTML(event_summary_table.to_html()))
+    display(HTML(event_summary_table.to_html(index=False)))
 
 
 def display_image(file, dir=RESULTS_DIR):
@@ -237,4 +237,4 @@ def display_top_5(file, dir=RESULTS_DIR):
     Displays a pandas dataframe in a table. Input is a csv file.
     """
     df = pd.read_csv(f"{dir}/{file}")
-    display(HTML(df.to_html()))
+    display(HTML(df.to_html(index=False)))
