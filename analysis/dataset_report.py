@@ -51,7 +51,7 @@ def read_dataframe(path):
     from_csv = False
     if (ext := get_extension(path)) in [".csv", ".csv.gz"]:
         from_csv = True
-        dataframe = pandas.read_csv(path)
+        dataframe = pandas.read_csv(path, dtype="str")
     elif ext in [".feather"]:
         dataframe = pandas.read_feather(path)
     elif ext in [".dta", ".dta.gz"]:
@@ -94,6 +94,9 @@ def is_date_as_obj(series):
 
 def is_category(series):
     """Series with 10 or fewer levels"""
+    # TODO: Codelists could have 50+ codes
+    # TODO: In the absence of feather dtypes, how to differentiate cat/cont?
+    # TODO: Or just group and report the top n?
     return len(series.unique()) <= 10
 
 
@@ -174,7 +177,7 @@ def get_column_summaries(dataframe, granularity):
 
         is_date = types.is_datetime64_ns_dtype(series)
         is_csv_date = dataframe.attrs["from_csv"] and "date" in name
-        is_cat = is_category(series)
+        is_cat = (series.dtype.name == "category") or is_category(series)
         if is_date or is_csv_date:
             if is_csv_date:
                 series = parse_os_date(series)
@@ -205,7 +208,7 @@ def get_column_summaries(dataframe, granularity):
 def count_impossible_dates(dataframe, reference_date, granularity):
     dataframe = dataframe.set_index("patient_id")
     try:
-        age = dataframe["age"]
+        age = dataframe["age"].astype(int)
     except KeyError:
         return
     dates = dataframe.filter(regex="date")
