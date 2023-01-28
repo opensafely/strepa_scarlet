@@ -14,7 +14,10 @@ MEDICATION_TO_CODELIST = {
     "azithromycin": "codelists/opensafely-azithromycin-oral.csv",
     "clarithromycin": "codelists/opensafely-clarithromycin-oral.csv",
     "erythromycin": "codelists/opensafely-erythromycin-oral.csv",
-    "phenoxymethypenicillin": "codelists/opensafely-phenoxymethypenicillin.csv",
+    "phenoxymethylpenicillin": "codelists/opensafely-phenoxymethylpenicillin-oral-preparations-only.csv",
+    "cefalexin": "codelists/opensafely-cefalexin-oral.csv",
+    "co_amoxiclav": "codelists/opensafely-co-amoxiclav-oral.csv",
+    "flucloxacillin": "codelists/opensafely-flucloxacillin-oral.csv",
 }
 
 CLINICAL_TO_CODELIST = {

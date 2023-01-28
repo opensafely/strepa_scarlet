@@ -10,7 +10,10 @@ from codelists import (
     azithromycin_codes,
     clarithromycin_codes,
     erythromycin_codes,
-    phenoxymethypenicillin_codes,
+    phenoxymethylpenicillin_codes,
+    cefalexin_codes,
+    co_amoxiclav_codes,
+    flucloxacillin_codes,
     scarlet_fever_codes,
     invasive_strep_a_codes,
     strep_a_sore_throat_codes,
@@ -21,7 +24,10 @@ medication_codelists = {
     "azithromycin": azithromycin_codes,
     "clarithromycin": clarithromycin_codes,
     "erythromycin": erythromycin_codes,
-    "phenoxymethypenicillin": phenoxymethypenicillin_codes,
+    "phenoxymethylpenicillin": phenoxymethylpenicillin_codes,
+    "cefalexin": cefalexin_codes,
+    "co_amoxiclav": co_amoxiclav_codes,
+    "flucloxacillin": flucloxacillin_codes,
 }
 
 
@@ -82,38 +88,29 @@ demographics = {
         patients.categorised_as(
             {
                 "missing": "DEFAULT",
-                "0-19": """ age >= 0 AND age < 20""",
-                "20-29": """ age >=  20 AND age < 30""",
-                "30-39": """ age >=  30 AND age < 40""",
-                "40-49": """ age >=  40 AND age < 50""",
-                "50-59": """ age >=  50 AND age < 60""",
-                "60-69": """ age >=  60 AND age < 70""",
-                "70-79": """ age >=  70 AND age < 80""",
-                "80+": """ age >=  80 AND age < 120""",
+                "Under 1": """ age >= 0 AND age <1""",
+                "1-4": """ age >=  1 AND age < 5""",
+                "5-9": """ age >=  5 AND age < 10""",
+                "10-14": """ age >=  10 AND age < 15""",
+                "15-44": """ age >=  15 AND age < 45""",
+                "45-64": """ age >=  45 AND age < 65""",
+                "65-74": """ age >=  65 AND age < 75""",
+                "75+": """ age >=  75 AND age < 120""",
             },
             return_expectations={
                 "rate": "universal",
                 "category": {
                     "ratios": {
-                        "0-19": 0.125,
-                        "20-29": 0.125,
-                        "30-39": 0.125,
-                        "40-49": 0.125,
-                        "50-59": 0.125,
-                        "60-69": 0.125,
-                        "70-79": 0.125,
-                        "80+": 0.125,
+                        "Under 1": 0.15,
+                        "1-4": 0.3,
+                        "5-9": 0.3,
+                        "10-14": 0.05,
+                        "15-44": 0.05,
+                        "45-64": 0.05,
+                        "75+": 0.1,
                     }
                 },
             },
-        )
-    ),
-    "sex": (
-        patients.sex(
-            return_expectations={
-                "rate": "universal",
-                "category": {"ratios": {"M": 0.5, "F": 0.5}},
-            }
         )
     ),
     "region": (
@@ -139,12 +136,12 @@ demographics = {
     "imd": (
         patients.categorised_as(
             {
-                "0": "DEFAULT",
-                "1": """index_of_multiple_deprivation >=0 AND index_of_multiple_deprivation < 32844*1/5""",
+                "missing": "DEFAULT",
+                "1 - most deprived": """index_of_multiple_deprivation >=0 AND index_of_multiple_deprivation < 32844*1/5""",
                 "2": """index_of_multiple_deprivation >= 32844*1/5 AND index_of_multiple_deprivation < 32844*2/5""",
                 "3": """index_of_multiple_deprivation >= 32844*2/5 AND index_of_multiple_deprivation < 32844*3/5""",
                 "4": """index_of_multiple_deprivation >= 32844*3/5 AND index_of_multiple_deprivation < 32844*4/5""",
-                "5": """index_of_multiple_deprivation >= 32844*4/5 AND index_of_multiple_deprivation < 32844""",
+                "5 - least deprived": """index_of_multiple_deprivation >= 32844*4/5 AND index_of_multiple_deprivation < 32844""",
             },
             index_of_multiple_deprivation=patients.address_as_of(
                 "index_date",
@@ -155,12 +152,12 @@ demographics = {
                 "rate": "universal",
                 "category": {
                     "ratios": {
-                        "0": 0.05,
-                        "1": 0.19,
+                        "missing": 0.05,
+                        "1 - most deprived": 0.19,
                         "2": 0.19,
                         "3": 0.19,
                         "4": 0.19,
-                        "5": 0.19,
+                        "5 - least deprived": 0.19,
                     }
                 },
             },
@@ -250,8 +247,7 @@ study = StudyDefinition(
         NOT died AND
         age >= 0 AND
         age < 120 AND
-        age_band != "missing" AND
-        (sex = "M" OR sex = "F")
+        age_band != "missing"
         """,
         registered=patients.registered_as_of(
             "index_date",
@@ -375,20 +371,21 @@ for clinical_key in clinical_event_codelists.keys():
     )
 
     for d in demographics.keys():
-        measures.extend([
-            Measure(
-                id=f"event_{clinical_key}_{d}_rate",
-                numerator=f"event_{clinical_key}",
-                denominator="population",
-                group_by=[d],
-                small_number_suppression=True,
-            ),
-            Measure(
-                id=f"event_{clinical_key}_medication_any_2_weeks_{d}_rate",
-                numerator=f"{clinical_key}_medication_any_2_weeks",
-                denominator="population",
-                group_by=[d],
-                small_number_suppression=True,
-            ),
+        measures.extend(
+            [
+                Measure(
+                    id=f"event_{clinical_key}_{d}_rate",
+                    numerator=f"event_{clinical_key}",
+                    denominator="population",
+                    group_by=[d],
+                    small_number_suppression=True,
+                ),
+                Measure(
+                    id=f"event_{clinical_key}_medication_any_2_weeks_{d}_rate",
+                    numerator=f"{clinical_key}_medication_any_2_weeks",
+                    denominator="population",
+                    group_by=[d],
+                    small_number_suppression=True,
+                ),
             ]
         )
