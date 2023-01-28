@@ -55,6 +55,27 @@ actions:
         moderately_sensitive:
           # Only output the single summary file
           cohort_report: output/curation/input_report_2022-07-01.html
+
+  curation_diagnostics:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_diagnostics_curation
+      --index-date-range "2019-01-01 to 2019-01-01 by month"
+      --output-dir=output/curation
+      --output-format=feather
+    outputs:
+      highly_sensitive:
+        cohort: output/curation/input_diagnostics_curation_2019-01-01.feather
+
+  dataset_report_diagnostics:
+      run: python:latest python analysis/dataset_report.py
+           --input-files output/curation/input_diagnostics_curation_2019-01-01.feather
+           --output-dir output/curation/
+           --granularity "day"
+      needs: [curation_diagnostics]
+      outputs:
+        moderately_sensitive:
+          # Only output the single summary file
+          cohort_report: output/curation/input_diagnostics_curation_2019-01-01.html
   ### End curation check ###
 
   ### MONTHLY ###

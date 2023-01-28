@@ -6,6 +6,8 @@ opensafely/erythromycin-oral/7d3b84dd/
 opensafely/co-amoxiclav-oral/67fac179
 opensafely/cefalexin-oral/4eeb4e44/
 opensafely/flucloxacillin-oral/35dbdb0f/
+user/chriswood/sore-throat-clinical-prediction-rules/5df67530/
+user/chriswood/throat-swab/4c388e4e/
 opensafely/ethnicity-snomed-0removed/2e641f61/
 user/chriswood/scarlet-fever/1ba70f02/
 user/chriswood/invasive-group-a-strep/42344205/
