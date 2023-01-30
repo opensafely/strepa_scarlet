@@ -41,7 +41,7 @@ def main():
                 df["date"] = date
                 num_events = get_column_sum(df, f"event_{measure}")
                 events[date] = num_events
-                unique_patients = get_column_uniques(df, "patient_id")
+                unique_patients = get_column_uniques(df.loc[df[f"event_{measure}"]==1,:], "patient_id")
                 patients.extend(unique_patients)
 
         total_events = round_to_nearest_100(sum(events.values()))

@@ -201,8 +201,8 @@ def main():
             code_df=codelist,
             code_column=code_column,
             term_column=term_column,
-            low_count_threshold=7,
-            rounding_base=7,
+            low_count_threshold=5,
+            rounding_base=10,
         )
         top_5_code_table.to_csv(
             output_dir / f"top_5_code_table_{measure}.csv", index=False

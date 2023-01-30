@@ -213,16 +213,33 @@ RESULTS_DIR = REPORT_DIR / "results"
 WEEKLY_RESULTS_DIR = REPORT_DIR / "weekly/results"
 
 
-def display_event_counts(file, dir=RESULTS_DIR):
+def display_event_counts(file, period, dir=RESULTS_DIR):
     """
     Displays event counts table. Input is a json file containing a dictionary
     of event counts.
     """
+
+    column_name_map = {
+        "total_events": "Total recorded events",
+        "total_patients": "Total unique patients with an event",
+        "events_in_latest_period": f"Events in the latest {period}",
+    }
+
     with open(f"{dir}/{file}") as f:
         event_summary = json.load(f)
+
+        event_summary = {
+            column_name_map.get(key, key): value
+            for key, value in event_summary.items()
+        }
+
         event_summary_table = pd.DataFrame(event_summary, index=[0])
 
-    display(HTML(event_summary_table.to_html()))
+    event_summary_table = event_summary_table.applymap(
+        lambda x: "{:,}".format(x) if isinstance(x, int) else x
+    )
+
+    display(HTML(event_summary_table.to_html(index=False)))
 
 
 def display_image(file, dir=RESULTS_DIR):
@@ -237,4 +254,5 @@ def display_top_5(file, dir=RESULTS_DIR):
     Displays a pandas dataframe in a table. Input is a csv file.
     """
     df = pd.read_csv(f"{dir}/{file}")
-    display(HTML(df.to_html()))
+    df["Count"] = df["Count"].apply(lambda x: "{:,}".format(x))
+    display(HTML(df.to_html(index=False)))
