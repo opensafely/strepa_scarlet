@@ -19,6 +19,11 @@ from codelists import (
     strep_a_sore_throat_codes,
 )
 
+# Import so we can inspect metadata logs for correct variable expansion
+import logging
+import json
+
+
 medication_codelists = {
     "amoxicillin": amoxicillin_codes,
     "azithromycin": azithromycin_codes,
@@ -46,18 +51,39 @@ else:
 
 
 def generate_all_medications():
-    return {
+    var = {
         "event_medication_any": patients.satisfying(
             " OR ".join(
                 list(map(lambda x: f"event_{x}", medication_codelists.keys()))
             )
         ),
     }
+    logging.info(json.dumps(var, indent=4))
+    return var
 
 
-def generate_all_medications_2_weeks(clinical_events_codelists):
-    return {
-        f"{clinical_key}_medication_any_2_weeks": patients.satisfying(
+def generate_all_clinical():
+    var = {
+        "event_clinical_any": patients.satisfying(
+            " OR ".join(
+                list(
+                    map(
+                        lambda x: f"event_{x}", clinical_event_codelists.keys()
+                    )
+                )
+            )
+        ),
+    }
+    logging.info(json.dumps(var, indent=4))
+    return var
+
+
+def generate_all_medications_2_weeks():
+    # For each clinical event, create a new variable for any medication
+    # This is for proportion of clinical events with medication
+    # Likely most useful for the strep codelist, which is sensitive
+    var = {
+        f"{clinical_key}_with_medication_any": patients.satisfying(
             " OR ".join(
                 list(
                     map(
@@ -67,19 +93,41 @@ def generate_all_medications_2_weeks(clinical_events_codelists):
                 )
             )
         )
-        for clinical_key in clinical_events_codelists.keys()
+        for clinical_key in clinical_event_codelists.keys()
     }
+    logging.info(json.dumps(var, indent=4))
+    return var
+
+
+def generate_all_clinical_2_weeks():
+    # For each medication, create a new variable for any clinical event
+    # This is for proportion of medications with a strepa/scarlet indication
+    # Likely most useful for medications other than pheno, with other indications
+    var = {
+        f"{medication_key}_with_clinical_any": patients.satisfying(
+            " OR ".join(
+                list(
+                    map(
+                        lambda clinical_key: f"event_{medication_key}_with_{clinical_key}",
+                        clinical_event_codelists.keys(),
+                    )
+                )
+            )
+        )
+        for medication_key in medication_codelists.keys()
+    }
+    logging.info(json.dumps(var, indent=4))
+    return var
 
 
 def generate_expectations_codes(codelist, incidence=0.5):
 
     expectations = {str(x): (1 - incidence) / 10 for x in codelist[0:10]}
-    # expectations = {str(x): (1-incidence) / len(codelist) for x in codelist}
     expectations[None] = incidence
     return expectations
 
 
-start_date = "2019-01-01"
+start_date = "2018-01-01"
 end_date = "2022-12-01"
 # Specifiy study definition
 
@@ -161,7 +209,54 @@ demographics = {
             },
         )
     ),
+    "practice": patients.registered_practice_as_of(
+        "index_date",
+        returning="pseudo_id",
+        return_expectations={
+            "int": {"distribution": "normal", "mean": 25, "stddev": 5},
+            "incidence": 0.9,
+        },
+    ),
 }
+
+
+clinical_events = [
+    {
+        f"event_{clinical_key}": patients.with_these_clinical_events(
+            codelist=clinical_codelist,
+            between=["index_date", ENDDATE],
+            returning="binary_flag",
+            include_date_of_match=True,
+            date_format="YYYY-MM",
+            return_expectations={"incidence": 0.1},
+        ),
+        f"event_code_{clinical_key}": patients.with_these_clinical_events(
+            codelist=clinical_codelist,
+            between=["index_date", ENDDATE],
+            returning="code",
+            return_expectations={
+                "rate": "universal",
+                "category": {
+                    "ratios": generate_expectations_codes(clinical_codelist)
+                },
+            },
+        ),
+        # Clinical with medication for (medication + clinical)/clinical
+        # Clinical falls within the timeframe
+        **{
+            f"event_{clinical_key}_with_{medication_key}": patients.with_these_medications(
+                codelist=medication_codelist,
+                between=[
+                    f"event_{clinical_key}_date - 7 days",
+                    f"event_{clinical_key}_date + 14 days",
+                ],
+                returning="binary_flag",
+            )
+            for medication_key, medication_codelist in medication_codelists.items()
+        },
+    }
+    for clinical_key, clinical_codelist in clinical_event_codelists.items()
+]
 
 
 medication_events = [
@@ -185,46 +280,22 @@ medication_events = [
                 },
             },
         ),
+        # Medication with clinical for (medication + clinical)/medication
+        # Medication falls within the timeframe
         **{
-            f"event_{clinical_key}_with_{medication_key}": patients.with_these_medications(
-                codelist=medication_codelist,
+            f"event_{medication_key}_with_{clinical_key}": patients.with_these_clinical_events(
+                codelist=clinical_codelist,
                 between=[
-                    f"event_{clinical_key}_date - 7 days",
-                    f"event_{clinical_key}_date + 14 days",
+                    f"event_{medication_key}_date - 7 days",
+                    f"event_{medication_key}_date + 14 days",
                 ],
                 returning="binary_flag",
             )
-            for clinical_key in clinical_event_codelists.keys()
+            for clinical_key, clinical_codelist in clinical_event_codelists.items()
         },
     }
     for medication_key, medication_codelist in medication_codelists.items()
 ]
-
-clinical_events = [
-    {
-        f"event_{clinical_key}": patients.with_these_clinical_events(
-            codelist=clinical_codelist,
-            between=["index_date", ENDDATE],
-            returning="binary_flag",
-            include_date_of_match=True,
-            date_format="YYYY-MM",
-            return_expectations={"incidence": 0.1},
-        ),
-        f"event_code_{clinical_key}": patients.with_these_clinical_events(
-            codelist=clinical_codelist,
-            between=["index_date", ENDDATE],
-            returning="code",
-            return_expectations={
-                "rate": "universal",
-                "category": {
-                    "ratios": generate_expectations_codes(clinical_codelist)
-                },
-            },
-        ),
-    }
-    for clinical_key, clinical_codelist in clinical_event_codelists.items()
-]
-
 
 # convert list of dicts into a single dict
 medication_variables = {k: v for d in medication_events for k, v in d.items()}
@@ -265,31 +336,23 @@ study = StudyDefinition(
         },
     ),
     **demographics,
-    # keep this in case we do want it later
-    practice=patients.registered_practice_as_of(
-        "index_date",
-        returning="pseudo_id",
-        return_expectations={
-            "int": {"distribution": "normal", "mean": 25, "stddev": 5},
-            "incidence": 0.5,
-        },
-    ),
     **clinical_event_variables,
     **medication_variables,
     **generate_all_medications(),
-    **generate_all_medications_2_weeks(clinical_event_codelists),
+    **generate_all_clinical(),
+    **generate_all_medications_2_weeks(),
+    **generate_all_clinical_2_weeks(),
 )
 
 # Ethnicity isn't in the demographics dict because it's extracted in a separate
-# study definition. We add it here because we want to calculate a measure using it.
-# We only care about the key.
+# study definition. We add it here because we want to calculate a measure using
+# it. We only care about the key.
 
 demographics["ethnicity"] = ""
 
 measures = []
-
 # add measure for each codelist
-for medication_key in medication_codelists.keys():
+for medication_key in list(medication_codelists.keys()):
     measures.extend(
         [
             Measure(
@@ -306,42 +369,41 @@ for medication_key in medication_codelists.keys():
                 group_by=[f"event_code_{medication_key}"],
                 small_number_suppression=True,
             ),
+            Measure(
+                id=f"event_{medication_key}_with_clinical_any_rate",
+                numerator=f"{medication_key}_with_clinical_any",
+                denominator=f"event_{medication_key}",
+                group_by=["population"],
+                small_number_suppression=True,
+            ),
         ]
     )
 
     for d in demographics.keys():
-        measures.append(
-            Measure(
-                id=f"event_{medication_key}_{d}_rate",
-                numerator=f"event_{medication_key}",
-                denominator="population",
-                group_by=[d],
-                small_number_suppression=True,
-            ),
+        if d == "practice":
+            suppress = False
+        else:
+            suppress = True
+        measures.extend(
+            [
+                Measure(
+                    id=f"event_{medication_key}_{d}_rate",
+                    numerator=f"event_{medication_key}",
+                    denominator="population",
+                    group_by=[d],
+                    small_number_suppression=suppress,
+                ),
+                Measure(
+                    id=f"event_{medication_key}_with_clinical_any_{d}_rate",
+                    numerator=f"{medication_key}_with_clinical_any",
+                    denominator=f"event_{medication_key}",
+                    group_by=[d],
+                    small_number_suppression=suppress,
+                ),
+            ]
         )
 
-# Any medication
-measures.append(
-    Measure(
-        id="event_medication_any_rate",
-        numerator="event_medication_any",
-        denominator="population",
-        group_by=["population"],
-        small_number_suppression=True,
-    )
-)
-for d in demographics.keys():
-    measures.append(
-        Measure(
-            id=f"event_medication_any_{d}_rate",
-            numerator="event_medication_any",
-            denominator="population",
-            group_by=[d],
-            small_number_suppression=True,
-        ),
-    )
-
-for clinical_key in clinical_event_codelists.keys():
+for clinical_key in list(clinical_event_codelists.keys()):
     measures.extend(
         [
             Measure(
@@ -359,9 +421,9 @@ for clinical_key in clinical_event_codelists.keys():
                 small_number_suppression=True,
             ),
             Measure(
-                id=f"event_{clinical_key}_medication_any_2_weeks_rate",
-                numerator=f"{clinical_key}_medication_any_2_weeks",
-                denominator="population",
+                id=f"event_{clinical_key}_with_medication_any_rate",
+                numerator=f"{clinical_key}_with_medication_any",
+                denominator=f"event_{clinical_key}",
                 group_by=["population"],
                 small_number_suppression=True,
             ),
@@ -369,6 +431,10 @@ for clinical_key in clinical_event_codelists.keys():
     )
 
     for d in demographics.keys():
+        if d == "practice":
+            suppress = False
+        else:
+            suppress = True
         measures.extend(
             [
                 Measure(
@@ -376,14 +442,58 @@ for clinical_key in clinical_event_codelists.keys():
                     numerator=f"event_{clinical_key}",
                     denominator="population",
                     group_by=[d],
-                    small_number_suppression=True,
+                    small_number_suppression=suppress,
                 ),
                 Measure(
-                    id=f"event_{clinical_key}_medication_any_2_weeks_{d}_rate",
-                    numerator=f"{clinical_key}_medication_any_2_weeks",
-                    denominator="population",
+                    id=f"event_{clinical_key}_with_medication_any_{d}_rate",
+                    numerator=f"{clinical_key}_with_medication_any",
+                    denominator=f"event_{clinical_key}",
                     group_by=[d],
-                    small_number_suppression=True,
+                    small_number_suppression=suppress,
                 ),
             ]
         )
+
+# Medication any and clinical any
+measures.extend(
+    [
+        Measure(
+            id="event_medication_any_rate",
+            numerator="event_medication_any",
+            denominator="population",
+            group_by=["population"],
+            small_number_suppression=True,
+        ),
+        Measure(
+            id="event_clinical_any_rate",
+            numerator="event_clinical_any",
+            denominator="population",
+            group_by=["population"],
+            small_number_suppression=True,
+        ),
+    ]
+)
+
+for d in demographics.keys():
+    if d == "practice":
+        suppress = False
+    else:
+        suppress = True
+    measures.extend(
+        [
+            Measure(
+                id=f"event_medication_any_{d}_rate",
+                numerator="event_medication_any",
+                denominator="population",
+                group_by=[d],
+                small_number_suppression=suppress,
+            ),
+            Measure(
+                id=f"event_clinical_any_{d}_rate",
+                numerator="event_clinical_any",
+                denominator="population",
+                group_by=[d],
+                small_number_suppression=suppress,
+            ),
+        ]
+    )

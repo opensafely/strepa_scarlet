@@ -29,21 +29,17 @@ def parse_args():
 
 
 def get_pattern_and_list(key, column_to_plot, first):
-    measure_list = []
     if column_to_plot == "value":
-        if key in MEDICATION_TO_CODELIST.keys():
-            return (f"event_{key}*_rate", measure_list)
-        else:
-            demographics = [
-                "age_band",
-                "imd",
-                "ethnicity",
-                "region",
-            ]
-            return (
-                None,
-                [first] + [f"event_{key}_{d}_rate" for d in demographics],
-            )
+        demographics = [
+            "age_band",
+            "imd",
+            "ethnicity",
+            "region",
+        ]
+        return (
+            None,
+            [first] + [f"event_{key}_{d}_rate" for d in demographics],
+        )
     else:
         return (
             None,
@@ -55,7 +51,7 @@ def get_pattern_and_list(key, column_to_plot, first):
 def panels_loop(measure_table, output_dir):
     for key in (
         list(MEDICATION_TO_CODELIST.keys())
-        + ["medication_any"]
+        + ["medication_any", "clinical_any"]
         + list(CLINICAL_TO_CODELIST.keys())
     ):
         first = f"event_{key}_rate"

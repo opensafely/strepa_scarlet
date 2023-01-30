@@ -35,9 +35,12 @@ def main():
     # TODO: name has extra text i.e. event_*_rate
     population_measures = df[df.group == "population"]
     # Medications
+    medication_measures = [
+        f"event_{x}_rate" for x in list(MEDICATION_TO_CODELIST.keys())
+    ]
     medications = population_measures[
         population_measures.name.str.contains(
-            "|".join(MEDICATION_TO_CODELIST.keys())
+            "|".join(medication_measures)
         )
     ]
     plot_measures(
@@ -82,6 +85,8 @@ def main():
 
     # for each group, plot the measure
     for group, df_subset in df.groupby("name"):
+        if "practice" in group:
+            continue
         df_subset["rate"] = df_subset["value"] * 1000
 
         if len(df_subset["group"].unique()) == 1:
