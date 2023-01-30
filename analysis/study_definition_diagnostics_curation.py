@@ -52,7 +52,7 @@ study = StudyDefinition(
             "int": {"distribution": "population_ages"},
         },
     ),
-    any_prescription=patients.with_these_clinical_events(
+    any_prescription=patients.with_these_medications(
         codelist=any_medication_codes,
         between=["index_date", "last_day_of_month(index_date)"],
         include_date_of_match=True,
