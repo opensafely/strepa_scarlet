@@ -222,7 +222,7 @@ def display_event_counts(file, period, dir=RESULTS_DIR):
     column_name_map = {
         "total_events": "Total recorded events",
         "total_patients": "Total unique patients with an event",
-        "event_in_latest_period": "Events in the latest {period}",
+        "events_in_latest_period": f"Events in the latest {period}",
     }
 
     with open(f"{dir}/{file}") as f:
