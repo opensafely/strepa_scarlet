@@ -88,8 +88,7 @@ demographics = {
         patients.categorised_as(
             {
                 "missing": "DEFAULT",
-                "Under 1": """ age >= 0 AND age <1""",
-                "1-4": """ age >=  1 AND age < 5""",
+                "0-4": """ age >=  0 AND age < 5""",
                 "5-9": """ age >=  5 AND age < 10""",
                 "10-14": """ age >=  10 AND age < 15""",
                 "15-44": """ age >=  15 AND age < 45""",
@@ -101,12 +100,11 @@ demographics = {
                 "rate": "universal",
                 "category": {
                     "ratios": {
-                        "Under 1": 0.15,
-                        "1-4": 0.3,
+                        "0-4": 0.3,
                         "5-9": 0.3,
-                        "10-14": 0.05,
-                        "15-44": 0.05,
-                        "45-64": 0.05,
+                        "10-14": 0.1,
+                        "15-44": 0.1,
+                        "45-64": 0.1,
                         "75+": 0.1,
                     }
                 },
