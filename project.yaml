@@ -163,6 +163,7 @@ actions:
            --input-files output/report/joined/measure_*_rate.csv
            --output-dir output/report/results
            --output-name "measure_all.csv"
+           --allow-practice
       needs: [generate_measures_report]
       outputs:
         moderately_sensitive:
