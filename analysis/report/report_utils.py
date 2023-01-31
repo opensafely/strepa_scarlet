@@ -69,6 +69,8 @@ def plot_measures(
     """
     df_copy = df.copy()
     plt.figure(figsize=(18, 8))
+    plt.style.use("seaborn")
+    
     y_max = df[column_to_plot].max() * 1.05
     # Ignore timestamp - this could be done at load time
     df_copy["date"] = df_copy["date"].dt.date
@@ -256,3 +258,5 @@ def display_top_5(file, dir=RESULTS_DIR):
     df = pd.read_csv(f"{dir}/{file}")
     df["Count"] = df["Count"].apply(lambda x: "{:,}".format(x))
     display(HTML(df.to_html(index=False)))
+
+
