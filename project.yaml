@@ -163,6 +163,7 @@ actions:
            --input-files output/report/joined/measure_*_rate.csv
            --output-dir output/report/results
            --output-name "measure_all.csv"
+           --allow-practice
       needs: [generate_measures_report]
       outputs:
         moderately_sensitive:
@@ -204,11 +205,11 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/results/measure_all.csv
-      --measures-pattern "event_scarlet_fever_medication_any_2_weeks*rate"
+      --measures-pattern "event_scarlet_fever_with_medication_any*rate"
       --output-dir output/report/results
       --output-name "scarlet_fever_plus_medication_by_subgroup"
       --scale "rate"
-      --first "event_scarlet_fever_medication_any_2_weeks_rate"
+      --first "event_scarlet_fever_with_medication_any_rate"
       --exclude-group "Missing"
     needs: [join_measures]
     outputs:
@@ -219,11 +220,11 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/results/measure_all.csv
-      --measures-pattern "event_invasive_strep_a_medication_any_2_weeks*rate"
+      --measures-pattern "event_invasive_strep_a_with_medication_any*rate"
       --output-dir output/report/results
       --output-name "invasive_strep_a_plus_medication_by_subgroup"
       --scale "rate"
-      --first "event_invasive_strep_a_medication_any_2_weeks_rate"
+      --first "event_invasive_strep_a_with_medication_any_rate"
       --exclude-group "Missing"
     needs: [join_measures]
     outputs:
@@ -234,11 +235,11 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/results/measure_all.csv
-      --measures-pattern "event_strep_a_sore_throat_medication_any_2_weeks*rate"
+      --measures-pattern "event_strep_a_sore_throat_with_medication_any*rate"
       --output-dir output/report/results
       --output-name "strep_a_sore_throat_plus_medication_by_subgroup"
       --scale "rate"
-      --first "event_strep_a_sore_throat_medication_any_2_weeks_rate"
+      --first "event_strep_a_sore_throat_with_medication_any_rate"
       --exclude-group "Missing"
     needs: [join_measures]
     outputs:
@@ -337,6 +338,7 @@ actions:
            --input-files output/report/weekly/joined/measure_*_rate.csv
            --output-dir output/report/weekly/results
            --output-name "measure_weekly.csv"
+           --allow-practice
       needs: [generate_measures_report_weekly]
       outputs:
         moderately_sensitive:
@@ -377,11 +379,11 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/weekly/results/measure_weekly.csv
-      --measures-pattern "event_scarlet_fever_medication_any_2_weeks*rate"
+      --measures-pattern "event_scarlet_fever_with_medication_any*rate"
       --output-dir output/report/weekly/results
       --output-name "scarlet_fever_plus_medication_by_subgroup"
       --scale "rate"
-      --first "event_scarlet_fever_medication_any_2_weeks_rate"
+      --first "event_scarlet_fever_with_medication_any_rate"
       --exclude-group "Missing"
     needs: [join_measures_weekly]
     outputs:
@@ -392,11 +394,11 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/weekly/results/measure_weekly.csv
-      --measures-pattern "event_invasive_strep_a_medication_any_2_weeks*rate"
+      --measures-pattern "event_invasive_strep_a_with_medication_any*rate"
       --output-dir output/report/weekly/results
       --output-name "invasive_strep_a_plus_medication_by_subgroup"
       --scale "rate"
-      --first "event_invasive_strep_a_medication_any_2_weeks_rate"
+      --first "event_invasive_strep_a_with_medication_any_rate"
       --exclude-group "Missing"
     needs: [join_measures_weekly]
     outputs:
@@ -407,11 +409,11 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/weekly/results/measure_weekly.csv
-      --measures-pattern "event_strep_a_sore_throat_medication_any_2_weeks*rate"
+      --measures-pattern "event_strep_a_sore_throat_with_medication_any*rate"
       --output-dir output/report/weekly/results
       --output-name "strep_a_sore_throat_plus_medication_by_subgroup"
       --scale "rate"
-      --first "event_strep_a_sore_throat_medication_any_2_weeks_rate"
+      --first "event_strep_a_sore_throat_with_medication_any_rate"
       --exclude-group "Missing"
     needs: [join_measures_weekly]
     outputs:

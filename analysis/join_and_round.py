@@ -184,6 +184,11 @@ def parse_args():
         action="store_true",
         help="Just join, do not round",
     )
+    parser.add_argument(
+        "--allow-practice",
+        action="store_true",
+        help="Allow practice-level data in joined measures file",
+    )
     return parser.parse_args()
 
 
@@ -195,6 +200,7 @@ def main():
     output_name = args.output_name
     round_to = args.round_to
     skip_round = args.skip_round
+    allow_practice = args.allow_practice
 
     if not input_files and not input_list:
         raise FileNotFoundError("No files matched the input pattern provided")
@@ -210,13 +216,18 @@ def main():
         tables.append(redacted_str)
 
     output = _join_tables(tables)
-    _check_for_practice(output)
-
-    # Remove any rows where the "name" column contains "event_code"
-    output_checking = output[~output.name.str.contains("event_code")]
-    write_table(output_checking, output_dir, f"checking_{output_name}")
+    if not allow_practice:
+        _check_for_practice(output)
 
     write_table(output, output_dir, output_name)
+
+    # Remove any rows where the "name" column contains "event_code"
+    # the output checking file (leave output alone)
+    output_checking = output[~output.name.str.contains("event_code")]
+    output_checking = output_checking[
+        ~output_checking.name.str.contains("practice")
+    ]
+    write_table(output_checking, output_dir, f"checking_{output_name}")
 
 
 if __name__ == "__main__":
