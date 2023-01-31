@@ -70,8 +70,9 @@ def plot_measures(
     df_copy = df.copy()
     plt.figure(figsize=(18, 8))
     plt.style.use("seaborn")
-    
-    y_max = df[column_to_plot].max() * 1.05
+
+    # NOTE: finite filter for dummy data
+    y_max = df[numpy.isfinite(df[column_to_plot])][column_to_plot].max() * 1.05
     # Ignore timestamp - this could be done at load time
     df_copy["date"] = df_copy["date"].dt.date
     df_copy = df_copy.set_index("date")
@@ -99,14 +100,14 @@ def plot_measures(
         else:
             df_copy[column_to_plot].plot(legend=False)
 
-    #if as_bar:
-        # Matplotlib treats bar labels as necessary categories
-        # So we force it to use only every third label
-        #labels = ax.get_xticklabels()
-        #skipped_labels = [
-        #    x if index % 3 == 0 else "" for index, x in enumerate(labels)
-        #]
-        #ax.set_xticklabels(skipped_labels)
+    # if as_bar:
+    # Matplotlib treats bar labels as necessary categories
+    # So we force it to use only every third label
+    # labels = ax.get_xticklabels()
+    # skipped_labels = [
+    #    x if index % 3 == 0 else "" for index, x in enumerate(labels)
+    # ]
+    # ax.set_xticklabels(skipped_labels)
 
     plt.ylabel(y_label)
     plt.xlabel("Date")
@@ -258,5 +259,3 @@ def display_top_5(file, dir=RESULTS_DIR):
     df = pd.read_csv(f"{dir}/{file}")
     df["Count"] = df["Count"].apply(lambda x: "{:,}".format(x))
     display(HTML(df.to_html(index=False)))
-
-
