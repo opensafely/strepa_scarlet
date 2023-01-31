@@ -291,17 +291,6 @@ actions:
       highly_sensitive:
         cohort: output/report/weekly/input*.csv.gz
 
-  generate_study_population_report_weekly_3:
-    run: cohortextractor:latest generate_cohort
-      --study-definition study_definition_report
-      --index-date-range "2023-01-13 to 2023-01-20 by week"
-      --param frequency=weekly
-      --output-dir=output/report/weekly
-      --output-format=csv.gz
-    outputs:
-      highly_sensitive:
-        cohort: output/report/weekly/inpu*.csv.gz
-      
   join_cohorts_report_weekly:
     run: >
       python:latest python analysis/cohort_joiner.py
@@ -313,21 +302,9 @@ actions:
       highly_sensitive:
         cohort: output/report/weekly/joined/input_report_20*.csv.gz
 
-  join_cohorts_report_weekly_2:
-    run: >
-      python:latest python analysis/cohort_joiner.py
-        --lhs output/report/weekly/input_report_2*.csv.gz
-        --rhs output/report/input_ethnicity_report.csv.gz
-        --output-dir output/report/weekly/joined
-    needs: [generate_study_population_report_weekly_3, generate_study_population_report_ethnicity]
-    outputs:
-      highly_sensitive:
-        cohort: output/report/weekly/joined/input_report_2*.csv.gz
-
-
   generate_measures_report_weekly:
     run: cohortextractor:latest generate_measures --study-definition study_definition_report --output-dir=output/report/weekly/joined
-    needs: [join_cohorts_report_weekly, join_cohorts_report_weekly_2]
+    needs: [join_cohorts_report_weekly]
     outputs:
       moderately_sensitive:
         measure_csv: output/report/weekly/joined/measure_event_*_rate.csv
@@ -437,7 +414,7 @@ actions:
       --measures-list="scarlet_fever"
       --measures-list="strep_a_sore_throat"
       --measures-list="invasive_strep_a"
-    needs: [join_cohorts_report_weekly, join_cohorts_report_weekly_2]
+    needs: [join_cohorts_report_weekly]
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/event_counts_*.json
