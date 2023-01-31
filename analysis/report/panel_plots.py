@@ -131,6 +131,8 @@ def get_group_chart(
         # )
         measure_table = reorder_dataframe(measure_table, first)
 
+    # NOTE: temporarily exclude practice
+    measure_table = measure_table[measure_table.category != "practice"]
     repeated = autoselect_labels(measure_table["name"])
     groups = measure_table.groupby("name", sort=False)
     total_plots = len(groups)
@@ -147,6 +149,9 @@ def get_group_chart(
     for index, panel in enumerate(groups):
 
         panel_group, panel_group_data = panel
+
+        # TODO: if practice, create a decile chart
+
         # We need to sort by date before setting it as index
         # If a 'first' group was specified, date could be out of order
         panel_group_data = panel_group_data.sort_values("date")
