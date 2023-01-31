@@ -220,7 +220,8 @@ def main():
         _check_for_practice(output)
 
     # Remove any rows where the "name" column contains "event_code"
-    output_checking = output[~output.name.str.contains("event_code")]
+    output = output[~output.name.str.contains("event_code")]
+    output_checking = output[~output.name.str.contains("practice")]
     write_table(output_checking, output_dir, f"checking_{output_name}")
 
     write_table(output, output_dir, output_name)
