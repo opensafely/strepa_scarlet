@@ -257,7 +257,7 @@ def plot_top_codes_over_time(code_df, code_column, top_codes, measure, output_di
     # seaborn styling
     sns.set_style("darkgrid")
     plt.xlabel("Date")
-    plt.ylabel("Proportion of events")
+    plt.ylabel("Proportion of codes (%)")
 
     # Plot the proportion of events for each code on each date. Plots should be on the same graph.
     for code in top_codes:
