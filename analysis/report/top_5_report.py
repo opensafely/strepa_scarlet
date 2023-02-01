@@ -226,13 +226,12 @@ def get_proportion_of_events(df, code, date):
 
         return row
 
-def plot_top_codes_over_time(code_df, code_column, top_codes, measure, output_dir):
+def plot_top_codes_over_time(code_df, top_codes,measure, output_dir):
     """
     Plots the top 5 codes over time for each measure.
     Args:
         code_df: A codelist table.
-        code_column: The name of the code column in the codelist table.
-        top_codes: A list of the top codes to plot.
+        top_codes:A dictionary of the top codes for each measure with corresponding descriptions.
         measure: The measure ID.
         output_dir: The directory to save the plot to.
     
@@ -240,7 +239,7 @@ def plot_top_codes_over_time(code_df, code_column, top_codes, measure, output_di
 
     # Create a new dataframe with the proportion of events for each code on each date.
     code_proportions = pd.DataFrame()
-    for code in top_codes:
+    for code in top_codes.keys():
         code_proportions = pd.concat(
             [
                 code_proportions,
@@ -262,9 +261,15 @@ def plot_top_codes_over_time(code_df, code_column, top_codes, measure, output_di
     plt.ylabel("Proportion of codes (%)")
 
     # Plot the proportion of events for each code on each date. Plots should be on the same graph.
-    for code in top_codes:
-        code_proportions[code_proportions["code"] == code].plot(
-            x="date", y="proportion", label=code, ax=plt.gca()
+    for code, description in top_codes.items():
+    
+        code_proportions.loc[
+            code_proportions["code"] == code, :
+        ].plot(
+            x="date", 
+            y="proportion",
+            label=description,
+            ax=plt.gca()
         )
 
     # legend outside of plot - top right
@@ -294,26 +299,23 @@ def main():
         code_df = measure_table[measure_table["name"] == measure]
  
         code_column = "code"
-        if "vpid" in codelist.columns:
-            term_column = "bnf_name"
+        if "bnf_code" in codelist.columns and "dmd_name" in codelist.columns:
+            term_column = "dmd_name"
             code_df = code_df.merge(
-                codelist, left_on="group", right_on="snomed_id", how="left"
+                codelist, left_on="group", right_on="dmd_id", how="left"
             )
-            code_df = code_df.set_index("vpid")
+            code_df = code_df.set_index("bnf_code")
             codelist = (
-                codelist.groupby("vpid")[["bnf_name"]].first().reset_index()
+                codelist.groupby("bnf_code")[["dmd_name"]].first().reset_index()
             )
-            codelist = codelist.rename(columns={"vpid": "code"})
+            codelist = codelist.rename(columns={"bnf_code": "code"})
             code_df = (
-                code_df.groupby(["vpid", "date"])[["numerator"]].sum().reset_index()
+                code_df.groupby(["bnf_code", "date"])[["numerator"]].sum().reset_index()
             )
         else:
-            # TODO: Do we also want to group on bnf code?
-            if "dmd_type" in codelist.columns:
-                term_column = "dmd_name"
-                code_column = "dmd_id"
-            else:
-                term_column = "term"
+            
+           
+            term_column = "term"
             code_df = (
                 code_df.groupby(["group", "date"])[["numerator"]].sum().reset_index()
             )
@@ -340,11 +342,18 @@ def main():
             set(top_5_code_table_last["Code"])
         ))
 
+        top_codes_dict = {
+            i: codelist[codelist[code_column] == i][
+            term_column
+        ].values[0] for i in top_codes
+        }
+
+        
+
         # plot the top codes over time
         plot_top_codes_over_time(
             code_df=code_df,
-            code_column=code_column,
-            top_codes=top_codes,
+            top_codes=top_codes_dict,
             measure=measure,
             output_dir=output_dir,
         )
