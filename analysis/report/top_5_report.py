@@ -270,7 +270,7 @@ def plot_top_codes_over_time(code_df, code_column, top_codes, measure, output_di
     
     
     plt.savefig(
-        pathlib.Path(output_dir) / f"{measure}_top_5_codes_over_time.png",
+        output_dir / f"{measure}_top_5_codes_over_time.png",
         bbox_inches="tight",
     )
 
