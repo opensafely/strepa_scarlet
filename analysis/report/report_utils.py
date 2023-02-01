@@ -4,6 +4,7 @@ import pandas as pd
 import numpy
 import fnmatch
 import matplotlib.pyplot as plt
+import seaborn as sns
 from collections import Counter
 from pathlib import Path
 from IPython.display import display, HTML, Image
@@ -69,7 +70,7 @@ def plot_measures(
     """
     df_copy = df.copy()
     plt.figure(figsize=(18, 8))
-    plt.style.use("seaborn")
+    sns.set_style("darkgrid")
 
     # NOTE: finite filter for dummy data
     y_max = df[numpy.isfinite(df[column_to_plot])][column_to_plot].max() * 1.05
