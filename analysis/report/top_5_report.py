@@ -134,6 +134,10 @@ def calculate_top_5(events_table, code_df, code_column, term_column, df_code, da
     events_table = events_table.loc[
         :, ["Code", "Description", "Count", "Proportion of codes (%)"]
     ]
+
+    # sort by count
+    events_table = events_table.sort_values("Count", ascending=False)
+    
     return events_table
 
 def create_top_5_code_table(
@@ -166,16 +170,15 @@ def create_top_5_code_table(
     # cast both code columns to str
     df_code = "code"
 
+    # remove rows where code is "Missing"
+    df = df.loc[df[df_code] != "Missing", :]
+
     # sum event counts over patients
-    event_counts = df.sort_values(ascending=False, by="num")
-    
-    first_date_period = event_counts["date"].min()
-    last_date_period = event_counts["date"].max()
-
+    first_date_period = df["date"].min()
+    last_date_period = df["date"].max()
     event_counts = group_low_values(
-        event_counts, "num", df_code, low_count_threshold
+        df, "num", df_code, low_count_threshold
     )
-
     # round
     event_counts["num"] = event_counts["num"].apply(
         lambda x: round_values(x, rounding_base)
@@ -194,7 +197,6 @@ def create_top_5_code_table(
     top_5_whole_period = calculate_top_5(
         event_counts, code_df, code_column, term_column, df_code
     ).head(nrows)
-
 
     # return top n rows
     return top_5_first_date_period, top_5_last_date_period, top_5_whole_period
