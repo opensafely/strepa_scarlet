@@ -9,6 +9,7 @@ from report_utils import (
     coerce_numeric,
     MEDICATION_TO_CODELIST,
     CLINICAL_TO_CODELIST,
+    colour_palette,
 )
 
 
@@ -258,6 +259,9 @@ def plot_top_codes_over_time(code_df, top_codes,measure, output_dir):
     plt.figure(figsize=(10, 6))
     # seaborn styling
     sns.set_style("darkgrid")
+    plt.rcParams["axes.prop_cycle"] = plt.cycler(
+        color=colour_palette
+    )
     plt.xlabel("Date")
     plt.ylabel("Proportion of codes (%)")
 

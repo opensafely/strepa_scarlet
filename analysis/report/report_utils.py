@@ -9,6 +9,7 @@ from collections import Counter
 from pathlib import Path
 from IPython.display import display, HTML, Image
 
+colour_palette = sns.color_palette("Set3", 12)
 
 MEDICATION_TO_CODELIST = {
     "amoxicillin": "codelists/opensafely-amoxicillin-oral.csv",
@@ -69,13 +70,17 @@ def plot_measures(
         category: Name of column indicating different categories
     """
     df_copy = df.copy()
+
     plt.figure(figsize=(18, 8))
     sns.set_style("darkgrid")
+    
+    plt.rcParams["axes.prop_cycle"] = plt.cycler(color=colour_palette)
 
     # NOTE: finite filter for dummy data
     y_max = df[numpy.isfinite(df[column_to_plot])][column_to_plot].max() * 1.05
     # Ignore timestamp - this could be done at load time
     df_copy["date"] = df_copy["date"].dt.date
+    
     df_copy = df_copy.set_index("date")
     if category:
         # Set up category to have clean labels
@@ -101,18 +106,27 @@ def plot_measures(
         else:
             df_copy[column_to_plot].plot(legend=False)
 
-    # if as_bar:
+    if as_bar:
     # Matplotlib treats bar labels as necessary categories
     # So we force it to use only every third label
-    # labels = ax.get_xticklabels()
-    # skipped_labels = [
-    #    x if index % 3 == 0 else "" for index, x in enumerate(labels)
-    # ]
-    # ax.set_xticklabels(skipped_labels)
+        labels = ax.get_xticklabels()
+        if len(labels) > 30:
+            skipped_labels = [
+                x if index % 2 == 0 else "" for index, x in enumerate(labels)
+            ]
+        else:
+            skipped_labels = labels
+        ax.set_xticklabels(skipped_labels)
+
 
     plt.ylabel(y_label)
     plt.xlabel("Date")
     plt.xticks(rotation="vertical")
+    plt.xticks(fontsize=8)
+
+
+    
+
     plt.ylim(
         bottom=0,
         top=1000 if df_copy[column_to_plot].isnull().values.all() else y_max,
