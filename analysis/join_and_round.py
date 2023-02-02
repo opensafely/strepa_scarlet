@@ -4,6 +4,7 @@ import re
 import glob
 import numpy
 import pandas
+import itertools
 
 MEASURE_FNAME_REGEX = re.compile(r"measure_(?P<id>\S+)\.csv")
 
@@ -65,7 +66,8 @@ def _join_tables(tables):
 
 
 def get_measure_tables(input_files):
-    for input_file in input_files:
+    all_files = set(itertools.chain(*input_files))
+    for input_file in all_files:
         measure_fname_match = re.match(MEASURE_FNAME_REGEX, input_file.name)
         if measure_fname_match is not None:
             # The `date` column is assigned by the measures framework.
@@ -147,19 +149,12 @@ def match_paths(pattern):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    input_group = parser.add_mutually_exclusive_group(required=True)
-    input_group.add_argument(
+    parser.add_argument(
         "--input-files",
-        required=False,
+        required=True,
         type=match_paths,
-        help="Glob pattern for matching one or more input files",
-    )
-    input_group.add_argument(
-        "--input-list",
-        required=False,
-        type=match_input,
         action="append",
-        help="Manually provide a list of one or more input files",
+        help="Glob pattern(s) for matching one or more input files",
     )
     parser.add_argument(
         "--output-dir",
@@ -195,18 +190,14 @@ def parse_args():
 def main():
     args = parse_args()
     input_files = args.input_files
-    input_list = args.input_list
     output_dir = args.output_dir
     output_name = args.output_name
     round_to = args.round_to
     skip_round = args.skip_round
     allow_practice = args.allow_practice
 
-    if not input_files and not input_list:
-        raise FileNotFoundError("No files matched the input pattern provided")
-
     tables = []
-    for measure_table in get_measure_tables(input_list or input_files):
+    for measure_table in get_measure_tables(input_files):
         table = _reshape_data(measure_table)
         no_zeroes = _redact_zeroes(table)
         names_ensured = _ensure_names(no_zeroes)
