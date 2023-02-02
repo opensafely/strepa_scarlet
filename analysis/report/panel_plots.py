@@ -17,6 +17,7 @@ from report_utils import (
     get_measure_tables,
     subset_table,
     write_group_chart,
+    colour_palette
 )
 
 
@@ -127,6 +128,10 @@ def get_group_chart(
     # NOTE: constrained_layout=True available in matplotlib>=3.5
     figure = plt.figure(figsize=(columns * 6, columns * 5))
     sns.set_style("darkgrid")
+    
+    # set the color palette using matplotlib
+    plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colour_palette)
+
     if first:
         # NOTE: key param is in pandas>1.0
         # measure_table = measure_table.sort_values(

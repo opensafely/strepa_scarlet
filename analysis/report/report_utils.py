@@ -9,6 +9,7 @@ from collections import Counter
 from pathlib import Path
 from IPython.display import display, HTML, Image
 
+colour_palette = sns.color_palette("Set3", 12)
 
 MEDICATION_TO_CODELIST = {
     "amoxicillin": "codelists/opensafely-amoxicillin-oral.csv",
@@ -69,13 +70,17 @@ def plot_measures(
         category: Name of column indicating different categories
     """
     df_copy = df.copy()
+
     plt.figure(figsize=(18, 8))
     sns.set_style("darkgrid")
+    
+    plt.rcParams["axes.prop_cycle"] = plt.cycler(color=colour_palette)
 
     # NOTE: finite filter for dummy data
     y_max = df[numpy.isfinite(df[column_to_plot])][column_to_plot].max() * 1.05
     # Ignore timestamp - this could be done at load time
     df_copy["date"] = df_copy["date"].dt.date
+    
     df_copy = df_copy.set_index("date")
     if category:
         # Set up category to have clean labels
@@ -118,6 +123,9 @@ def plot_measures(
     plt.xlabel("Date")
     plt.xticks(rotation="vertical")
     plt.xticks(fontsize=8)
+
+
+    
 
     plt.ylim(
         bottom=0,
