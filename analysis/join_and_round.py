@@ -65,8 +65,10 @@ def _join_tables(tables):
     return pandas.concat(tables)
 
 
-def get_measure_tables(input_files):
+def get_measure_tables(input_files, exclude_files):
     all_files = set(itertools.chain(*input_files))
+    all_exclude = set(itertools.chain(*exclude_files))
+    all_files = all_files - all_exclude
     for input_file in all_files:
         measure_fname_match = re.match(MEASURE_FNAME_REGEX, input_file.name)
         if measure_fname_match is not None:
@@ -157,6 +159,14 @@ def parse_args():
         help="Glob pattern(s) for matching one or more input files",
     )
     parser.add_argument(
+        "--exclude-files",
+        required=False,
+        type=match_paths,
+        action="append",
+        default=[],
+        help="Glob pattern(s) to exclude one or more input files",
+    )
+    parser.add_argument(
         "--output-dir",
         required=True,
         type=pathlib.Path,
@@ -190,6 +200,7 @@ def parse_args():
 def main():
     args = parse_args()
     input_files = args.input_files
+    exclude_files = args.exclude_files
     output_dir = args.output_dir
     output_name = args.output_name
     round_to = args.round_to
@@ -197,7 +208,7 @@ def main():
     allow_practice = args.allow_practice
 
     tables = []
-    for measure_table in get_measure_tables(input_files):
+    for measure_table in get_measure_tables(input_files, exclude_files):
         table = _reshape_data(measure_table)
         no_zeroes = _redact_zeroes(table)
         names_ensured = _ensure_names(no_zeroes)
