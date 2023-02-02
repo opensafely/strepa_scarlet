@@ -52,6 +52,16 @@ def get_date_input_file(file: str) -> str:
         return date.group(1)
 
 
+def round_values(x, base=5):
+    rounded = x
+    if isinstance(x, (int, float)):
+        if numpy.isnan(x):
+            rounded = numpy.nan
+        else:
+            rounded = int(base * round(x / base))
+    return rounded
+
+
 def plot_measures(
     df,
     filename: str,
@@ -162,6 +172,23 @@ def coerce_numeric(table):
     coerced["value"] = pd.to_numeric(coerced["value"], errors="coerce")
     coerced["group"] = coerced["group"].astype(str)
     return coerced
+
+
+def drop_zero_denominator_rows(measure_table):
+    """
+    Zero-denominator rows could cause the deciles to be computed incorrectly, so should
+    be dropped beforehand. For example, a practice can have zero registered patients. If
+    the measure is computed from the number of registered patients by practice, then
+    this practice will have a denominator of zero and, consequently, a value of inf.
+    Depending on the implementation, this practice's value may be sorted as greater than
+    other practices' values, which may increase the deciles.
+    """
+    # It's non-trivial to identify the denominator column without the associated Measure
+    # instance. It's much easier to test the value column for inf, which is returned by
+    # Pandas when the second argument of a division operation is zero.
+    is_not_inf = measure_table["value"] != numpy.inf
+    num_is_inf = len(is_not_inf) - is_not_inf.sum()
+    return measure_table[is_not_inf].reset_index(drop=True)
 
 
 def filename_to_title(filename):
