@@ -281,6 +281,10 @@ def plot_top_codes_over_time(code_df, top_codes,measure, output_dir):
         bbox_inches="tight",
     )
 
+    # save the underlying data for the plot
+    code_proportions.to_csv(
+        output_dir / f"{measure}_top_5_codes_over_time.csv", index=False
+    )
 
 
 def main():

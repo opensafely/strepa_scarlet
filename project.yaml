@@ -181,6 +181,7 @@ actions:
       moderately_sensitive:
         tables: output/report/results/top_5*.csv
         figures: output/report/results/*top_5_codes_over_time.png
+        data: output/report/results/*top_5_codes_over_time.csv
 
   plot_measure_report:
     run: >
@@ -333,6 +334,7 @@ actions:
       moderately_sensitive:
         tables: output/report/weekly/results/top_5*.csv
         figures: output/report/weekly/results/*top_5_codes_over_time.png
+        data: output/report/weekly/results/*top_5_codes_over_time.csv
 
   plot_measure_report_weekly:
     run: >
