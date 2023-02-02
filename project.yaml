@@ -220,7 +220,7 @@ actions:
   panel_plots_stacked_medications:
     run: >
       python:latest python analysis/report/panel_plots.py
-      --input-file output/report/results/measure_all.csv
+      --input-file output/report/results/measure_rounded.csv
       --measures-list "event_amoxicillin_rate"
       --measures-list "event_azithromycin_rate"
       --measures-list "event_clarithromycin_rate"
@@ -233,7 +233,7 @@ actions:
       --output-name "all_medications_by_year"
       --scale "rate"
       --stack-years
-    needs: [join_measures]
+    needs: [join_measures_rounded]
     outputs:
       moderately_sensitive:
         measure: output/report/results/all_medications_by_year.png
@@ -241,7 +241,7 @@ actions:
   panel_plots_stacked_diagnostics:
     run: >
       python:latest python analysis/report/panel_plots.py
-      --input-file output/report/results/measure_all.csv
+      --input-file output/report/results/measure_rounded.csv
       --measures-list "event_scarlet_fever_rate"
       --measures-list "event_strep_a_sore_throat_rate"
       --measures-list "event_invasive_strep_a_rate"
@@ -249,7 +249,7 @@ actions:
       --output-name "all_diagnostics_by_year"
       --scale "rate"
       --stack-years
-    needs: [join_measures]
+    needs: [join_measures_rounded]
     outputs:
       moderately_sensitive:
         measure: output/report/results/all_diagnostics_by_year.png
