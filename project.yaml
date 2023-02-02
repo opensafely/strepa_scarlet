@@ -409,6 +409,8 @@ actions:
       top_5_table_report,
       plot_measure_report,
       panel_plots,
+      panel_plots_stacked_medications,
+      panel_plots_stacked_diagnostics
       ]
     outputs:
       moderately_sensitive:
@@ -418,7 +420,7 @@ actions:
     run: jupyter:latest jupyter nbconvert /workspace/analysis/report/report_weekly.ipynb --execute --to html --output-dir=/workspace/output/report --ExecutePreprocessor.timeout=86400 --no-input
     needs: [
       event_counts_report_weekly,
-      top_5_table_report_weekly, 
+      top_5_table_report_weekly,
       plot_measure_report_weekly,
       panel_plots_weekly,
       ]
