@@ -9,8 +9,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter
 from dateutil import parser
+from ebmdatalab import charts
 from report_utils import (
     coerce_numeric,
+    round_values,
+    drop_zero_denominator_rows,
     filename_to_title,
     autoselect_labels,
     translate_group,
@@ -114,6 +117,56 @@ def reorder_labels(labels):
     return labels
 
 
+def write_deciles_table(measure_table, output_dir, filename):
+    """
+    Output a deciles table, including a count of practices
+    per time period to ensure enough practices per decile
+    """
+
+    num_practices = measure_table.groupby("date")["group"].count()
+    num_practices = num_practices.apply(lambda x: round_values(x, 10))
+    deciles_table = charts.add_percentiles(
+        measure_table,
+        period_column="date",
+        column="value",
+    )
+    deciles_table = deciles_table.set_index("date")
+    deciles_table["practice_count_per_date"] = num_practices
+    deciles_table.to_csv(
+        output_dir / f"deciles_table_{filename}.csv", index=True
+    )
+
+
+def add_deciles_plot(measure_table, ax, output_dir, filename):
+    """
+    Adds a deciles plot to the existing figure
+    NOTE: NOT IDEAL as the deciles_chart command changes the overall plt
+    format with commands such as plt.gcf().autofmt_xdate()
+    Manually adjust the legend, label size and roation to match
+    Retuns the legend so it can be included in the layout
+    """
+    numeric = coerce_numeric(measure_table)
+    numeric = drop_zero_denominator_rows(numeric)
+
+    write_deciles_table(numeric, output_dir, filename)
+
+    charts.deciles_chart(
+        numeric,
+        period_column="date",
+        column="value",
+        show_legend=True,
+        ax=ax,
+    )
+    ax.legend(
+        bbox_to_anchor=(1, 1),
+        loc="upper left",
+        fontsize="x-small",
+    )
+    ax.tick_params(axis="x", labelsize=7, rotation=30)
+    ax.set_title("Practice Deciles")
+    return ax.get_legend()
+
+
 def get_group_chart(
     measure_table,
     first,
@@ -124,13 +177,10 @@ def get_group_chart(
     scale=None,
     ci=None,
     exclude_group=None,
+    output_dir=None,
 ):
     # NOTE: constrained_layout=True available in matplotlib>=3.5
     figure = plt.figure(figsize=(columns * 6, columns * 5))
-    sns.set_style("darkgrid")
-    
-    # set the color palette using matplotlib
-    plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colour_palette)
 
     if first:
         # NOTE: key param is in pandas>1.0
@@ -139,8 +189,6 @@ def get_group_chart(
         # )
         measure_table = reorder_dataframe(measure_table, first)
 
-    # NOTE: temporarily exclude practice
-    measure_table = measure_table[measure_table.category != "practice"]
     repeated = autoselect_labels(measure_table["name"])
     groups = measure_table.groupby("name", sort=False)
     total_plots = len(groups)
@@ -155,10 +203,20 @@ def get_group_chart(
 
     lgds = []
     for index, panel in enumerate(groups):
+        sns.set_style("darkgrid")
+        # set the color palette using matplotlib
+        plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colour_palette)
 
         panel_group, panel_group_data = panel
+        ax = figure.add_subplot(rows, columns, index + 1)
+        ax.autoscale(enable=True, axis="y")
 
-        # TODO: if practice, create a decile chart
+        if "practice" in panel_group:
+            lgd = add_deciles_plot(
+                panel_group_data, ax, output_dir, panel_group
+            )
+            lgds.append(lgd)
+            continue
 
         # We need to sort by date before setting it as index
         # If a 'first' group was specified, date could be out of order
@@ -169,8 +227,6 @@ def get_group_chart(
             panel_group_data.group = panel_group_data.group.astype(int).astype(
                 bool
             )
-        ax = figure.add_subplot(rows, columns, index + 1)
-        ax.autoscale(enable=True, axis="y")
         title = translate_group(
             panel_group_data.category[0],
             panel_group,
@@ -213,7 +269,7 @@ def get_group_chart(
         )
         lgds.append(lgd)
         ax.set_xlabel("")
-        ax.tick_params(axis="x", labelsize=7, rotation=45)
+        ax.tick_params(axis="x", labelsize=7, rotation=30)
         if date_lines:
             min_date = min(measure_table.index)
             max_date = max(measure_table.index)
@@ -228,6 +284,11 @@ def get_group_chart(
         plt.xlabel(
             f"*Those with '{exclude_group}' category excluded from each plot"
         )
+    # Deciles chart code globally calls plt.gcf().autofmt_xdate()
+    # So we have to turn the axes back on here
+    for ax in plt.gcf().get_axes():
+        ax.tick_params(labelbottom=True)
+        ax.get_xticklabels("auto")
     plt.subplots_adjust(wspace=0.7, hspace=0.6)
     return (plt, lgds)
 
@@ -252,6 +313,11 @@ def parse_args():
         "--input-file",
         required=True,
         help="Path to single joined measures file",
+    )
+    parser.add_argument(
+        "--practice-file",
+        required=False,
+        help="Path to extra practice file",
     )
     measures_group = parser.add_mutually_exclusive_group(required=False)
     measures_group.add_argument(
@@ -317,6 +383,7 @@ def parse_args():
 def main():
     args = parse_args()
     input_file = args.input_file
+    practice_file = args.practice_file
     measures_pattern = args.measures_pattern
     measures_list = args.measures_list
     first = args.first
@@ -330,6 +397,10 @@ def main():
     exclude_group = args.exclude_group
 
     measure_table = get_measure_tables(input_file)
+    if practice_file:
+        practice_table = get_measure_tables(practice_file)
+        practice_table = practice_table[practice_table.category == "practice"]
+        measure_table = pandas.concat([measure_table, practice_table])
 
     plot_title = filename_to_title(output_name)
 
@@ -345,6 +416,7 @@ def main():
         scale=scale,
         ci=confidence_intervals,
         exclude_group=exclude_group,
+        output_dir=output_dir,
     )
     write_group_chart(chart, lgds, output_dir / output_name, plot_title)
     chart.close()
