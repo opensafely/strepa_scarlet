@@ -223,7 +223,7 @@ def get_group_chart(
         plt.xlabel(
             f"*Those with '{exclude_group}' category excluded from each plot"
         )
-    plt.subplots_adjust(wspace=0.5, hspace=0.4)
+    plt.subplots_adjust(wspace=0.7, hspace=0.6)
     return (plt, lgds)
 
 
