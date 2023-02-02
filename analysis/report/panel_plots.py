@@ -126,6 +126,7 @@ def get_group_chart(
 ):
     # NOTE: constrained_layout=True available in matplotlib>=3.5
     figure = plt.figure(figsize=(columns * 6, columns * 5))
+    sns.set_style("darkgrid")
     if first:
         # NOTE: key param is in pandas>1.0
         # measure_table = measure_table.sort_values(
@@ -164,7 +165,6 @@ def get_group_chart(
                 bool
             )
         ax = figure.add_subplot(rows, columns, index + 1)
-        sns.set_style("darkgrid")
         ax.autoscale(enable=True, axis="y")
         title = translate_group(
             panel_group_data.category[0],
