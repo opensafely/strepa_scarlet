@@ -223,6 +223,7 @@ def get_proportion_of_events(df, code, date):
             row["proportion"] = 0
         else:
             row["proportion"] = (code_events / total_events) * 100
+            row["count"] = code_events
 
         return row
 
@@ -275,7 +276,7 @@ def plot_top_codes_over_time(code_df, top_codes,measure, output_dir):
     # legend outside of plot - top right
     plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
     
-    
+
     plt.savefig(
         output_dir / f"{measure}_top_5_codes_over_time.png",
         bbox_inches="tight",
