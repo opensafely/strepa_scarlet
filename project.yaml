@@ -211,11 +211,13 @@ actions:
     run: >
       python:latest python analysis/report/create_panels.py
       --input-file output/report/results/measure_rounded.csv
+      --practice-file output/report/results/measure_unrounded.csv
       --output-dir output/report/results
-    needs: [join_measures_rounded]
+    needs: [join_measures_rounded, join_measures_unrounded]
     outputs:
       moderately_sensitive:
         measure: output/report/results/*.png
+        deciles_tables: output/report/results/deciles_table*.csv
 
   panel_plots_stacked_medications:
     run: >
@@ -258,46 +260,52 @@ actions:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/results/measure_rounded.csv
+      --practice-file output/report/results/measure_unrounded.csv
       --measures-pattern "event_scarlet_fever_with_medication_any*rate"
       --output-dir output/report/results
       --output-name "scarlet_fever_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_scarlet_fever_with_medication_any_rate"
       --exclude-group "Missing"
-    needs: [join_measures_rounded]
+    needs: [join_measures_rounded, join_measures_unrounded]
     outputs:
       moderately_sensitive:
         measure: output/report/results/scarlet_fever_plus_medication_by_subgroup.png
+        deciles_tables: output/report/results/deciles_tabl*.csv
 
   panel_plots_event_plus_medication_igas:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/results/measure_rounded.csv
+      --practice-file output/report/results/measure_unrounded.csv
       --measures-pattern "event_invasive_strep_a_with_medication_any*rate"
       --output-dir output/report/results
       --output-name "invasive_strep_a_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_invasive_strep_a_with_medication_any_rate"
       --exclude-group "Missing"
-    needs: [join_measures_rounded]
+    needs: [join_measures_rounded, join_measures_unrounded]
     outputs:
       moderately_sensitive:
         measure: output/report/results/invasive_strep_a_plus_medication_by_subgroup.png
+        deciles_tables: output/report/results/deciles_tab*.csv
 
   panel_plots_event_plus_medication_strp:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/results/measure_rounded.csv
+      --practice-file output/report/results/measure_unrounded.csv
       --measures-pattern "event_strep_a_sore_throat_with_medication_any*rate"
       --output-dir output/report/results
       --output-name "strep_a_sore_throat_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_strep_a_sore_throat_with_medication_any_rate"
       --exclude-group "Missing"
-    needs: [join_measures_rounded]
+    needs: [join_measures_rounded, join_measures_unrounded]
     outputs:
       moderately_sensitive:
         measure: output/report/results/strep_a_sore_throat_plus_medication_by_subgroup.png
+        deciles_tables: output/report/results/deciles_ta*.csv
 
   event_counts_report:
     run: >
@@ -416,56 +424,64 @@ actions:
     run: >
       python:latest python analysis/report/create_panels.py
       --input-file output/report/weekly/results/measure_rounded_weekly.csv
+      --practice-file output/report/weekly/results/measure_unrounded_weekly.csv
       --output-dir output/report/weekly/results
-    needs: [join_measures_rounded_weekly]
+    needs: [join_measures_rounded_weekly, join_measures_unrounded_weekly]
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/*.png
+        deciles_tables: output/report/weekly/results/deciles_t*.csv
 
   panel_plots_event_plus_medication_scarlet_weekly:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/weekly/results/measure_rounded_weekly.csv
+      --practice-file output/report/weekly/results/measure_unrounded_weekly.csv
       --measures-pattern "event_scarlet_fever_with_medication_any*rate"
       --output-dir output/report/weekly/results
       --output-name "scarlet_fever_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_scarlet_fever_with_medication_any_rate"
       --exclude-group "Missing"
-    needs: [join_measures_rounded_weekly]
+    needs: [join_measures_rounded_weekly, join_measures_unrounded_weekly]
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/scarlet_fever_plus_medication_by_subgroup.png
+        deciles_tables: output/report/weekly/results/deciles_*.csv
 
   panel_plots_event_plus_medication_igas_weekly:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/weekly/results/measure_rounded_weekly.csv
+      --practice-file output/report/weekly/results/measure_unrounded_weekly.csv
       --measures-pattern "event_invasive_strep_a_with_medication_any*rate"
       --output-dir output/report/weekly/results
       --output-name "invasive_strep_a_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_invasive_strep_a_with_medication_any_rate"
       --exclude-group "Missing"
-    needs: [join_measures_rounded_weekly]
+    needs: [join_measures_rounded_weekly, join_measures_unrounded_weekly]
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/invasive_strep_a_plus_medication_by_subgroup.png
+        deciles_tables: output/report/weekly/results/deciles*.csv
 
   panel_plots_event_plus_medication_strp_weekly:
     run: >
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/weekly/results/measure_rounded_weekly.csv
+      --practice-file output/report/weekly/results/measure_unrounded_weekly.csv
       --measures-pattern "event_strep_a_sore_throat_with_medication_any*rate"
       --output-dir output/report/weekly/results
       --output-name "strep_a_sore_throat_plus_medication_by_subgroup"
       --scale "rate"
       --first "event_strep_a_sore_throat_with_medication_any_rate"
       --exclude-group "Missing"
-    needs: [join_measures_rounded_weekly]
+    needs: [join_measures_rounded_weekly, join_measures_unrounded_weekly]
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/strep_a_sore_throat_plus_medication_by_subgroup.png
+        deciles_tables: output/report/weekly/results/decile*.csv
 
 
   event_counts_report_weekly:
