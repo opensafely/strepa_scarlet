@@ -205,7 +205,7 @@ actions:
     needs: [join_measures_rounded]
     outputs:
       moderately_sensitive:
-        measure: output/report/results/*measures*.jpeg
+        measure: output/report/results/*_bar_measures*.jpeg
 
   panel_plots:
     run: >
@@ -418,7 +418,7 @@ actions:
     needs: [join_measures_rounded_weekly]
     outputs:
       moderately_sensitive:
-        measure: output/report/weekly/results/*measures*.jpeg
+        measure: output/report/weekly/results/*_bar_measures*.jpeg
 
   panel_plots_weekly:
     run: >
