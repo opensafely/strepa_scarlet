@@ -6,6 +6,7 @@ import re
 import operator
 import math
 import matplotlib.pyplot as plt
+import seaborn as sns
 from matplotlib.ticker import FuncFormatter
 from dateutil import parser
 from report_utils import (
@@ -162,7 +163,7 @@ def get_group_chart(
                 bool
             )
         ax = figure.add_subplot(rows, columns, index + 1)
-        plt.style.use("seaborn")
+        sns.set_style("darkgrid")
         ax.autoscale(enable=True, axis="y")
         title = translate_group(
             panel_group_data.category[0],
