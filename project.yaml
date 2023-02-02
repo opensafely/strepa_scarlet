@@ -203,6 +203,43 @@ actions:
       moderately_sensitive:
         measure: output/report/results/*.png
 
+  panel_plots_stacked_medications:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_all.csv
+      --measures-list "event_amoxicillin_rate"
+      --measures-list "event_azithromycin_rate"
+      --measures-list "event_clarithromycin_rate"
+      --measures-list "event_erythromycin_rate"
+      --measures-list "event_phenoxymethylpenicillin_rate"
+      --measures-list "event_cefalexin_rate"
+      --measures-list "event_co_amoxiclav_rate"
+      --measures-list "event_flucloxacillin_rate"
+      --output-dir output/report/results
+      --output-name "all_medications_by_year"
+      --scale "rate"
+      --stack-years
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/all_medications_by_year.png
+
+  panel_plots_stacked_diagnostics:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_all.csv
+      --measures-list "event_scarlet_fever_rate"
+      --measures-list "event_strep_a_sore_throat_rate"
+      --measures-list "event_invasive_strep_a_rate"
+      --output-dir output/report/results
+      --output-name "all_diagnostics_by_year"
+      --scale "rate"
+      --stack-years
+    needs: [join_measures]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/all_diagnostics_by_year.png
+
   panel_plots_event_plus_medication_scarlet:
     run: >
       python:latest python analysis/report/panel_plots.py

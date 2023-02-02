@@ -117,14 +117,16 @@ def get_group_chart(
     measure_table,
     first,
     column_to_plot,
-    columns,
-    date_lines,
-    scale,
-    ci,
-    exclude_group,
+    stack_years=False,
+    columns=2,
+    date_lines=None,
+    scale=None,
+    ci=None,
+    exclude_group=None,
 ):
     # NOTE: constrained_layout=True available in matplotlib>=3.5
     figure = plt.figure(figsize=(columns * 6, columns * 5))
+    sns.set_style("darkgrid")
     if first:
         # NOTE: key param is in pandas>1.0
         # measure_table = measure_table.sort_values(
@@ -163,7 +165,6 @@ def get_group_chart(
                 bool
             )
         ax = figure.add_subplot(rows, columns, index + 1)
-        sns.set_style("darkgrid")
         ax.autoscale(enable=True, axis="y")
         title = translate_group(
             panel_group_data.category[0],
@@ -178,7 +179,15 @@ def get_group_chart(
                 panel_group_data.group.str.lower() != exclude_group.lower()
             ]
         numeric = coerce_numeric(panel_group_data)
-        for plot_group, plot_group_data in numeric.groupby("group"):
+        group_by = ["group"]
+        # TODO: we may need to handle weekly data differently
+        if stack_years and len(numeric.group.unique()) == 1:
+            numeric = numeric.reset_index()
+            numeric["year"] = numeric["date"].dt.year
+            numeric["date"] = numeric["date"].dt.month_name()
+            numeric = numeric.set_index("date")
+            group_by = ["group", "year"]
+        for plot_group, plot_group_data in numeric.groupby(group_by):
             ax.plot(
                 plot_group_data.index,
                 plot_group_data[column_to_plot],
@@ -186,7 +195,10 @@ def get_group_chart(
             )
             if ci:
                 plot_cis(ax, plot_group_data)
-        labels = reorder_labels(list(panel_group_data.group.unique()))
+        # NOTE: Use the last group_by, which will be "year" for stack_years
+        labels = reorder_labels(
+            list(numeric[group_by[-1]].astype(str).unique())
+        )
         lgd = ax.legend(
             labels,
             bbox_to_anchor=(1, 1),
@@ -211,7 +223,7 @@ def get_group_chart(
         plt.xlabel(
             f"*Those with '{exclude_group}' category excluded from each plot"
         )
-    plt.subplots_adjust(wspace=0.5, hspace=0.4)
+    plt.subplots_adjust(wspace=0.7, hspace=0.6)
     return (plt, lgds)
 
 
@@ -260,6 +272,11 @@ def parse_args():
         help="Which measure column to plot",
     )
     parser.add_argument(
+        "--stack-years",
+        action="store_true",
+        help="If there is only one group, option to stack the years",
+    ),
+    parser.add_argument(
         "--output-dir",
         required=True,
         type=pathlib.Path,
@@ -299,6 +316,7 @@ def main():
     measures_list = args.measures_list
     first = args.first
     column_to_plot = args.column_to_plot
+    stack_years = args.stack_years
     output_dir = args.output_dir
     output_name = args.output_name
     date_lines = args.date_lines
@@ -316,6 +334,7 @@ def main():
         subset,
         first=first,
         column_to_plot=column_to_plot,
+        stack_years=stack_years,
         columns=2,
         date_lines=date_lines,
         scale=scale,
