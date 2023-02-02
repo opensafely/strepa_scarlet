@@ -101,18 +101,24 @@ def plot_measures(
         else:
             df_copy[column_to_plot].plot(legend=False)
 
-    # if as_bar:
+    if as_bar:
     # Matplotlib treats bar labels as necessary categories
     # So we force it to use only every third label
-    # labels = ax.get_xticklabels()
-    # skipped_labels = [
-    #    x if index % 3 == 0 else "" for index, x in enumerate(labels)
-    # ]
-    # ax.set_xticklabels(skipped_labels)
+        labels = ax.get_xticklabels()
+        if len(labels) > 30:
+            skipped_labels = [
+                x if index % 2 == 0 else "" for index, x in enumerate(labels)
+            ]
+        else:
+            skipped_labels = labels
+        ax.set_xticklabels(skipped_labels)
+
 
     plt.ylabel(y_label)
     plt.xlabel("Date")
     plt.xticks(rotation="vertical")
+    plt.xticks(fontsize=8)
+
     plt.ylim(
         bottom=0,
         top=1000 if df_copy[column_to_plot].isnull().values.all() else y_max,
