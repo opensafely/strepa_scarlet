@@ -271,7 +271,8 @@ def get_group_chart(
         # Filter out group, but ignore case
         if exclude_group:
             panel_group_data = panel_group_data[
-                panel_group_data.group.str.lower() != exclude_group.lower()
+                panel_group_data.group.astype(str).apply(lambda x: x.lower())
+                != exclude_group.lower()
             ]
 
         if "practice" in panel_group:
