@@ -47,7 +47,7 @@ def get_pattern_and_list(key, column_to_plot, first):
             [first]
             + [
                 f"event_{key}_{d}_rate"
-                for d in ["age_band", "region", "practice"]
+                for d in ["age_band", "region"]
             ],
         )
 
