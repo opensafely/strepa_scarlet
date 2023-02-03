@@ -20,7 +20,7 @@ from report_utils import (
     get_measure_tables,
     subset_table,
     write_group_chart,
-    colour_palette
+    colour_palette,
 )
 
 
@@ -137,7 +137,9 @@ def write_deciles_table(measure_table, output_dir, filename):
     )
 
 
-def add_deciles_plot(measure_table, ax, output_dir, filename):
+def add_deciles_plot(
+    measure_table, ax, output_dir, filename, column_to_plot, lgd_params
+):
     """
     Adds a deciles plot to the existing figure
     NOTE: NOT IDEAL as the deciles_chart command changes the overall plt
@@ -153,18 +155,61 @@ def add_deciles_plot(measure_table, ax, output_dir, filename):
     charts.deciles_chart(
         numeric,
         period_column="date",
-        column="value",
+        column=column_to_plot,
         show_legend=True,
         ax=ax,
     )
+    ax.legend(**lgd_params)
+
+
+def plot_axis(
+    panel_group_data,
+    ax,
+    column_to_plot,
+    stack_years,
+    date_lines,
+    ci,
+    lgd_params,
+):
+    """
+    Within a figure, code to plot a single axis as a line chart
+    """
+    # We need to sort by date before setting it as index
+    # If a 'first' group was specified, date could be out of order
+    panel_group_data = panel_group_data.sort_values("date")
+    panel_group_data = panel_group_data.set_index("date")
+    is_bool = is_bool_as_int(panel_group_data.group)
+    if is_bool:
+        panel_group_data.group = panel_group_data.group.astype(int).astype(
+            bool
+        )
+    numeric = coerce_numeric(panel_group_data)
+    group_by = ["group"]
+    # TODO: we may need to handle weekly data differently
+    if stack_years and len(numeric.group.unique()) == 1:
+        numeric = numeric.reset_index()
+        numeric["year"] = numeric["date"].dt.year
+        numeric["date"] = numeric["date"].dt.month_name()
+        numeric = numeric.set_index("date")
+        group_by = ["group", "year"]
+    for plot_group, plot_group_data in numeric.groupby(group_by):
+        ax.plot(
+            plot_group_data.index,
+            plot_group_data[column_to_plot],
+            label=plot_group,
+        )
+        if ci:
+            plot_cis(ax, plot_group_data)
+    # NOTE: Use the last group_by, which will be "year" for stack_years
+    labels = reorder_labels(list(numeric[group_by[-1]].astype(str).unique()))
     ax.legend(
-        bbox_to_anchor=(1, 1),
-        loc="upper left",
-        fontsize="x-small",
+        labels,
+        **lgd_params,
     )
-    ax.tick_params(axis="x", labelsize=7, rotation=30)
-    ax.set_title("Practice Deciles")
-    return ax.get_legend()
+    if date_lines:
+        min_date = min(panel_group_data.index)
+        max_date = max(panel_group_data.index)
+        add_date_lines(date_lines, min_date, max_date)
 
 
 def get_group_chart(
@@ -181,6 +226,12 @@ def get_group_chart(
 ):
     # NOTE: constrained_layout=True available in matplotlib>=3.5
     figure = plt.figure(figsize=(columns * 6, columns * 5))
+    lgd_params = {
+        "bbox_to_anchor": (1, 1),
+        "loc": "upper left",
+        "fontsize": "x-small",
+        "ncol": 1,
+    }
 
     if first:
         # NOTE: key param is in pandas>1.0
@@ -205,30 +256,13 @@ def get_group_chart(
     for index, panel in enumerate(groups):
         sns.set_style("darkgrid")
         # set the color palette using matplotlib
-        plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colour_palette)
+        plt.rcParams["axes.prop_cycle"] = plt.cycler(color=colour_palette)
 
         panel_group, panel_group_data = panel
         ax = figure.add_subplot(rows, columns, index + 1)
         ax.autoscale(enable=True, axis="y")
-
-        if "practice" in panel_group:
-            lgd = add_deciles_plot(
-                panel_group_data, ax, output_dir, panel_group
-            )
-            lgds.append(lgd)
-            continue
-
-        # We need to sort by date before setting it as index
-        # If a 'first' group was specified, date could be out of order
-        panel_group_data = panel_group_data.sort_values("date")
-        panel_group_data = panel_group_data.set_index("date")
-        is_bool = is_bool_as_int(panel_group_data.group)
-        if is_bool:
-            panel_group_data.group = panel_group_data.group.astype(int).astype(
-                bool
-            )
         title = translate_group(
-            panel_group_data.category[0],
+            panel_group_data.category.unique()[0],
             panel_group,
             repeated,
             autolabel=True,
@@ -239,41 +273,31 @@ def get_group_chart(
             panel_group_data = panel_group_data[
                 panel_group_data.group.str.lower() != exclude_group.lower()
             ]
-        numeric = coerce_numeric(panel_group_data)
-        group_by = ["group"]
-        # TODO: we may need to handle weekly data differently
-        if stack_years and len(numeric.group.unique()) == 1:
-            numeric = numeric.reset_index()
-            numeric["year"] = numeric["date"].dt.year
-            numeric["date"] = numeric["date"].dt.month_name()
-            numeric = numeric.set_index("date")
-            group_by = ["group", "year"]
-        for plot_group, plot_group_data in numeric.groupby(group_by):
-            ax.plot(
-                plot_group_data.index,
-                plot_group_data[column_to_plot],
-                label=plot_group,
+
+        if "practice" in panel_group:
+            add_deciles_plot(
+                panel_group_data,
+                ax,
+                output_dir,
+                panel_group,
+                column_to_plot,
+                lgd_params,
             )
-            if ci:
-                plot_cis(ax, plot_group_data)
-        # NOTE: Use the last group_by, which will be "year" for stack_years
-        labels = reorder_labels(
-            list(numeric[group_by[-1]].astype(str).unique())
-        )
-        lgd = ax.legend(
-            labels,
-            bbox_to_anchor=(1, 1),
-            loc="upper left",
-            fontsize="x-small",
-            ncol=1,
-        )
+
+        else:
+            plot_axis(
+                panel_group_data,
+                ax,
+                column_to_plot,
+                stack_years,
+                date_lines,
+                ci,
+                lgd_params,
+            )
+        lgd = ax.get_legend()
         lgds.append(lgd)
-        ax.set_xlabel("")
-        ax.tick_params(axis="x", labelsize=7, rotation=30)
-        if date_lines:
-            min_date = min(measure_table.index)
-            max_date = max(measure_table.index)
-            add_date_lines(plt, date_lines, min_date, max_date)
+
+        # Global plot settings
         if scale == "percentage":
             scale_hundred(ax)
         elif scale == "rate":
@@ -284,6 +308,11 @@ def get_group_chart(
         plt.xlabel(
             f"*Those with '{exclude_group}' category excluded from each plot"
         )
+    ax.set_xlabel("")
+    ax.tick_params(axis="x", labelsize=7, rotation=30)
+    ax.tick_params(axis="y", labelsize="small")
+    ax.yaxis.label.set_alpha(1.0)
+    ax.yaxis.label.set_fontsize("small")
     # Deciles chart code globally calls plt.gcf().autofmt_xdate()
     # So we have to turn the axes back on here
     for ax in plt.gcf().get_axes():
@@ -297,7 +326,7 @@ def get_path(*args):
     return pathlib.Path(*args).resolve()
 
 
-def add_date_lines(plt, vlines, min_date, max_date):
+def add_date_lines(vlines, min_date, max_date):
     for date in vlines:
         date_obj = pandas.to_datetime(date)
         if date_obj >= min_date and date_obj <= max_date:
