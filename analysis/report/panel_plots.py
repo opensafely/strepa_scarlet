@@ -308,16 +308,16 @@ def get_group_chart(
         plt.xlabel(
             f"*Those with '{exclude_group}' category excluded from each plot"
         )
-    ax.set_xlabel("")
-    ax.tick_params(axis="x", labelsize=7, rotation=30)
-    ax.tick_params(axis="y", labelsize="small")
-    ax.yaxis.label.set_alpha(1.0)
-    ax.yaxis.label.set_fontsize("small")
     # Deciles chart code globally calls plt.gcf().autofmt_xdate()
     # So we have to turn the axes back on here
     for ax in plt.gcf().get_axes():
         ax.tick_params(labelbottom=True)
         ax.get_xticklabels("auto")
+        ax.set_xlabel("")
+        ax.tick_params(axis="x", labelsize=7, rotation=30)
+        ax.tick_params(axis="y", labelsize="small")
+        ax.yaxis.label.set_alpha(1.0)
+        ax.yaxis.label.set_fontsize("small")
     plt.subplots_adjust(wspace=0.7, hspace=0.6)
     return (plt, lgds)
 
