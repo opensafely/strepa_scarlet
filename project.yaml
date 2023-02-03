@@ -205,17 +205,19 @@ actions:
     needs: [join_measures_rounded]
     outputs:
       moderately_sensitive:
-        measure: output/report/results/*measures*.jpeg
+        measure: output/report/results/*_bar_measures*.jpeg
 
   panel_plots:
     run: >
       python:latest python analysis/report/create_panels.py
       --input-file output/report/results/measure_rounded.csv
+      --practice-file output/report/results/measure_unrounded.csv
       --output-dir output/report/results
-    needs: [join_measures_rounded]
+    needs: [join_measures_rounded, join_measures_unrounded]
     outputs:
       moderately_sensitive:
         measure: output/report/results/*.png
+        deciles_tables: output/report/results/deciles_table*.csv
 
   panel_plots_stacked_medications:
     run: >
@@ -253,51 +255,6 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/results/all_diagnostics_by_year.png
-
-  panel_plots_event_plus_medication_scarlet:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/results/measure_rounded.csv
-      --measures-pattern "event_scarlet_fever_with_medication_any*rate"
-      --output-dir output/report/results
-      --output-name "scarlet_fever_plus_medication_by_subgroup"
-      --scale "rate"
-      --first "event_scarlet_fever_with_medication_any_rate"
-      --exclude-group "Missing"
-    needs: [join_measures_rounded]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/results/scarlet_fever_plus_medication_by_subgroup.png
-
-  panel_plots_event_plus_medication_igas:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/results/measure_rounded.csv
-      --measures-pattern "event_invasive_strep_a_with_medication_any*rate"
-      --output-dir output/report/results
-      --output-name "invasive_strep_a_plus_medication_by_subgroup"
-      --scale "rate"
-      --first "event_invasive_strep_a_with_medication_any_rate"
-      --exclude-group "Missing"
-    needs: [join_measures_rounded]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/results/invasive_strep_a_plus_medication_by_subgroup.png
-
-  panel_plots_event_plus_medication_strp:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/results/measure_rounded.csv
-      --measures-pattern "event_strep_a_sore_throat_with_medication_any*rate"
-      --output-dir output/report/results
-      --output-name "strep_a_sore_throat_plus_medication_by_subgroup"
-      --scale "rate"
-      --first "event_strep_a_sore_throat_with_medication_any_rate"
-      --exclude-group "Missing"
-    needs: [join_measures_rounded]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/results/strep_a_sore_throat_plus_medication_by_subgroup.png
 
   event_counts_report:
     run: >
@@ -410,63 +367,19 @@ actions:
     needs: [join_measures_rounded_weekly]
     outputs:
       moderately_sensitive:
-        measure: output/report/weekly/results/*measures*.jpeg
+        measure: output/report/weekly/results/*_bar_measures*.jpeg
 
   panel_plots_weekly:
     run: >
       python:latest python analysis/report/create_panels.py
       --input-file output/report/weekly/results/measure_rounded_weekly.csv
+      --practice-file output/report/weekly/results/measure_unrounded_weekly.csv
       --output-dir output/report/weekly/results
-    needs: [join_measures_rounded_weekly]
+    needs: [join_measures_rounded_weekly, join_measures_unrounded_weekly]
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/*.png
-
-  panel_plots_event_plus_medication_scarlet_weekly:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/weekly/results/measure_rounded_weekly.csv
-      --measures-pattern "event_scarlet_fever_with_medication_any*rate"
-      --output-dir output/report/weekly/results
-      --output-name "scarlet_fever_plus_medication_by_subgroup"
-      --scale "rate"
-      --first "event_scarlet_fever_with_medication_any_rate"
-      --exclude-group "Missing"
-    needs: [join_measures_rounded_weekly]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/weekly/results/scarlet_fever_plus_medication_by_subgroup.png
-
-  panel_plots_event_plus_medication_igas_weekly:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/weekly/results/measure_rounded_weekly.csv
-      --measures-pattern "event_invasive_strep_a_with_medication_any*rate"
-      --output-dir output/report/weekly/results
-      --output-name "invasive_strep_a_plus_medication_by_subgroup"
-      --scale "rate"
-      --first "event_invasive_strep_a_with_medication_any_rate"
-      --exclude-group "Missing"
-    needs: [join_measures_rounded_weekly]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/weekly/results/invasive_strep_a_plus_medication_by_subgroup.png
-
-  panel_plots_event_plus_medication_strp_weekly:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file output/report/weekly/results/measure_rounded_weekly.csv
-      --measures-pattern "event_strep_a_sore_throat_with_medication_any*rate"
-      --output-dir output/report/weekly/results
-      --output-name "strep_a_sore_throat_plus_medication_by_subgroup"
-      --scale "rate"
-      --first "event_strep_a_sore_throat_with_medication_any_rate"
-      --exclude-group "Missing"
-    needs: [join_measures_rounded_weekly]
-    outputs:
-      moderately_sensitive:
-        measure: output/report/weekly/results/strep_a_sore_throat_plus_medication_by_subgroup.png
-
+        deciles_tables: output/report/weekly/results/deciles_t*.csv
 
   event_counts_report_weekly:
     run: >
@@ -496,9 +409,8 @@ actions:
       top_5_table_report,
       plot_measure_report,
       panel_plots,
-      panel_plots_event_plus_medication_scarlet,
-      panel_plots_event_plus_medication_igas,
-      panel_plots_event_plus_medication_strp
+      panel_plots_stacked_medications,
+      panel_plots_stacked_diagnostics
       ]
     outputs:
       moderately_sensitive:
@@ -508,12 +420,9 @@ actions:
     run: jupyter:latest jupyter nbconvert /workspace/analysis/report/report_weekly.ipynb --execute --to html --output-dir=/workspace/output/report --ExecutePreprocessor.timeout=86400 --no-input
     needs: [
       event_counts_report_weekly,
-      top_5_table_report_weekly, 
+      top_5_table_report_weekly,
       plot_measure_report_weekly,
       panel_plots_weekly,
-      panel_plots_event_plus_medication_scarlet_weekly,
-      panel_plots_event_plus_medication_igas_weekly,
-      panel_plots_event_plus_medication_strp_weekly
       ]
     outputs:
       moderately_sensitive:

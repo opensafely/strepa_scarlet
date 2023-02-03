@@ -7,6 +7,7 @@ import seaborn as sns
 
 from report_utils import (
     coerce_numeric,
+    round_values,
     MEDICATION_TO_CODELIST,
     CLINICAL_TO_CODELIST,
     colour_palette,
@@ -78,17 +79,9 @@ def group_low_values(df, count_column, code_column, threshold):
     return df
 
 
-def round_values(x, base=5):
-    rounded = x
-    if isinstance(x, (int, float)):
-        if np.isnan(x):
-            rounded = np.nan
-        else:
-            rounded = int(base * round(x / base))
-    return rounded
-
-
-def calculate_top_5(events_table, code_df, code_column, term_column, df_code, date_subset=None):
+def calculate_top_5(
+    events_table, code_df, code_column, term_column, df_code, date_subset=None
+):
     """
     Calculates the top 5 codes recorded in the measure table.
     Args:
@@ -102,13 +95,13 @@ def calculate_top_5(events_table, code_df, code_column, term_column, df_code, da
 
     if date_subset:
         events_table = events_table.loc[
-            (events_table["date"] == date_subset),
-            :
+            (events_table["date"] == date_subset), :
         ]
 
     # sum event counts over dates
-    events_table = events_table.groupby(df_code).sum(numeric_only=True).reset_index()
-
+    events_table = (
+        events_table.groupby(df_code).sum(numeric_only=True).reset_index()
+    )
 
     # calculate % makeup of each code
     total_events = events_table["num"].sum()
@@ -129,17 +122,19 @@ def calculate_top_5(events_table, code_df, code_column, term_column, df_code, da
     events_table.loc[events_table[df_code] == "Other", "Description"] = "-"
 
     # Rename the code column to something consistent
-    events_table.rename(columns={df_code: "Code", "num": "Count"}, inplace=True)
+    events_table.rename(
+        columns={df_code: "Code", "num": "Count"}, inplace=True
+    )
 
-    
     events_table = events_table.loc[
         :, ["Code", "Description", "Count", "Proportion of codes (%)"]
     ]
 
     # sort by count
     events_table = events_table.sort_values("Count", ascending=False)
-    
+
     return events_table
+
 
 def create_top_5_code_table(
     df,
@@ -177,23 +172,29 @@ def create_top_5_code_table(
     # sum event counts over patients
     first_date_period = df["date"].min()
     last_date_period = df["date"].max()
-    event_counts = group_low_values(
-        df, "num", df_code, low_count_threshold
-    )
+    event_counts = group_low_values(df, "num", df_code, low_count_threshold)
     # round
     event_counts["num"] = event_counts["num"].apply(
         lambda x: round_values(x, rounding_base)
     )
-    
-    
+
     top_5_first_date_period = calculate_top_5(
-        event_counts, code_df, code_column, term_column, df_code, first_date_period
+        event_counts,
+        code_df,
+        code_column,
+        term_column,
+        df_code,
+        first_date_period,
     ).head(nrows)
 
     top_5_last_date_period = calculate_top_5(
-        event_counts, code_df, code_column, term_column, df_code, last_date_period
+        event_counts,
+        code_df,
+        code_column,
+        term_column,
+        df_code,
+        last_date_period,
     ).head(nrows)
-
 
     top_5_whole_period = calculate_top_5(
         event_counts, code_df, code_column, term_column, df_code
@@ -202,33 +203,35 @@ def create_top_5_code_table(
     # return top n rows
     return top_5_first_date_period, top_5_last_date_period, top_5_whole_period
 
+
 def get_proportion_of_events(df, code, date):
-        """
-        Calculates the proportion of events for a given code on a given date.
-        Args:
-            df: A measure table.
-            code: The code to calculate the proportion for.
-            date: The date to calculate the proportion for.
-        Returns:
-            A dictionary containing the date, code and proportion.
-        """
-        total_events = df.loc[df["date"] == date, "num"].sum()
-        code_events = df.loc[
-            (df["date"] == date) & (df["code"] == code), "num"
-        ].sum()
-        row = {
-            "date": date,
-            "code": code,
-        }
-        if total_events == 0:
-            row["proportion"] = 0
-        else:
-            row["proportion"] = (code_events / total_events) * 100
-            row["count"] = code_events
+    """
+    Calculates the proportion of events for a given code on a given date.
+    Args:
+        df: A measure table.
+        code: The code to calculate the proportion for.
+        date: The date to calculate the proportion for.
+    Returns:
+        A dictionary containing the date, code and proportion.
+    """
+    total_events = df.loc[df["date"] == date, "num"].sum()
+    code_events = df.loc[
+        (df["date"] == date) & (df["code"] == code), "num"
+    ].sum()
+    row = {
+        "date": date,
+        "code": code,
+    }
+    if total_events == 0:
+        row["proportion"] = 0
+    else:
+        row["proportion"] = (code_events / total_events) * 100
+        row["count"] = code_events
 
-        return row
+    return row
 
-def plot_top_codes_over_time(code_df, top_codes,measure, output_dir):
+
+def plot_top_codes_over_time(code_df, top_codes, measure, output_dir):
     """
     Plots the top 5 codes over time for each measure.
     Args:
@@ -236,7 +239,7 @@ def plot_top_codes_over_time(code_df, top_codes,measure, output_dir):
         top_codes:A dictionary of the top codes for each measure with corresponding descriptions.
         measure: The measure ID.
         output_dir: The directory to save the plot to.
-    
+
     """
 
     # Create a new dataframe with the proportion of events for each code on each date.
@@ -252,10 +255,8 @@ def plot_top_codes_over_time(code_df, top_codes,measure, output_dir):
                     ]
                 ),
             ]
-        
-            )
-        
-    
+        )
+
     plt.figure(figsize=(10, 6))
     # seaborn styling
     sns.set_style("darkgrid")
@@ -267,19 +268,13 @@ def plot_top_codes_over_time(code_df, top_codes,measure, output_dir):
 
     # Plot the proportion of events for each code on each date. Plots should be on the same graph.
     for code, description in top_codes.items():
-    
-        code_proportions.loc[
-            code_proportions["code"] == code, :
-        ].plot(
-            x="date", 
-            y="proportion",
-            label=description,
-            ax=plt.gca()
+
+        code_proportions.loc[code_proportions["code"] == code, :].plot(
+            x="date", y="proportion", label=description, ax=plt.gca()
         )
 
     # legend outside of plot - top right
     plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
-    
 
     plt.savefig(
         output_dir / f"{measure}_top_5_codes_over_time.png",
@@ -306,7 +301,7 @@ def main():
         measure = f"event_code_{key}_rate"
         codelist = pd.read_csv(codelist, dtype="str")
         code_df = measure_table[measure_table["name"] == measure]
- 
+
         code_column = "code"
         if "bnf_code" in codelist.columns and "dmd_name" in codelist.columns:
             term_column = "dmd_name"
@@ -315,25 +310,33 @@ def main():
             )
             code_df = code_df.set_index("bnf_code")
             codelist = (
-                codelist.groupby("bnf_code")[["dmd_name"]].first().reset_index()
+                codelist.groupby("bnf_code")[["dmd_name"]]
+                .first()
+                .reset_index()
             )
             codelist = codelist.rename(columns={"bnf_code": "code"})
             code_df = (
-                code_df.groupby(["bnf_code", "date"])[["numerator"]].sum().reset_index()
+                code_df.groupby(["bnf_code", "date"])[["numerator"]]
+                .sum()
+                .reset_index()
             )
         else:
-            
-           
+
             term_column = "term"
             code_df = (
-                code_df.groupby(["group", "date"])[["numerator"]].sum().reset_index()
+                code_df.groupby(["group", "date"])[["numerator"]]
+                .sum()
+                .reset_index()
             )
 
-       
         # drop all columns except code and numerator
         code_df.columns = ["code", "date", "num"]
 
-        top_5_code_table_first, top_5_code_table_last, top_5_code_table = create_top_5_code_table(
+        (
+            top_5_code_table_first,
+            top_5_code_table_last,
+            top_5_code_table,
+        ) = create_top_5_code_table(
             df=code_df,
             code_df=codelist,
             code_column=code_column,
@@ -347,17 +350,16 @@ def main():
         )
 
         # find the top codes across the first and last date periods
-        top_codes = list(set(top_5_code_table_first["Code"]).union(
-            set(top_5_code_table_last["Code"])
-        ))
+        top_codes = list(
+            set(top_5_code_table_first["Code"]).union(
+                set(top_5_code_table_last["Code"])
+            )
+        )
 
         top_codes_dict = {
-            i: codelist[codelist[code_column] == i][
-            term_column
-        ].values[0] for i in top_codes
+            i: codelist[codelist[code_column] == i][term_column].values[0]
+            for i in top_codes
         }
-
-        
 
         # plot the top codes over time
         plot_top_codes_over_time(
@@ -366,7 +368,6 @@ def main():
             measure=measure,
             output_dir=output_dir,
         )
-
 
 
 def parse_args():
