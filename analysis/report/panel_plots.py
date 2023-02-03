@@ -103,18 +103,21 @@ def reorder_labels(labels):
     Assuming a dash implies a range, sort the list by the max number
     contained in each string
     Strings with no numbers will be sorted last
+    Keep the handle/label paired together, but once reordered return two lists
     """
     max_val = {}
-    if any("-" in label for label in labels):
-        for label in labels:
+    if any("-" in label for handle, label in labels):
+        for handle, label in labels:
             matches = re.findall(r"\d+", label)
             if matches:
                 highest = max([int(m) for m in matches])
             else:
                 highest = math.inf
-            max_val[label] = highest
-        return dict(sorted(max_val.items(), key=operator.itemgetter(1))).keys()
-    return labels
+            max_val[(handle, label)] = highest
+        return zip(
+            *dict(sorted(max_val.items(), key=operator.itemgetter(1))).keys()
+        )
+    return zip(*labels)
 
 
 def write_deciles_table(measure_table, output_dir, filename):
@@ -201,11 +204,11 @@ def plot_axis(
         if ci:
             plot_cis(ax, plot_group_data)
     # NOTE: Use the last group_by, which will be "year" for stack_years
-    labels = reorder_labels(list(numeric[group_by[-1]].astype(str).unique()))
-    ax.legend(
-        labels,
-        **lgd_params,
+    handles, labels = ax.get_legend_handles_labels()
+    handles_reordered, labels_reordered = reorder_labels(
+        list(zip(handles, labels))
     )
+    ax.legend(handles_reordered, labels_reordered, **lgd_params)
     if date_lines:
         min_date = min(panel_group_data.index)
         max_date = max(panel_group_data.index)
