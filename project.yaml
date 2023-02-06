@@ -301,6 +301,16 @@ actions:
       highly_sensitive:
         cohort: output/report/weekly/input*.csv.gz
 
+  generate_study_population_report_weekly_3:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_report_weekly
+      --index-date-range "2023-01-26 to 2023-02-01 by week"
+      --output-dir=output/report/weekly
+      --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/report/weekly/inpu*.csv.gz
+
   join_cohorts_report_weekly:
     run: >
       python:latest python analysis/cohort_joiner.py
@@ -319,15 +329,24 @@ actions:
       moderately_sensitive:
         measure_csv: output/report/weekly/joined/measure_event_*_rate.csv
 
+  generate_measures_report_weekly_1:
+    run: cohortextractor:latest generate_measures --study-definition study_definition_report_weekly --output-dir=output/report/weekly
+    needs: [generate_study_population_report_weekly_3]
+    outputs:
+      moderately_sensitive:
+        measure_csv: output/report/weekly/measure_event_*_rate.csv
 
   join_measures_rounded_weekly:
       run: python:latest python analysis/join_and_round.py
            --input-files output/report/weekly/joined/measure_*_rate.csv
+           --input-files output/report/weekly/measure_*_rate.csv
            --exclude-files output/report/weekly/joined/measure_*practice*_rate.csv
            --exclude-files output/report/weekly/joined/measure_event_code*_rate.csv
+           --exclude-files output/report/weekly/measure_*practice*_rate.csv
+           --exclude-files output/report/weekly/measure_event_code*_rate.csv
            --output-dir output/report/weekly/results
            --output-name "measure_rounded_weekly.csv"
-      needs: [generate_measures_report_weekly]
+      needs: [generate_measures_report_weekly, generate_measures_report_weekly_1]
       outputs:
         moderately_sensitive:
           # Only output the single summary file
@@ -337,11 +356,13 @@ actions:
       run: python:latest python analysis/join_and_round.py
            --input-files output/report/weekly/joined/measure_*practice*_rate.csv
            --input-files output/report/weekly/joined/measure_event_code*_rate.csv
+           --input-files output/report/weekly/measure_*practice*_rate.csv
+           --input-files output/report/weekly/measure_event_code*_rate.csv
            --output-dir output/report/weekly/results
            --output-name "measure_unrounded_weekly.csv"
            --allow-practice
            --skip-round
-      needs: [generate_measures_report_weekly]
+      needs: [generate_measures_report_weekly, generate_measures_report_weekly_1]
       outputs:
         moderately_sensitive:
           # Only output the single summary file
