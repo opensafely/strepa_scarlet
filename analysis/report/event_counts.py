@@ -30,6 +30,7 @@ def get_column_sum(df, column):
 def main():
     args = parse_args()
     measures = args.measures_list
+    args.output_dir.mkdir(parents=True, exist_ok=True)
     measures = [measure.strip() for measure in measures]
 
     for measure in measures:
