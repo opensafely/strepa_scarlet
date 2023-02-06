@@ -23,10 +23,14 @@ def _reshape_data(measure_table):
         raise (
             AssertionError("This script only supports one group_by category")
         )
-    if measure_table.date[0] != measure_table.date[1]:
+    if (
+        len(measure_table.date) == 1
+        or measure_table.date[0] != measure_table.date[1]
+    ):
         # if sequential rows have different dates, then an individual date's
         # data has not been subdivided by category, and we can assume that
         # group_by = "population"
+        # This is also true if there is only one time period and one category
         # Therefore, the numerator and denominator will be the first columns
         numerator = measure_table.columns[0]
         denominator = measure_table.columns[1]

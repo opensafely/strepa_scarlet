@@ -36,7 +36,7 @@ def parse_args():
 
 def get_pattern_and_list(key, column_to_plot, first):
     if column_to_plot == "value":
-        demographics = ["age_band", "imd", "ethnicity", "region", "practice"]
+        demographics = ["age_band", "imd", "region", "practice"]
         return (
             None,
             [first] + [f"event_{key}_{d}_rate" for d in demographics],
@@ -45,10 +45,7 @@ def get_pattern_and_list(key, column_to_plot, first):
         return (
             None,
             [first]
-            + [
-                f"event_{key}_{d}_rate"
-                for d in ["age_band", "region"]
-            ],
+            + [f"event_{key}_{d}_rate" for d in ["age_band", "region"]],
         )
 
 
