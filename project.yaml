@@ -386,6 +386,7 @@ actions:
       python:latest python analysis/report/event_counts.py
       --input-dir="output/report/weekly/joined/"
       --output-dir="output/report/weekly/results"
+      --latest-period-only
       --measures-list="amoxicillin"
       --measures-list="azithromycin"
       --measures-list="clarithromycin"
