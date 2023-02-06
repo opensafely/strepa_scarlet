@@ -9,7 +9,7 @@ from collections import Counter
 from pathlib import Path
 from IPython.display import display, HTML, Image
 
-colour_palette = sns.color_palette("Set3", 12)
+colour_palette = sns.color_palette("Paired", 12)
 
 MEDICATION_TO_CODELIST = {
     "amoxicillin": "codelists/opensafely-amoxicillin-oral.csv",
