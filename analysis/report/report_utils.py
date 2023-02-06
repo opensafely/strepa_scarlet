@@ -37,7 +37,7 @@ def save_to_json(d, filename: str):
 
 def match_input_files(file: str) -> bool:
     """Checks if file name has format outputted by cohort extractor"""
-    pattern = r"^input_report_20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])\.csv.gz"
+    pattern = r"^input_report_([a-zA-Z]+\_)*20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])\.csv.gz"
     return True if re.match(pattern, file) else False
 
 
@@ -83,14 +83,14 @@ def plot_measures(
 
     plt.figure(figsize=(18, 8))
     sns.set_style("darkgrid")
-    
+
     plt.rcParams["axes.prop_cycle"] = plt.cycler(color=colour_palette)
 
     # NOTE: finite filter for dummy data
     y_max = df[numpy.isfinite(df[column_to_plot])][column_to_plot].max() * 1.05
     # Ignore timestamp - this could be done at load time
     df_copy["date"] = df_copy["date"].dt.date
-    
+
     df_copy = df_copy.set_index("date")
     if category:
         # Set up category to have clean labels
@@ -117,8 +117,8 @@ def plot_measures(
             df_copy[column_to_plot].plot(legend=False)
 
     if as_bar:
-    # Matplotlib treats bar labels as necessary categories
-    # So we force it to use only every third label
+        # Matplotlib treats bar labels as necessary categories
+        # So we force it to use only every third label
         labels = ax.get_xticklabels()
         if len(labels) > 30:
             skipped_labels = [
@@ -128,14 +128,10 @@ def plot_measures(
             skipped_labels = labels
         ax.set_xticklabels(skipped_labels)
 
-
     plt.ylabel(y_label)
     plt.xlabel("Date")
     plt.xticks(rotation="vertical")
     plt.xticks(fontsize=8)
-
-
-    
 
     plt.ylim(
         bottom=0,
