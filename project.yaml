@@ -405,7 +405,7 @@ actions:
   event_counts_report_weekly:
     run: >
       python:latest python analysis/report/event_counts.py
-      --input-dir="output/report/weekly/joined/"
+      --input-dir="output/report/weekly/"
       --output-dir="output/report/weekly/results"
       --latest-period-only
       --measures-list="amoxicillin"
@@ -419,7 +419,7 @@ actions:
       --measures-list="scarlet_fever"
       --measures-list="strep_a_sore_throat"
       --measures-list="invasive_strep_a"
-    needs: [join_cohorts_report_weekly]
+    needs: [generate_study_population_report_weekly_3]
     outputs:
       moderately_sensitive:
         measure: output/report/weekly/results/event_counts_*.json
