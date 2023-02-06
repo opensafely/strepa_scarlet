@@ -264,13 +264,13 @@ def plot_top_codes_over_time(code_df, top_codes, measure, output_dir):
         color=colour_palette
     )
     plt.xlabel("Date")
-    plt.ylabel("Proportion of codes (%)")
+    plt.ylabel("Count of codes")
 
     # Plot the proportion of events for each code on each date. Plots should be on the same graph.
     for code, description in top_codes.items():
 
         code_proportions.loc[code_proportions["code"] == code, :].plot(
-            x="date", y="proportion", label=description, ax=plt.gca()
+            x="date", y="count", label=description, ax=plt.gca()
         )
 
     # legend outside of plot - top right
