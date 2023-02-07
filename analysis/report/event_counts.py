@@ -7,8 +7,8 @@ import argparse
 import numpy as np
 
 
-def round_to_nearest_100(x):
-    return int(round(x, -2))
+def round_to_nearest_10(x):
+    return int(round(x, -1))
 
 
 def parse_args():
@@ -62,7 +62,7 @@ def main():
             ][0]
 
             df = pd.read_csv(latest_file)
-            num_events = round_to_nearest_100(
+            num_events = round_to_nearest_10(
                 int(get_column_sum(df, f"event_{measure}"))
             )
 
@@ -90,9 +90,9 @@ def main():
                     )
                     patients.extend(unique_patients)
 
-            total_events = round_to_nearest_100(sum(events.values()))
-            total_patients = round_to_nearest_100(len(np.unique(patients)))
-            events_in_latest_period = round_to_nearest_100(
+            total_events = round_to_nearest_10(sum(events.values()))
+            total_patients = round_to_nearest_10(len(np.unique(patients)))
+            events_in_latest_period = round_to_nearest_10(
                 events[max(events.keys())]
             )
 
