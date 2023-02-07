@@ -1,4 +1,5 @@
-# load each input file and count the number of unique patients and number of events
+""" Load each input file and count the number of unique patients and number of
+events"""
 from pathlib import Path
 from report_utils import match_input_files, get_date_input_file, save_to_json
 import pandas as pd
@@ -6,16 +7,25 @@ import argparse
 import numpy as np
 
 
-def round_to_nearest_100(x):
-    return int(round(x, -2))
+def round_to_nearest_10(x):
+    return int(round(x, -1))
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument("--measures-list", required=True, action="append", help="A list of one or more measure names")
-    parser.add_argument("--latest-period-only", action="store_true", help="Only include events in the latest period (default: False)")
+    parser.add_argument(
+        "--measures-list",
+        required=True,
+        action="append",
+        help="A list of one or more measure names",
+    )
+    parser.add_argument(
+        "--latest-period-only",
+        action="store_true",
+        help="Only include events in the latest period (default: False)",
+    )
     return parser.parse_args()
 
 
@@ -37,20 +47,32 @@ def main():
 
         if args.latest_period_only:
             # find the latest period
-            latest_period = max([get_date_input_file(file.name) for file in args.input_dir.iterdir() if match_input_files(file.name)])
-            latest_file = [file for file in args.input_dir.iterdir() if match_input_files(file.name) and get_date_input_file(file.name) == latest_period][0]
-            
+            latest_period = max(
+                [
+                    get_date_input_file(file.name)
+                    for file in args.input_dir.iterdir()
+                    if match_input_files(file.name)
+                ]
+            )
+            latest_file = [
+                file
+                for file in args.input_dir.iterdir()
+                if match_input_files(file.name)
+                and get_date_input_file(file.name) == latest_period
+            ][0]
+
             df = pd.read_csv(latest_file)
-            num_events = int(get_column_sum(df, f"event_{measure}"))
-           
+            num_events = round_to_nearest_10(
+                int(get_column_sum(df, f"event_{measure}"))
+            )
+
             save_to_json(
                 {
-                    
                     "events_in_latest_period": num_events,
                 },
                 args.output_dir / f"event_counts_{measure}.json",
             )
-        
+
         else:
 
             patients = []
@@ -63,12 +85,14 @@ def main():
                     df["date"] = date
                     num_events = get_column_sum(df, f"event_{measure}")
                     events[date] = num_events
-                    unique_patients = get_column_uniques(df.loc[df[f"event_{measure}"]==1,:], "patient_id")
+                    unique_patients = get_column_uniques(
+                        df.loc[df[f"event_{measure}"] == 1, :], "patient_id"
+                    )
                     patients.extend(unique_patients)
 
-            total_events = round_to_nearest_100(sum(events.values()))
-            total_patients = round_to_nearest_100(len(np.unique(patients)))
-            events_in_latest_period = round_to_nearest_100(
+            total_events = round_to_nearest_10(sum(events.values()))
+            total_patients = round_to_nearest_10(len(np.unique(patients)))
+            events_in_latest_period = round_to_nearest_10(
                 events[max(events.keys())]
             )
 
