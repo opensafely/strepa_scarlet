@@ -41,7 +41,7 @@ def main():
             latest_file = [file for file in args.input_dir.iterdir() if match_input_files(file.name) and get_date_input_file(file.name) == latest_period][0]
             
             df = pd.read_csv(latest_file)
-            num_events = int(get_column_sum(df, f"event_{measure}"))
+            num_events = round_to_nearest_100(int(get_column_sum(df, f"event_{measure}")))
            
             save_to_json(
                 {
