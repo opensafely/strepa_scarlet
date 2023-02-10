@@ -3,6 +3,7 @@ from cohortextractor import (
     patients,
     Measure,
     params,
+    combine_codelists,
 )
 
 from codelists import (
@@ -42,6 +43,11 @@ clinical_event_codelists = {
     "strep_a_sore_throat": strep_a_sore_throat_codes,
 }
 
+all_medication_codes = combine_codelists(*list(medication_codelists.values()))
+all_clinical_codes = combine_codelists(
+    *list(clinical_event_codelists.values())
+)
+
 
 frequency = params.get("frequency", None)
 if frequency == "weekly":
@@ -73,48 +79,6 @@ def generate_all_clinical():
                 )
             )
         ),
-    }
-    logging.info(json.dumps(var, indent=4))
-    return var
-
-
-def generate_all_medications_2_weeks():
-    # For each clinical event, create a new variable for any medication
-    # This is for proportion of clinical events with medication
-    # Likely most useful for the strep codelist, which is sensitive
-    var = {
-        f"{clinical_key}_with_medication_any": patients.satisfying(
-            " OR ".join(
-                list(
-                    map(
-                        lambda medication_key: f"event_{clinical_key}_with_{medication_key}",
-                        medication_codelists.keys(),
-                    )
-                )
-            )
-        )
-        for clinical_key in clinical_event_codelists.keys()
-    }
-    logging.info(json.dumps(var, indent=4))
-    return var
-
-
-def generate_all_clinical_2_weeks():
-    # For each medication, create a new variable for any clinical event
-    # This is for proportion of medications with a strepa/scarlet indication
-    # Likely most useful for medications other than pheno, with other indications
-    var = {
-        f"{medication_key}_with_clinical_any": patients.satisfying(
-            " OR ".join(
-                list(
-                    map(
-                        lambda clinical_key: f"event_{medication_key}_with_{clinical_key}",
-                        clinical_event_codelists.keys(),
-                    )
-                )
-            )
-        )
-        for medication_key in medication_codelists.keys()
     }
     logging.info(json.dumps(var, indent=4))
     return var
@@ -244,15 +208,14 @@ clinical_events = [
         # Clinical with medication for (medication + clinical)/clinical
         # Clinical falls within the timeframe
         **{
-            f"event_{clinical_key}_with_{medication_key}": patients.with_these_medications(
-                codelist=medication_codelist,
+            f"{clinical_key}_with_medication_any": patients.with_these_medications(
+                codelist=all_medication_codes,
                 between=[
-                    f"event_{clinical_key}_date - 7 days",
-                    f"event_{clinical_key}_date + 14 days",
+                    f"event_{clinical_key}_date",
+                    f"event_{clinical_key}_date",
                 ],
                 returning="binary_flag",
             )
-            for medication_key, medication_codelist in medication_codelists.items()
         },
     }
     for clinical_key, clinical_codelist in clinical_event_codelists.items()
@@ -283,15 +246,14 @@ medication_events = [
         # Medication with clinical for (medication + clinical)/medication
         # Medication falls within the timeframe
         **{
-            f"event_{medication_key}_with_{clinical_key}": patients.with_these_clinical_events(
-                codelist=clinical_codelist,
+            f"{medication_key}_with_clinical_any": patients.with_these_clinical_events(
+                codelist=all_clinical_codes,
                 between=[
-                    f"event_{medication_key}_date - 7 days",
-                    f"event_{medication_key}_date + 14 days",
+                    f"event_{medication_key}_date",
+                    f"event_{medication_key}_date",
                 ],
                 returning="binary_flag",
             )
-            for clinical_key, clinical_codelist in clinical_event_codelists.items()
         },
     }
     for medication_key, medication_codelist in medication_codelists.items()
@@ -340,15 +302,14 @@ study = StudyDefinition(
     **medication_variables,
     **generate_all_medications(),
     **generate_all_clinical(),
-    **generate_all_medications_2_weeks(),
-    **generate_all_clinical_2_weeks(),
 )
 
 # Ethnicity isn't in the demographics dict because it's extracted in a separate
 # study definition. We add it here because we want to calculate a measure using
 # it. We only care about the key.
 
-demographics["ethnicity"] = ""
+# TODO: Remove for now while we determine runtime
+# demographics["ethnicity"] = ""
 
 measures = []
 # add measure for each codelist

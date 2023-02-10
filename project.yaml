@@ -41,6 +41,7 @@ actions:
       --param frequency=weekly
       --output-dir=output/curation
       --output-format=csv.gz
+      --skip-existing
     outputs:
       highly_sensitive:
         cohort: output/curation/input_report_2022-07-01.csv.gz
@@ -55,6 +56,13 @@ actions:
         moderately_sensitive:
           # Only output the single summary file
           cohort_report: output/curation/input_report_2022-07-01.html
+
+  curation_measures_weekly:
+    run: cohortextractor:latest generate_measures --study-definition study_definition_report --output-dir=output/curation --skip-existing
+    needs: [curation_weekly]
+    outputs:
+      moderately_sensitive:
+        measure_csv: output/curation/measure_event_*_rate.csv
 
   curation_diagnostics:
     run: cohortextractor:latest generate_cohort
