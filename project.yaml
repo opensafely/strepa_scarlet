@@ -44,7 +44,7 @@ actions:
       --skip-existing
     outputs:
       highly_sensitive:
-        cohort: output/curation/input_report_2022-07-01.csv.gz
+        cohort: output/curation/input_report_2022-07*.csv.gz
 
   dataset_report_weekly:
       run: python:latest python analysis/dataset_report.py
