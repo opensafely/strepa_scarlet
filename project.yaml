@@ -37,14 +37,14 @@ actions:
   curation_weekly:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_report
-      --index-date-range "2022-07-01 to 2022-07-01 by week"
+      --index-date-range "2022-07-01 to 2022-07-28 by week"
       --param frequency=weekly
       --output-dir=output/curation
       --output-format=csv.gz
       --skip-existing
     outputs:
       highly_sensitive:
-        cohort: output/curation/input_report_2022-07-01.csv.gz
+        cohort: output/curation/input_report_2022-07*.csv.gz
 
   dataset_report_weekly:
       run: python:latest python analysis/dataset_report.py
