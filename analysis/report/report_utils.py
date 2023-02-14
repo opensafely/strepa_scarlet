@@ -1,7 +1,7 @@
 import re
 import json
 import pandas as pd
-import numpy
+import numpy as np
 import fnmatch
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -52,13 +52,30 @@ def get_date_input_file(file: str) -> str:
         return date.group(1)
 
 
-def round_values(x, base=5):
-    rounded = x
+def round_values(x, base=5, redact=False, redaction_threshold=5):
+    """
+    Rounds values to nearest multiple of base.  If redact is True, values less than or equal to
+    redaction_threshold are converted to np.nan.
+    Args:
+        x: Value to round
+        base: Base to round to
+        redact: Boolean indicating if values less than redaction_threshold should be
+        redacted
+        redaction_threshold: Threshold for redaction
+        Returns:
+            Rounded value
+    """
+
     if isinstance(x, (int, float)):
-        if numpy.isnan(x):
-            rounded = numpy.nan
+        if np.isnan(x):
+            rounded = np.nan
+
         else:
-            rounded = int(base * round(x / base))
+            if redact and x <= redaction_threshold:
+                rounded = np.nan
+            
+            else:
+                rounded = int(base * round(x / base))
     return rounded
 
 
@@ -87,7 +104,7 @@ def plot_measures(
     plt.rcParams["axes.prop_cycle"] = plt.cycler(color=colour_palette)
 
     # NOTE: finite filter for dummy data
-    y_max = df[numpy.isfinite(df[column_to_plot])][column_to_plot].max() * 1.05
+    y_max = df[np.isfinite(df[column_to_plot])][column_to_plot].max() * 1.05
     # Ignore timestamp - this could be done at load time
     df_copy["date"] = df_copy["date"].dt.date
 
@@ -182,7 +199,7 @@ def drop_zero_denominator_rows(measure_table):
     # It's non-trivial to identify the denominator column without the associated Measure
     # instance. It's much easier to test the value column for inf, which is returned by
     # Pandas when the second argument of a division operation is zero.
-    is_not_inf = measure_table["value"] != numpy.inf
+    is_not_inf = measure_table["value"] != np.inf
     num_is_inf = len(is_not_inf) - is_not_inf.sum()
     return measure_table[is_not_inf].reset_index(drop=True)
 
@@ -194,7 +211,7 @@ def filename_to_title(filename):
 def autoselect_labels(measures_list):
     measures_set = set(measures_list)
     counts = Counter(
-        numpy.concatenate([item.split("_") for item in measures_set])
+        np.concatenate([item.split("_") for item in measures_set])
     )
     remove = [k for k, v in counts.items() if v == len(measures_set)]
     return remove
@@ -297,3 +314,5 @@ def display_top_5(file, dir=RESULTS_DIR):
     df = pd.read_csv(f"{dir}/{file}")
     df["Count"] = df["Count"].apply(lambda x: "{:,}".format(x))
     display(HTML(df.to_html(index=False)))
+
+
