@@ -264,26 +264,38 @@ actions:
       moderately_sensitive:
         measure: output/report/results/all_diagnostics_by_year.png
 
-  event_counts_report:
+  event_counts_medication:
     run: >
-      python:latest python analysis/report/event_counts.py
-      --input-dir="output/report/joined/"
-      --output-dir="output/report/results"
-      --measures-list="amoxicillin"
-      --measures-list="azithromycin"
-      --measures-list="clarithromycin"
-      --measures-list="erythromycin"
-      --measures-list="phenoxymethylpenicillin"
-      --measures-list="flucloxacillin"
-      --measures-list="cefalexin"
-      --measures-list="co_amoxiclav"
-      --measures-list="scarlet_fever"
-      --measures-list="strep_a_sore_throat"
-      --measures-list="invasive_strep_a"
-    needs: [join_cohorts_report]
+      python:latest python analysis/report/tables.py
+      --input-file output/report/results/measure_rounded.csv
+      --output-dir output/report/results
+      --output-name "event_counts_medication.csv"
+      --measures-list "event_amoxicillin_rate"
+      --measures-list "event_azithromycin_rate"
+      --measures-list "event_clarithromycin_rate"
+      --measures-list "event_erythromycin_rate"
+      --measures-list "event_phenoxymethylpenicillin_rate"
+      --measures-list "event_flucloxacillin_rate"
+      --measures-list "event_cefalexin_rate"
+      --measures-list "event_co_amoxiclav_rate"
+    needs: [join_measures_rounded]
     outputs:
       moderately_sensitive:
-        measure: output/report/results/event_counts_*.json
+        measure: output/report/results/event_counts_medication.csv
+
+  event_counts_clinical:
+    run: >
+      python:latest python analysis/report/tables.py
+      --input-file output/report/results/measure_rounded.csv
+      --output-dir output/report/results
+      --output-name "event_counts_clinical.csv"
+      --measures-list "event_scarlet_fever_rate"
+      --measures-list "event_strep_a_sore_throat_rate"
+      --measures-list "event_invasive_strep_a_rate"
+    needs: [join_measures_rounded]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/event_counts_clinical.csv
 
 
 ### WEEKLY ###
@@ -410,32 +422,44 @@ actions:
         measure: output/report/weekly/results/*.png
         deciles_tables: output/report/weekly/results/deciles_t*.csv
 
-  event_counts_report_weekly:
+  event_counts_medication_weekly:
     run: >
-      python:latest python analysis/report/event_counts.py
-      --input-dir="output/report/weekly/"
-      --output-dir="output/report/weekly/results"
-      --latest-period-only
-      --measures-list="amoxicillin"
-      --measures-list="azithromycin"
-      --measures-list="clarithromycin"
-      --measures-list="erythromycin"
-      --measures-list="phenoxymethylpenicillin"
-      --measures-list="flucloxacillin"
-      --measures-list="cefalexin"
-      --measures-list="co_amoxiclav"
-      --measures-list="scarlet_fever"
-      --measures-list="strep_a_sore_throat"
-      --measures-list="invasive_strep_a"
-    needs: [generate_study_population_report_weekly_3]
+      python:latest python analysis/report/tables.py
+      --input-file output/report/weekly/results/measure_rounded_weekly.csv
+      --output-dir output/report/weekly/results
+      --output-name "event_counts_medication.csv"
+      --measures-list "event_amoxicillin_rate"
+      --measures-list "event_azithromycin_rate"
+      --measures-list "event_clarithromycin_rate"
+      --measures-list "event_erythromycin_rate"
+      --measures-list "event_phenoxymethylpenicillin_rate"
+      --measures-list "event_flucloxacillin_rate"
+      --measures-list "event_cefalexin_rate"
+      --measures-list "event_co_amoxiclav_rate"
+    needs: [join_measures_rounded_weekly]
     outputs:
       moderately_sensitive:
-        measure: output/report/weekly/results/event_counts_*.json
+        measure: output/report/weekly/results/event_counts_medication.csv
+
+  event_counts_clinical_weekly:
+    run: >
+      python:latest python analysis/report/tables.py
+      --input-file output/report/weekly/results/measure_rounded_weekly.csv
+      --output-dir output/report/weekly/results
+      --output-name "event_counts_clinical.csv"
+      --measures-list "event_scarlet_fever_rate"
+      --measures-list "event_strep_a_sore_throat_rate"
+      --measures-list "event_invasive_strep_a_rate"
+    needs: [join_measures_rounded_weekly]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/weekly/results/event_counts_clinical.csv
 
   generate_notebook:
     run: jupyter:latest jupyter nbconvert /workspace/analysis/report/report.ipynb --execute --to html --output-dir=/workspace/output/report --ExecutePreprocessor.timeout=86400 --no-input
     needs: [
-      event_counts_report,
+      event_counts_medication,
+      event_counts_clinical,
       top_5_table_report,
       plot_measure_report,
       panel_plots,
@@ -449,7 +473,8 @@ actions:
   generate_notebook_weekly:
     run: jupyter:latest jupyter nbconvert /workspace/analysis/report/report_weekly.ipynb --execute --to html --output-dir=/workspace/output/report --ExecutePreprocessor.timeout=86400 --no-input
     needs: [
-      event_counts_report_weekly,
+      event_counts_medication_weekly,
+      event_counts_clinical_weekly,
       top_5_table_report_weekly,
       plot_measure_report_weekly,
       panel_plots_weekly,
