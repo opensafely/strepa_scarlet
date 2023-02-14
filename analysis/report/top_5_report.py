@@ -331,7 +331,7 @@ def main():
 
         # drop all columns except code and numerator
         code_df.columns = ["code", "date", "num"]
-
+        
         (
             top_5_code_table_first,
             top_5_code_table_last,
@@ -361,6 +361,11 @@ def main():
             for i in top_codes
         }
 
+
+        code_df["num"] = code_df["num"].apply(
+            lambda x: round_values(x, base=5, redact=True, redaction_threshold=5)
+        )
+        
         # plot the top codes over time
         plot_top_codes_over_time(
             code_df=code_df,
