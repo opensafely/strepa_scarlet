@@ -9,6 +9,10 @@ from report_utils import (
 
 
 def count_table(measure_table):
+    # TODO: TEMP FIX FOR STREP A SORE THROAT
+    measure_table["name"] = measure_table["name"].replace(
+        {"event_strep_a_sore_throat_rate": "event_sore_throat_tonsillitis_rate"}
+    )
     # Translate name column
     repeated = autoselect_labels(measure_table["name"])
     measure_table["name"] = measure_table["name"].apply(

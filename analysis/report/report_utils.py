@@ -93,6 +93,10 @@ def plot_measures(
 
     df_copy = df_copy.set_index("date")
     if category:
+        # TODO: TEMP FIX FOR STREP A SORE THROAT
+        df_copy[category] = df_copy[category].replace(
+            {"event_strep_a_sore_throat_rate": "event_sore_throat_tonsillitis_rate"}
+        )
         # Set up category to have clean labels
         repeated = autoselect_labels(df_copy[category])
         df_copy[category] = df_copy.apply(

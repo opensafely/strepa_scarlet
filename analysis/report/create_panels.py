@@ -102,7 +102,11 @@ def panels_loop(measure_table, output_dir):
             exclude_group="Missing",
             output_dir=output_dir,
         )
-        output_name = f"{key}_by_subgroup"
+        # TODO: TEMP FIX FOR STREP A SORE THROAT
+        title = key
+        if key == "strep_a_sore_throat":
+            title = "sore_throat_tonsillitis"
+        output_name = f"{title}_by_subgroup"
         plot_title = filename_to_title(output_name)
         write_group_chart(chart, lgds, output_dir / output_name, plot_title)
         chart.close()
@@ -124,7 +128,7 @@ def panels_loop(measure_table, output_dir):
             exclude_group="Missing",
             output_dir=output_dir,
         )
-        output_name_count = f"{key}_by_subgroup_count"
+        output_name_count = f"{title}_by_subgroup_count"
         plot_title_count = filename_to_title(output_name_count)
         write_group_chart(
             chart_count,
