@@ -39,16 +39,14 @@ def main():
         f"event_{x}_rate" for x in list(MEDICATION_TO_CODELIST.keys())
     ]
     medications = population_measures[
-        population_measures.name.str.contains(
-            "|".join(medication_measures)
-        )
+        population_measures.name.str.contains("|".join(medication_measures))
     ]
     plot_measures(
         medications,
         filename=output_dir / "medications_bar_measures_count",
         column_to_plot="numerator",
         y_label="Count of patients",
-        as_bar=True,
+        as_bar=False,
         category="name",
     )
     plot_measures(
@@ -56,7 +54,7 @@ def main():
         filename=output_dir / "medications_bar_measures",
         column_to_plot="rate",
         y_label="Rate per 1000",
-        as_bar=True,
+        as_bar=False,
         category="name",
     )
     # Clinical
@@ -71,7 +69,7 @@ def main():
         filename=output_dir / "clinical_bar_measures_count",
         column_to_plot="numerator",
         y_label="Count of patients",
-        as_bar=True,
+        as_bar=False,
         category="name",
     )
     plot_measures(
@@ -79,7 +77,7 @@ def main():
         filename=output_dir / "clinical_bar_measures",
         column_to_plot="rate",
         y_label="Rate per 1000",
-        as_bar=True,
+        as_bar=False,
         category="name",
     )
 
