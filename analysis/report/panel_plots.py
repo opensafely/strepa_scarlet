@@ -34,7 +34,7 @@ def scale_thousand(ax):
         return f"{x*1000: .1f}"
 
     ax.yaxis.set_major_formatter(FuncFormatter(thousand_formatter))
-    ax.set_ylabel("Rate per thousand")
+    ax.set_ylabel("Rate per thousand patients")
 
 
 def scale_hundred(ax):
@@ -307,7 +307,7 @@ def get_group_chart(
         elif scale == "rate":
             scale_thousand(ax)
         if column_to_plot == "numerator":
-            ax.set_ylabel("Count")
+            ax.set_ylabel("Count of patients")
     if exclude_group:
         plt.xlabel(
             f"*Those with '{exclude_group}' category excluded from each plot"

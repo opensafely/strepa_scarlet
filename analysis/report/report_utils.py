@@ -304,5 +304,5 @@ def display_top_5(file, dir=RESULTS_DIR):
     Displays a pandas dataframe in a table. Input is a csv file.
     """
     df = pd.read_csv(f"{dir}/{file}")
-    df["Count"] = df["Count"].apply(lambda x: "{:,}".format(x))
+    df["Count of patients with code"] = df["Count of patients with code"].apply(lambda x: "{:,}".format(x))
     display(HTML(df.to_html(index=False)))

@@ -97,7 +97,6 @@ def calculate_top_5(
         events_table = events_table.loc[
             (events_table["date"] == date_subset), :
         ]
-
     # sum event counts over dates
     events_table = (
         events_table.groupby(df_code).sum(numeric_only=True).reset_index()
@@ -105,7 +104,7 @@ def calculate_top_5(
 
     # calculate % makeup of each code
     total_events = events_table["num"].sum()
-    events_table["Proportion of codes (%)"] = round(
+    events_table["Proportion of total patients with code (%)"] = round(
         (events_table["num"] / total_events) * 100, 2
     )
 
@@ -123,15 +122,15 @@ def calculate_top_5(
 
     # Rename the code column to something consistent
     events_table.rename(
-        columns={df_code: "Code", "num": "Count"}, inplace=True
+        columns={df_code: "Code", "num": "Count of patients with code"}, inplace=True
     )
 
     events_table = events_table.loc[
-        :, ["Code", "Description", "Count", "Proportion of codes (%)"]
+        :, ["Code", "Description", "Count of patients with code", "Proportion of total patients with code (%)"]
     ]
 
     # sort by count
-    events_table = events_table.sort_values("Count", ascending=False)
+    events_table = events_table.sort_values("Count of patients with code", ascending=False)
 
     return events_table
 
