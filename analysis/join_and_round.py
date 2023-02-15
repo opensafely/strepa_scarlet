@@ -90,7 +90,7 @@ def get_measure_tables(input_files, exclude_files):
 def _round_table(measure_table, round_to, redact=False, redaction_threshold=5):
     def custom_round(x, base, redact=redact, threshold=redaction_threshold):
         
-        if redact and x and x <= threshold:
+        if redact and x <= threshold:
             return numpy.nan
         else:
             return int(base * round(float(x) / base))
