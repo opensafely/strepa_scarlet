@@ -95,10 +95,10 @@ def _round_table(measure_table, round_to, redact=False, redaction_threshold=5):
     measure_table.denominator = measure_table.denominator.astype(float)
 
     measure_table.numerator = measure_table.numerator.apply(
-        lambda x: round_values(x, round_to, redact=redact, redaction_threshold=redaction_threshold) if pandas.notnull(x) else x
+        lambda x: round_values(x, round_to, redact=redact, redaction_threshold=redaction_threshold)
     )
     measure_table.denominator = measure_table.denominator.apply(
-        lambda x: round_values(x, round_to, redact=redact, redaction_threshold=redaction_threshold) if pandas.notnull(x) else x
+        lambda x: round_values(x, round_to, redact=redact, redaction_threshold=redaction_threshold)
     )
     # recompute value
     measure_table.value = measure_table.numerator / measure_table.denominator
