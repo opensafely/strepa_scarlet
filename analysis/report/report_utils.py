@@ -52,7 +52,7 @@ def get_date_input_file(file: str) -> str:
         return date.group(1)
 
 
-def round_values(x, base=5, redact=False, redaction_threshold=5):
+def round_values(x, base=10, redact=False, redaction_threshold=5):
     """
     Rounds values to nearest multiple of base.  If redact is True, values less than or equal to
     redaction_threshold are converted to np.nan.

@@ -363,7 +363,7 @@ def main():
 
 
         code_df["num"] = code_df["num"].apply(
-            lambda x: round_values(x, base=5, redact=True, redaction_threshold=5)
+            lambda x: round_values(x, base=10, redact=True, redaction_threshold=5)
         )
         
         # plot the top codes over time
