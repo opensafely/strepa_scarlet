@@ -109,18 +109,6 @@ def _round_table(measure_table, round_to, redact=False, redaction_threshold=5):
     return measure_table
 
 
-def _redact_zeroes(measure_table):
-    """
-    The measures framework does not redact zeroes
-    Not compulsory, but better to include in redaction
-    A group could have the name 0, so apply to specific columns
-    The value column is recomputed, so we can skip
-    """
-    measure_table.numerator = measure_table.numerator.replace(0, numpy.nan)
-    measure_table.denominator = measure_table.denominator.replace(0, numpy.nan)
-    return measure_table
-
-
 def _redacted_string(measure_table):
     """
     Replace redacted values with "[REDACTED]" string
@@ -235,8 +223,7 @@ def main():
     tables = []
     for measure_table in get_measure_tables(input_files, exclude_files):
         table = _reshape_data(measure_table)
-        no_zeroes = _redact_zeroes(table)
-        names_ensured = _ensure_names(no_zeroes)
+        names_ensured = _ensure_names(table)
         if not skip_round:
             names_ensured = _round_table(names_ensured, round_to, redact, redaction_threshold)
         redacted_str = _redacted_string(names_ensured)
