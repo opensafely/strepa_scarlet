@@ -87,15 +87,22 @@ def get_measure_tables(input_files, exclude_files):
             yield measure_table
 
 
-def _round_table(measure_table, round_to):
-    def custom_round(x, base):
-        return int(base * round(float(x) / base))
+def _round_table(measure_table, round_to, redact=False, redaction_threshold=5):
+    def custom_round(x, base, redact=redact, threshold=redaction_threshold):
+        
+        if redact and x and x <= threshold:
+            return numpy.nan
+        else:
+            return int(base * round(float(x) / base))
+    
+    measure_table.numerator = measure_table.numerator.astype(float)
+    measure_table.denominator = measure_table.denominator.astype(float)
 
     measure_table.numerator = measure_table.numerator.apply(
-        lambda x: custom_round(x, round_to) if pandas.notnull(x) else x
+        lambda x: custom_round(x, round_to, redact=redact, threshold=redaction_threshold) if pandas.notnull(x) else x
     )
     measure_table.denominator = measure_table.denominator.apply(
-        lambda x: custom_round(x, round_to) if pandas.notnull(x) else x
+        lambda x: custom_round(x, round_to, redact=redact, threshold=redaction_threshold) if pandas.notnull(x) else x
     )
     # recompute value
     measure_table.value = measure_table.numerator / measure_table.denominator
@@ -198,6 +205,18 @@ def parse_args():
         action="store_true",
         help="Allow practice-level data in joined measures file",
     )
+    parser.add_argument(
+        "--redact",
+        action="store_true",
+        help="Redact values below a threshold",
+    )
+    parser.add_argument(
+        "--redaction-threshold",
+        required=False,
+        default=5,
+        type=int,
+        help="Redact values below or equal to this threshold",
+    )
     return parser.parse_args()
 
 
@@ -210,6 +229,8 @@ def main():
     round_to = args.round_to
     skip_round = args.skip_round
     allow_practice = args.allow_practice
+    redact = args.redact
+    redaction_threshold = args.redaction_threshold
 
     tables = []
     for measure_table in get_measure_tables(input_files, exclude_files):
@@ -217,7 +238,7 @@ def main():
         no_zeroes = _redact_zeroes(table)
         names_ensured = _ensure_names(no_zeroes)
         if not skip_round:
-            names_ensured = _round_table(names_ensured, round_to)
+            names_ensured = _round_table(names_ensured, round_to, redact, redaction_threshold)
         redacted_str = _redacted_string(names_ensured)
         tables.append(redacted_str)
 
