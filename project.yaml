@@ -173,6 +173,8 @@ actions:
            --exclude-files output/report/joined/measure_event_code*_rate.csv
            --output-dir output/report/results
            --output-name "measure_rounded.csv"
+           --redact
+           --redaction-threshold=5
       needs: [generate_measures_report]
       outputs:
         moderately_sensitive:
@@ -366,6 +368,8 @@ actions:
            --exclude-files output/report/weekly/measure_event_code*_rate.csv
            --output-dir output/report/weekly/results
            --output-name "measure_rounded_weekly.csv"
+           --redact
+           --redaction-threshold=5
       needs: [generate_measures_report_weekly, generate_measures_report_weekly_1]
       outputs:
         moderately_sensitive:
