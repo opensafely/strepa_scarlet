@@ -283,6 +283,11 @@ def display_event_counts(file, period, dir=RESULTS_DIR):
     display(HTML(event_summary_table.to_html(index=False)))
 
 
+def display_table(file, dir=RESULTS_DIR):
+    table = pd.read_csv(f"{dir}/{file}")
+    display(HTML(table.to_html(index=False)))
+
+
 def display_image(file, dir=RESULTS_DIR):
     """
     Displays image in file
