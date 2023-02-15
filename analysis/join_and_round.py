@@ -5,6 +5,8 @@ import glob
 import numpy
 import pandas
 import itertools
+from report.report_utils import round_values
+
 
 MEASURE_FNAME_REGEX = re.compile(r"measure_(?P<id>\S+)\.csv")
 
@@ -88,21 +90,15 @@ def get_measure_tables(input_files, exclude_files):
 
 
 def _round_table(measure_table, round_to, redact=False, redaction_threshold=5):
-    def custom_round(x, base, redact=redact, threshold=redaction_threshold):
-        
-        if redact and x <= threshold:
-            return numpy.nan
-        else:
-            return int(base * round(float(x) / base))
     
     measure_table.numerator = measure_table.numerator.astype(float)
     measure_table.denominator = measure_table.denominator.astype(float)
 
     measure_table.numerator = measure_table.numerator.apply(
-        lambda x: custom_round(x, round_to, redact=redact, threshold=redaction_threshold) if pandas.notnull(x) else x
+        lambda x: round_values(x, round_to, redact=redact, redaction_threshold=redaction_threshold) if pandas.notnull(x) else x
     )
     measure_table.denominator = measure_table.denominator.apply(
-        lambda x: custom_round(x, round_to, redact=redact, threshold=redaction_threshold) if pandas.notnull(x) else x
+        lambda x: round_values(x, round_to, redact=redact, redaction_threshold=redaction_threshold) if pandas.notnull(x) else x
     )
     # recompute value
     measure_table.value = measure_table.numerator / measure_table.denominator
