@@ -6,7 +6,6 @@ import re
 import operator
 import math
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter
 from dateutil import parser
@@ -25,7 +24,6 @@ from report_utils import (
 )
 import matplotlib.ticker as ticker
 ticker.Locator.MAXTICKS = 10000
-
 
 
 def scale_thousand(ax):
@@ -328,13 +326,25 @@ def get_group_chart(
         ax.yaxis.label.set_alpha(1.0)
         ax.yaxis.label.set_fontsize("small")
 
+        # TODO: this will apply the same date range limits to each axis
         if frequency == "month":
-            ax.xaxis.set_major_locator(mdates.YearLocator())
-            ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+            xticks = pandas.date_range(
+                start=measure_table["date"].min(),
+                end=measure_table["date"].max(),
+                freq="MS",
+            )
+            ax.set_xticks(xticks)
+            ax.set_xticklabels([x.strftime("%Y") for x in xticks])
         elif frequency == "week":
             # show 1 tick per week
-            ax.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=mdates.THURSDAY))
-            ax.xaxis.set_major_formatter(mdates.DateFormatter("%d-%m-%Y"))
+            xticks = pandas.date_range(
+                start=measure_table["date"].min(),
+                end=measure_table["date"].max(),
+                freq="W-THU",
+            )
+            ax.set_xticks(xticks)
+            ax.set_xticklabels([x.strftime("%d-%m-%Y") for x in xticks])
+
     plt.subplots_adjust(wspace=0.7, hspace=0.6)
     return (plt, lgds)
 
