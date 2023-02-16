@@ -411,6 +411,7 @@ actions:
       python:latest python analysis/report/plot_measures_report.py
       --measure-path output/report/weekly/results/measure_rounded_weekly.csv
       --output-dir output/report/weekly/results
+      --frequency week
     needs: [join_measures_rounded_weekly]
     outputs:
       moderately_sensitive:
