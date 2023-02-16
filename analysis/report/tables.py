@@ -11,7 +11,9 @@ from report_utils import (
 def count_table(measure_table):
     # TODO: TEMP FIX FOR STREP A SORE THROAT
     measure_table["name"] = measure_table["name"].replace(
-        {"event_strep_a_sore_throat_rate": "event_sore_throat_tonsillitis_rate"}
+        {
+            "event_strep_a_sore_throat_rate": "event_sore_throat_tonsillitis_rate"
+        }
     )
     # Translate name column
     repeated = autoselect_labels(measure_table["name"])
@@ -74,6 +76,7 @@ def main():
     # Parse the names field to determine which subset to use
     subset = subset_table(measure_table, measures_pattern, measures_list)
     table = count_table(subset)
+    table.index.name = table.index.name.title()
     table.index = table.index.strftime("%d-%m-%y")
     table.to_csv(output_dir / output_name)
 
