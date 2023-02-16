@@ -279,7 +279,7 @@ def plot_top_codes_over_time(code_df, top_codes, measure, output_dir, frequency)
             freq="MS",
         )
         ax.set_xticks(xticks)
-        ax.set_xticklabels([x.strftime("%Y") for x in xticks])
+        ax.set_xticklabels([x.strftime("%B %Y") for x in xticks])
     elif frequency == "week":
         xticks = pd.date_range(
             start=code_proportions["date"].min(),

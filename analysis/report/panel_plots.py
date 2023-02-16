@@ -334,7 +334,7 @@ def get_group_chart(
                 freq="MS",
             )
             ax.set_xticks(xticks)
-            ax.set_xticklabels([x.strftime("%Y") for x in xticks])
+            ax.set_xticklabels([x.strftime("%B %Y") for x in xticks])
         elif frequency == "week":
             # show 1 tick per week
             xticks = pandas.date_range(

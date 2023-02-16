@@ -147,7 +147,7 @@ def plot_measures(
             start=df_copy.index.min(), end=df_copy.index.max(), freq="MS"
         )
         ax.set_xticks(xticks)
-        ax.set_xticklabels([x.strftime("%Y") for x in xticks])
+        ax.set_xticklabels([x.strftime("%B %Y") for x in xticks])
     elif frequency == "week":
         xticks = pd.date_range(
             start=df_copy.index.min(), end=df_copy.index.max(), freq="W-THU"
