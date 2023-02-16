@@ -8,11 +8,9 @@ import seaborn as sns
 from collections import Counter
 from pathlib import Path
 from IPython.display import display, HTML, Image
-
-colour_palette = sns.color_palette("Paired", 12)
-
 import matplotlib.ticker as ticker
 
+colour_palette = sns.color_palette("Paired", 12)
 ticker.Locator.MAXTICKS = 10000
 
 MEDICATION_TO_CODELIST = {
@@ -146,9 +144,7 @@ def plot_measures(
 
     if frequency == "month":
         xticks = pd.date_range(
-            start=code_proportions["date"].min(),
-            end=code_proportions["date"].max(),
-            freq="MS",
+            start=df_copy.index.min(), end=df_copy.index.max(), freq="MS"
         )
         ax.set_xticks(xticks)
         ax.set_xticklabels([x.strftime("%Y") for x in xticks])
