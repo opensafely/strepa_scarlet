@@ -74,6 +74,7 @@ def main():
     # Parse the names field to determine which subset to use
     subset = subset_table(measure_table, measures_pattern, measures_list)
     table = count_table(subset)
+    table.index = table.index.strftime("%d-%m-%y")
     table.to_csv(output_dir / output_name)
 
 
