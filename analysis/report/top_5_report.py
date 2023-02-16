@@ -3,6 +3,7 @@ import numpy as np
 import argparse
 import pathlib
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import seaborn as sns
 
 from report_utils import (
@@ -230,7 +231,7 @@ def get_proportion_of_events(df, code, date):
     return row
 
 
-def plot_top_codes_over_time(code_df, top_codes, measure, output_dir):
+def plot_top_codes_over_time(code_df, top_codes, measure, output_dir, frequency):
     """
     Plots the top 5 codes over time for each measure.
     Args:
@@ -255,22 +256,43 @@ def plot_top_codes_over_time(code_df, top_codes, measure, output_dir):
                 ),
             ]
         )
-
+    
     plt.figure(figsize=(10, 6))
     # seaborn styling
     sns.set_style("darkgrid")
     plt.rcParams["axes.prop_cycle"] = plt.cycler(
         color=colour_palette
     )
-    plt.xlabel("Date")
-    plt.ylabel("Count of codes")
-
+    ax = plt.gca()
+    code_proportions["date"] = pd.to_datetime(code_proportions["date"])
     # Plot the proportion of events for each code on each date. Plots should be on the same graph.
     for code, description in top_codes.items():
-
         code_proportions.loc[code_proportions["code"] == code, :].plot(
-            x="date", y="count", label=description, ax=plt.gca()
+            x="date", y="count", label=description, ax=ax
         )
+    
+
+    if frequency == "month":
+        xticks = pd.date_range(
+            start=code_proportions["date"].min(),
+            end=code_proportions["date"].max(),
+            freq="MS",
+        )
+        ax.set_xticks(xticks)
+        ax.set_xticklabels([x.strftime("%Y") for x in xticks])
+    elif frequency == "week":
+        xticks = pd.date_range(
+            start=code_proportions["date"].min(),
+            end=code_proportions["date"].max(),
+            freq="W-THU",
+        )
+        ax.set_xticks(xticks)
+        ax.set_xticklabels([x.strftime("%d-%m-%Y") for x in xticks])
+    
+
+    ax.set_xlabel("Date")
+    plt.setp(ax.get_xticklabels(), rotation=90)
+    ax.set_ylabel("Count of codes")
 
     # legend outside of plot - top right
     plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
@@ -290,6 +312,7 @@ def main():
     args = parse_args()
     input_file = args.input_file
     output_dir = args.output_dir
+    frequency = args.frequency
 
     measure_table = get_measure_tables(input_file)
     measure_table = coerce_numeric(measure_table)
@@ -371,6 +394,7 @@ def main():
             top_codes=top_codes_dict,
             measure=measure,
             output_dir=output_dir,
+            frequency=frequency,
         )
 
 
@@ -386,6 +410,12 @@ def parse_args():
         required=True,
         type=pathlib.Path,
         help="Path to the output directory",
+    )
+    parser.add_argument(
+        "--frequency",
+        default="month",
+        choices=["month", "week"],
+        help="The frequency of the data",
     )
     return parser.parse_args()
 
