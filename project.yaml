@@ -420,6 +420,7 @@ actions:
       --input-file output/report/weekly/results/measure_rounded_weekly.csv
       --practice-file output/report/weekly/results/measure_unrounded_weekly.csv
       --output-dir output/report/weekly/results
+      --frequency week
     needs: [join_measures_rounded_weekly, join_measures_unrounded_weekly]
     outputs:
       moderately_sensitive:

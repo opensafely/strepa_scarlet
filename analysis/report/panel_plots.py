@@ -6,6 +6,7 @@ import re
 import operator
 import math
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter
 from dateutil import parser
@@ -226,6 +227,7 @@ def get_group_chart(
     ci=None,
     exclude_group=None,
     output_dir=None,
+    frequency="month",
 ):
     # NOTE: constrained_layout=True available in matplotlib>=3.5
     figure = plt.figure(figsize=(columns * 6, columns * 5))
@@ -318,10 +320,18 @@ def get_group_chart(
         ax.tick_params(labelbottom=True)
         ax.get_xticklabels("auto")
         ax.set_xlabel("")
-        ax.tick_params(axis="x", labelsize=7, rotation=30)
+        ax.tick_params(axis="x", labelsize=7, rotation=90)
         ax.tick_params(axis="y", labelsize="small")
         ax.yaxis.label.set_alpha(1.0)
         ax.yaxis.label.set_fontsize("small")
+
+        if frequency == "month":
+            ax.xaxis.set_major_locator(mdates.YearLocator())
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+        elif frequency == "week":
+            # show 1 tick per week
+            ax.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=mdates.THURSDAY))
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%d-%m-%Y"))
     plt.subplots_adjust(wspace=0.7, hspace=0.6)
     return (plt, lgds)
 
