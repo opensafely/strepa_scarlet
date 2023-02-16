@@ -23,6 +23,9 @@ from report_utils import (
     write_group_chart,
     colour_palette,
 )
+import matplotlib.ticker as ticker
+ticker.Locator.MAXTICKS = 10000
+
 
 
 def scale_thousand(ax):
