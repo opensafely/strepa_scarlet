@@ -3,7 +3,6 @@ import numpy as np
 import argparse
 import pathlib
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 import seaborn as sns
 
 from report_utils import (
@@ -123,15 +122,24 @@ def calculate_top_5(
 
     # Rename the code column to something consistent
     events_table.rename(
-        columns={df_code: "Code", "num": "Count of patients with code"}, inplace=True
+        columns={df_code: "Code", "num": "Count of patients with code"},
+        inplace=True,
     )
 
     events_table = events_table.loc[
-        :, ["Code", "Description", "Count of patients with code", "Proportion of total patients with code (%)"]
+        :,
+        [
+            "Code",
+            "Description",
+            "Count of patients with code",
+            "Proportion of total patients with code (%)",
+        ],
     ]
 
     # sort by count
-    events_table = events_table.sort_values("Count of patients with code", ascending=False)
+    events_table = events_table.sort_values(
+        "Count of patients with code", ascending=False
+    )
 
     return events_table
 
@@ -231,18 +239,21 @@ def get_proportion_of_events(df, code, date):
     return row
 
 
-def plot_top_codes_over_time(code_df, top_codes, measure, output_dir, frequency):
+def plot_top_codes_over_time(
+    code_df, top_codes, measure, output_dir, frequency
+):
     """
     Plots the top 5 codes over time for each measure.
     Args:
         code_df: A codelist table.
-        top_codes:A dictionary of the top codes for each measure with corresponding descriptions.
+        top_codes: A dictionary of the top codes for each measure with corresponding descriptions.
         measure: The measure ID.
         output_dir: The directory to save the plot to.
 
     """
 
-    # Create a new dataframe with the proportion of events for each code on each date.
+    # Create a new dataframe with the proportion of events for each code on
+    # each date.
     code_proportions = pd.DataFrame()
     for code in top_codes.keys():
         code_proportions = pd.concat(
@@ -256,39 +267,40 @@ def plot_top_codes_over_time(code_df, top_codes, measure, output_dir, frequency)
                 ),
             ]
         )
-    
+
     plt.figure(figsize=(10, 6))
     # seaborn styling
     sns.set_style("darkgrid")
-    plt.rcParams["axes.prop_cycle"] = plt.cycler(
-        color=colour_palette
-    )
+    plt.rcParams["axes.prop_cycle"] = plt.cycler(color=colour_palette)
     ax = plt.gca()
-    code_proportions["date"] = pd.to_datetime(code_proportions["date"])
-    # Plot the proportion of events for each code on each date. Plots should be on the same graph.
-    for code, description in top_codes.items():
-        code_proportions.loc[code_proportions["code"] == code, :].plot(
-            x="date", y="count", label=description, ax=ax
-        )
-    
 
-    if frequency == "month":
-        xticks = pd.date_range(
-            start=code_proportions["date"].min(),
-            end=code_proportions["date"].max(),
-            freq="MS",
-        )
-        ax.set_xticks(xticks)
-        ax.set_xticklabels([x.strftime("%B %Y") for x in xticks])
-    elif frequency == "week":
-        xticks = pd.date_range(
-            start=code_proportions["date"].min(),
-            end=code_proportions["date"].max(),
-            freq="W-THU",
-        )
-        ax.set_xticks(xticks)
-        ax.set_xticklabels([x.strftime("%d-%m-%Y") for x in xticks])
-    
+    # If the data is all redacted, code proportions will be empty
+    # But we still want to create the empty file for the notebook to load
+    if not code_proportions.empty and "date" in code_proportions.columns:
+        code_proportions["date"] = pd.to_datetime(code_proportions["date"])
+        # Plot the proportion of events for each code on each date.
+        # Plots should be on the same graph.
+        for code, description in top_codes.items():
+            code_proportions.loc[code_proportions["code"] == code, :].plot(
+                x="date", y="count", label=description, ax=ax
+            )
+
+        if frequency == "month":
+            xticks = pd.date_range(
+                start=code_proportions["date"].min(),
+                end=code_proportions["date"].max(),
+                freq="MS",
+            )
+            ax.set_xticks(xticks)
+            ax.set_xticklabels([x.strftime("%B %Y") for x in xticks])
+        elif frequency == "week":
+            xticks = pd.date_range(
+                start=code_proportions["date"].min(),
+                end=code_proportions["date"].max(),
+                freq="W-THU",
+            )
+            ax.set_xticks(xticks)
+            ax.set_xticklabels([x.strftime("%d-%m-%Y") for x in xticks])
 
     ax.set_xlabel("Date")
     plt.setp(ax.get_xticklabels(), rotation=90)
@@ -353,7 +365,7 @@ def main():
 
         # drop all columns except code and numerator
         code_df.columns = ["code", "date", "num"]
-        
+
         (
             top_5_code_table_first,
             top_5_code_table_last,
@@ -383,11 +395,12 @@ def main():
             for i in top_codes
         }
 
-
         code_df["num"] = code_df["num"].apply(
-            lambda x: round_values(x, base=10, redact=True, redaction_threshold=5)
+            lambda x: round_values(
+                x, base=10, redact=True, redaction_threshold=5
+            )
         )
-        
+
         # plot the top codes over time
         plot_top_codes_over_time(
             code_df=code_df,
