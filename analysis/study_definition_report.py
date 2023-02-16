@@ -328,7 +328,7 @@ for medication_key in list(medication_codelists.keys()):
                 numerator=f"event_{medication_key}",
                 denominator="population",
                 group_by=[f"event_code_{medication_key}"],
-                small_number_suppression=True,
+                small_number_suppression=False,
             ),
             Measure(
                 id=f"event_{medication_key}_with_clinical_any_rate",
@@ -379,7 +379,7 @@ for clinical_key in list(clinical_event_codelists.keys()):
                 numerator=f"event_{clinical_key}",
                 denominator="population",
                 group_by=[f"event_code_{clinical_key}"],
-                small_number_suppression=True,
+                small_number_suppression=False,
             ),
             Measure(
                 id=f"event_{clinical_key}_with_medication_any_rate",
