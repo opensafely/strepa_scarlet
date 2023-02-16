@@ -23,6 +23,7 @@ from report_utils import (
     colour_palette,
 )
 import matplotlib.ticker as ticker
+
 ticker.Locator.MAXTICKS = 10000
 
 
@@ -327,7 +328,7 @@ def get_group_chart(
         ax.yaxis.label.set_fontsize("small")
 
         # TODO: this will apply the same date range limits to each axis
-        if frequency == "month":
+        if not stack_years and frequency == "month":
             xticks = pandas.date_range(
                 start=measure_table["date"].min(),
                 end=measure_table["date"].max(),
@@ -335,7 +336,7 @@ def get_group_chart(
             )
             ax.set_xticks(xticks)
             ax.set_xticklabels([x.strftime("%B %Y") for x in xticks])
-        elif frequency == "week":
+        elif not stack_years and frequency == "week":
             # show 1 tick per week
             xticks = pandas.date_range(
                 start=measure_table["date"].min(),
