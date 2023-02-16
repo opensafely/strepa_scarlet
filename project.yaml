@@ -200,6 +200,7 @@ actions:
       python:latest python analysis/report/top_5_report.py
       --input-file output/report/results/measure_unrounded.csv
       --output-dir output/report/results
+      --frequency month
     needs: [join_measures_unrounded]
     outputs:
       moderately_sensitive:
@@ -397,6 +398,7 @@ actions:
       python:latest python analysis/report/top_5_report.py
       --input-file output/report/weekly/results/measure_unrounded_weekly.csv
       --output-dir output/report/weekly/results
+      --frequency week
     needs: [join_measures_unrounded_weekly]
     outputs:
       moderately_sensitive:
@@ -409,6 +411,7 @@ actions:
       python:latest python analysis/report/plot_measures_report.py
       --measure-path output/report/weekly/results/measure_rounded_weekly.csv
       --output-dir output/report/weekly/results
+      --frequency week
     needs: [join_measures_rounded_weekly]
     outputs:
       moderately_sensitive:
@@ -420,6 +423,7 @@ actions:
       --input-file output/report/weekly/results/measure_rounded_weekly.csv
       --practice-file output/report/weekly/results/measure_unrounded_weekly.csv
       --output-dir output/report/weekly/results
+      --frequency week
     needs: [join_measures_rounded_weekly, join_measures_unrounded_weekly]
     outputs:
       moderately_sensitive:

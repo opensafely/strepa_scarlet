@@ -18,6 +18,12 @@ def parse_args():
         type=pathlib.Path,
         help="Path to the output directory",
     )
+    parser.add_argument(
+        "--frequency",
+        default="month",
+        choices=["month", "week"],
+        help="Frequency of data",
+    )
     args = parser.parse_args()
     return args
 
@@ -26,6 +32,7 @@ def main():
     args = parse_args()
     measure_path = args.measure_path
     output_dir = args.output_dir
+    frequency = args.frequency
 
     df = pd.read_csv(measure_path, parse_dates=["date"])
     df = coerce_numeric(df)
@@ -48,6 +55,7 @@ def main():
         y_label="Count of patients",
         as_bar=False,
         category="name",
+        frequency=frequency,
     )
     plot_measures(
         medications,
@@ -56,6 +64,7 @@ def main():
         y_label="Rate per 1000",
         as_bar=False,
         category="name",
+        frequency=frequency,
     )
     # Clinical
     clinical_measures = [
@@ -71,6 +80,7 @@ def main():
         y_label="Count of patients",
         as_bar=False,
         category="name",
+        frequency=frequency,
     )
     plot_measures(
         clinical,
@@ -79,8 +89,9 @@ def main():
         y_label="Rate per 1000",
         as_bar=False,
         category="name",
+        frequency=frequency,
     )
-
+    return
     # for each group, plot the measure
     for group, df_subset in df.groupby("name"):
         if "practice" in group:
@@ -97,6 +108,7 @@ def main():
                 y_label="Rate per 1000",
                 as_bar=False,
                 category=None,
+                frequency=frequency,
             )
         else:
             plot_measures(
@@ -106,6 +118,7 @@ def main():
                 y_label="Rate per 1000",
                 as_bar=False,
                 category="group",
+                frequency=frequency,
             )
 
 

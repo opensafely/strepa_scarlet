@@ -22,6 +22,9 @@ from report_utils import (
     write_group_chart,
     colour_palette,
 )
+import matplotlib.ticker as ticker
+
+ticker.Locator.MAXTICKS = 10000
 
 
 def scale_thousand(ax):
@@ -226,6 +229,7 @@ def get_group_chart(
     ci=None,
     exclude_group=None,
     output_dir=None,
+    frequency="month",
 ):
     # NOTE: constrained_layout=True available in matplotlib>=3.5
     figure = plt.figure(figsize=(columns * 6, columns * 5))
@@ -318,10 +322,30 @@ def get_group_chart(
         ax.tick_params(labelbottom=True)
         ax.get_xticklabels("auto")
         ax.set_xlabel("")
-        ax.tick_params(axis="x", labelsize=7, rotation=30)
+        ax.tick_params(axis="x", labelsize=7, rotation=90)
         ax.tick_params(axis="y", labelsize="small")
         ax.yaxis.label.set_alpha(1.0)
         ax.yaxis.label.set_fontsize("small")
+
+        # TODO: this will apply the same date range limits to each axis
+        if not stack_years and frequency == "month":
+            xticks = pandas.date_range(
+                start=measure_table["date"].min(),
+                end=measure_table["date"].max(),
+                freq="MS",
+            )
+            ax.set_xticks(xticks)
+            ax.set_xticklabels([x.strftime("%B %Y") for x in xticks])
+        elif not stack_years and frequency == "week":
+            # show 1 tick per week
+            xticks = pandas.date_range(
+                start=measure_table["date"].min(),
+                end=measure_table["date"].max(),
+                freq="W-THU",
+            )
+            ax.set_xticks(xticks)
+            ax.set_xticklabels([x.strftime("%d-%m-%Y") for x in xticks])
+
     plt.subplots_adjust(wspace=0.7, hspace=0.6)
     return (plt, lgds)
 

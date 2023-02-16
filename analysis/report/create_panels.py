@@ -31,6 +31,12 @@ def parse_args():
         type=pathlib.Path,
         help="Path to the output directory",
     )
+    parser.add_argument(
+        "--frequency",
+        default="month",
+        choices=["month", "week"],
+        help="Frequency of data",
+    )
     return parser.parse_args()
 
 
@@ -49,7 +55,7 @@ def get_pattern_and_list(key, column_to_plot, first):
         )
 
 
-def panels_with(measure_table, output_dir):
+def panels_with(measure_table, output_dir, frequency):
     pairs = {x: "clinical_any" for x in MEDICATION_TO_CODELIST.keys()}
     pairs.update({x: "medication_any" for x in CLINICAL_TO_CODELIST.keys()})
     for event, with_key in pairs.items():
@@ -71,6 +77,7 @@ def panels_with(measure_table, output_dir):
             ci=None,
             exclude_group="Missing",
             output_dir=output_dir,
+            frequency=frequency,
         )
         output_name = f"{prefix}_by_subgroup"
         plot_title = filename_to_title(output_name)
@@ -78,7 +85,7 @@ def panels_with(measure_table, output_dir):
         chart.close()
 
 
-def panels_loop(measure_table, output_dir):
+def panels_loop(measure_table, output_dir, frequency):
     for key in (
         list(MEDICATION_TO_CODELIST.keys())
         + ["medication_any", "clinical_any"]
@@ -101,6 +108,7 @@ def panels_loop(measure_table, output_dir):
             ci=None,
             exclude_group="Missing",
             output_dir=output_dir,
+            frequency=frequency,
         )
         # TODO: TEMP FIX FOR STREP A SORE THROAT
         title = key
@@ -127,6 +135,7 @@ def panels_loop(measure_table, output_dir):
             ci=None,
             exclude_group="Missing",
             output_dir=output_dir,
+            frequency=frequency,
         )
         output_name_count = f"{title}_by_subgroup_count"
         plot_title_count = filename_to_title(output_name_count)
@@ -144,6 +153,7 @@ def main():
     input_file = args.input_file
     practice_file = args.practice_file
     output_dir = args.output_dir
+    frequency = args.frequency
 
     measure_table = get_measure_tables(input_file)
     if practice_file:
@@ -151,8 +161,8 @@ def main():
         practice_table = practice_table[practice_table.category == "practice"]
         measure_table = pandas.concat([measure_table, practice_table])
 
-    panels_loop(measure_table, output_dir)
-    panels_with(measure_table, output_dir)
+    panels_loop(measure_table, output_dir, frequency=frequency)
+    panels_with(measure_table, output_dir, frequency=frequency)
 
 
 if __name__ == "__main__":

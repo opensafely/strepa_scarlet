@@ -8,8 +8,10 @@ import seaborn as sns
 from collections import Counter
 from pathlib import Path
 from IPython.display import display, HTML, Image
+import matplotlib.ticker as ticker
 
 colour_palette = sns.color_palette("Paired", 12)
+ticker.Locator.MAXTICKS = 10000
 
 MEDICATION_TO_CODELIST = {
     "amoxicillin": "codelists/opensafely-amoxicillin-oral.csv",
@@ -73,7 +75,7 @@ def round_values(x, base=10, redact=False, redaction_threshold=5):
         else:
             if redact and x <= redaction_threshold:
                 rounded = np.nan
-            
+
             else:
                 rounded = int(base * round(x / base))
     return rounded
@@ -86,6 +88,7 @@ def plot_measures(
     y_label: str,
     as_bar: bool = False,
     category: str = None,
+    frequency: str = "month",
 ):
     """Produce time series plot from measures table.  One line is plotted for each sub
     category within the category column. Saves output as jpeg file.
@@ -98,8 +101,8 @@ def plot_measures(
     """
     df_copy = df.copy()
 
-    plt.figure(figsize=(18, 8))
     sns.set_style("darkgrid")
+    fig, ax = plt.subplots(figsize=(18, 8))
 
     plt.rcParams["axes.prop_cycle"] = plt.cycler(color=colour_palette)
 
@@ -112,7 +115,9 @@ def plot_measures(
     if category:
         # TODO: TEMP FIX FOR STREP A SORE THROAT
         df_copy[category] = df_copy[category].replace(
-            {"event_strep_a_sore_throat_rate": "event_sore_throat_tonsillitis_rate"}
+            {
+                "event_strep_a_sore_throat_rate": "event_sore_throat_tonsillitis_rate"
+            }
         )
         # Set up category to have clean labels
         repeated = autoselect_labels(df_copy[category])
@@ -123,31 +128,32 @@ def plot_measures(
             axis=1,
         )
         if as_bar:
-            ax = df_copy.pivot(
-                columns=category, values=column_to_plot
-            ).plot.bar(stacked=True)
+            df_copy.pivot(columns=category, values=column_to_plot).plot.bar(
+                ax=ax, stacked=True
+            )
             y_max = (
                 df_copy.groupby(["date"])[column_to_plot].sum().max() * 1.05
             )
         else:
-            ax = df_copy.groupby(category)[column_to_plot].plot()
+            df_copy.groupby(category)[column_to_plot].plot(ax=ax)
     else:
         if as_bar:
-            df_copy[column_to_plot].bar(legend=False)
+            df_copy[column_to_plot].bar(ax=ax, legend=False)
         else:
-            df_copy[column_to_plot].plot(legend=False)
+            df_copy[column_to_plot].plot(ax=ax, legend=False)
 
-    if as_bar:
-        # Matplotlib treats bar labels as necessary categories
-        # So we force it to use only every third label
-        labels = ax.get_xticklabels()
-        if len(labels) > 30:
-            skipped_labels = [
-                x if index % 2 == 0 else "" for index, x in enumerate(labels)
-            ]
-        else:
-            skipped_labels = labels
-        ax.set_xticklabels(skipped_labels)
+    if frequency == "month":
+        xticks = pd.date_range(
+            start=df_copy.index.min(), end=df_copy.index.max(), freq="MS"
+        )
+        ax.set_xticks(xticks)
+        ax.set_xticklabels([x.strftime("%B %Y") for x in xticks])
+    elif frequency == "week":
+        xticks = pd.date_range(
+            start=df_copy.index.min(), end=df_copy.index.max(), freq="W-THU"
+        )
+        ax.set_xticks(xticks)
+        ax.set_xticklabels([x.strftime("%d-%m-%Y") for x in xticks])
 
     plt.ylabel(y_label)
     plt.xlabel("Date")
@@ -321,7 +327,7 @@ def display_top_5(file, dir=RESULTS_DIR):
     Displays a pandas dataframe in a table. Input is a csv file.
     """
     df = pd.read_csv(f"{dir}/{file}")
-    df["Count of patients with code"] = df["Count of patients with code"].apply(lambda x: "{:,}".format(x))
+    df["Count of patients with code"] = df[
+        "Count of patients with code"
+    ].apply(lambda x: "{:,}".format(x))
     display(HTML(df.to_html(index=False)))
-
-

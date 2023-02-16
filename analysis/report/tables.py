@@ -77,6 +77,7 @@ def main():
     subset = subset_table(measure_table, measures_pattern, measures_list)
     table = count_table(subset)
     table.index.name = table.index.name.title()
+    table.index = table.index.strftime("%d-%m-%y")
     table.to_csv(output_dir / output_name)
 
 
