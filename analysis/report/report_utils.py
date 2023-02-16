@@ -110,6 +110,10 @@ def plot_measures(
 
     df_copy = df_copy.set_index("date")
     if category:
+        # TODO: TEMP FIX FOR STREP A SORE THROAT
+        df_copy[category] = df_copy[category].replace(
+            {"event_strep_a_sore_throat_rate": "event_sore_throat_tonsillitis_rate"}
+        )
         # Set up category to have clean labels
         repeated = autoselect_labels(df_copy[category])
         df_copy[category] = df_copy.apply(
@@ -317,7 +321,7 @@ def display_top_5(file, dir=RESULTS_DIR):
     Displays a pandas dataframe in a table. Input is a csv file.
     """
     df = pd.read_csv(f"{dir}/{file}")
-    df["Count"] = df["Count"].apply(lambda x: "{:,}".format(x))
+    df["Count of patients with code"] = df["Count of patients with code"].apply(lambda x: "{:,}".format(x))
     display(HTML(df.to_html(index=False)))
 
 
