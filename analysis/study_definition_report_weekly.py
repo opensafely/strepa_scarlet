@@ -15,7 +15,7 @@ from codelists import (
     flucloxacillin_codes,
     scarlet_fever_codes,
     invasive_strep_a_codes,
-    strep_a_sore_throat_codes,
+    sore_throat_tonsillitis_codes,
 )
 
 # Import so we can inspect metadata logs for correct variable expansion
@@ -38,7 +38,7 @@ medication_codelists = {
 clinical_event_codelists = {
     "scarlet_fever": scarlet_fever_codes,
     "invasive_strep_a": invasive_strep_a_codes,
-    "strep_a_sore_throat": strep_a_sore_throat_codes,
+    "sore_throat_tonsillitis": sore_throat_tonsillitis_codes,
 }
 
 

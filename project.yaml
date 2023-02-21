@@ -256,7 +256,7 @@ actions:
       python:latest python analysis/report/panel_plots.py
       --input-file output/report/results/measure_rounded.csv
       --measures-list "event_scarlet_fever_rate"
-      --measures-list "event_strep_a_sore_throat_rate"
+      --measures-list "event_sore_throat_tonsillitis_rate"
       --measures-list "event_invasive_strep_a_rate"
       --output-dir output/report/results
       --output-name "all_diagnostics_by_year"
@@ -293,7 +293,7 @@ actions:
       --output-dir output/report/results
       --output-name "event_counts_clinical.csv"
       --measures-list "event_scarlet_fever_rate"
-      --measures-list "event_strep_a_sore_throat_rate"
+      --measures-list "event_sore_throat_tonsillitis_rate"
       --measures-list "event_invasive_strep_a_rate"
     needs: [join_measures_rounded]
     outputs:
@@ -438,7 +438,7 @@ actions:
       --output-dir output/report/weekly/results
       --output-name "event_counts_clinical.csv"
       --measures-list "event_scarlet_fever_rate"
-      --measures-list "event_strep_a_sore_throat_rate"
+      --measures-list "event_sore_throat_tonsillitis_rate"
       --measures-list "event_invasive_strep_a_rate"
     needs: [join_measures_rounded_weekly]
     outputs:

@@ -62,7 +62,7 @@ invasive_strep_a_codes = codelist_from_csv(
     column="code",
 )
 
-strep_a_sore_throat_codes = codelist_from_csv(
+sore_throat_tonsillitis_codes = codelist_from_csv(
     "codelists/user-chriswood-group-a-streptococcal-sore-throat.csv",
     system="snomed",
     column="code",
