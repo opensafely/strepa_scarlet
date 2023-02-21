@@ -334,27 +334,9 @@ actions:
       highly_sensitive:
         cohort: output/report/weekly/inpu*.csv.gz
 
-  join_cohorts_report_weekly:
-    run: >
-      python:latest python analysis/cohort_joiner.py
-        --lhs output/report/weekly/input_report_20*.csv.gz
-        --rhs output/report/input_ethnicity_report.csv.gz
-        --output-dir output/report/weekly/joined
-    needs: [generate_study_population_report_weekly_1, generate_study_population_report_weekly_2, generate_study_population_report_ethnicity]
-    outputs:
-      highly_sensitive:
-        cohort: output/report/weekly/joined/input_report_20*.csv.gz
-
   generate_measures_report_weekly:
-    run: cohortextractor:latest generate_measures --study-definition study_definition_report --output-dir=output/report/weekly/joined
-    needs: [join_cohorts_report_weekly]
-    outputs:
-      moderately_sensitive:
-        measure_csv: output/report/weekly/joined/measure_event_*_rate.csv
-
-  generate_measures_report_weekly_1:
     run: cohortextractor:latest generate_measures --study-definition study_definition_report_weekly --output-dir=output/report/weekly
-    needs: [generate_study_population_report_weekly_3]
+    needs: [generate_study_population_report_weekly_1, generate_study_population_report_weekly_2, generate_study_population_report_weekly_3]
     outputs:
       moderately_sensitive:
         measure_csv: output/report/weekly/measure_event_*_rate.csv
@@ -371,7 +353,7 @@ actions:
            --output-name "measure_rounded_weekly.csv"
            --redact
            --redaction-threshold=5
-      needs: [generate_measures_report_weekly, generate_measures_report_weekly_1]
+      needs: [generate_measures_report_weekly]
       outputs:
         moderately_sensitive:
           # Only output the single summary file
@@ -387,7 +369,7 @@ actions:
            --output-name "measure_unrounded_weekly.csv"
            --allow-practice
            --skip-round
-      needs: [generate_measures_report_weekly, generate_measures_report_weekly_1]
+      needs: [generate_measures_report_weekly]
       outputs:
         moderately_sensitive:
           # Only output the single summary file
