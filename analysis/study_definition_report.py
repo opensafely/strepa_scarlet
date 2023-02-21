@@ -91,9 +91,12 @@ def generate_expectations_codes(codelist, incidence=0.5):
     return expectations
 
 
-start_date = "2018-01-01"
-end_date = "2022-12-01"
-# Specifiy study definition
+if frequency == "weekly":
+    start_date = "2022-09-01"
+    end_date = "2023-02-15"
+else:
+    start_date = "2018-01-01"
+    end_date = "2022-01-01"
 
 demographics = {
     "age_band": (
@@ -205,21 +208,25 @@ clinical_events = [
                 },
             },
         ),
-        # Clinical with medication for (medication + clinical)/clinical
-        # Clinical falls within the timeframe
-        **{
-            f"{clinical_key}_with_medication_any": patients.with_these_medications(
-                codelist=all_medication_codes,
-                between=[
-                    f"event_{clinical_key}_date",
-                    f"event_{clinical_key}_date",
-                ],
-                returning="binary_flag",
-            )
-        },
     }
     for clinical_key, clinical_codelist in clinical_event_codelists.items()
 ]
+if frequency == "monthly":
+    for clinical_key, clinical_codelist in clinical_event_codelists.items():
+        clinical_events.append(
+            # Clinical with medication for (medication + clinical)/clinical
+            # Clinical falls within the timeframe
+            {
+                f"{clinical_key}_with_medication_any": patients.with_these_medications(
+                    codelist=all_medication_codes,
+                    between=[
+                        f"event_{clinical_key}_date",
+                        f"event_{clinical_key}_date",
+                    ],
+                    returning="binary_flag",
+                )
+            }
+        )
 
 
 medication_events = [
@@ -243,21 +250,25 @@ medication_events = [
                 },
             },
         ),
-        # Medication with clinical for (medication + clinical)/medication
-        # Medication falls within the timeframe
-        **{
-            f"{medication_key}_with_clinical_any": patients.with_these_clinical_events(
-                codelist=all_clinical_codes,
-                between=[
-                    f"event_{medication_key}_date",
-                    f"event_{medication_key}_date",
-                ],
-                returning="binary_flag",
-            )
-        },
     }
     for medication_key, medication_codelist in medication_codelists.items()
 ]
+if frequency == "monthly":
+    for medication_key, medication_codelist in medication_codelists.items():
+        medication_events.append(
+            # Medication with clinical for (medication + clinical)/medication
+            # Medication falls within the timeframe
+            {
+                f"{medication_key}_with_clinical_any": patients.with_these_clinical_events(
+                    codelist=all_clinical_codes,
+                    between=[
+                        f"event_{medication_key}_date",
+                        f"event_{medication_key}_date",
+                    ],
+                    returning="binary_flag",
+                )
+            },
+        )
 
 # convert list of dicts into a single dict
 medication_variables = {k: v for d in medication_events for k, v in d.items()}
@@ -307,9 +318,8 @@ study = StudyDefinition(
 # Ethnicity isn't in the demographics dict because it's extracted in a separate
 # study definition. We add it here because we want to calculate a measure using
 # it. We only care about the key.
-
-# TODO: Remove for now while we determine runtime
-# demographics["ethnicity"] = ""
+if frequency == "monthly":
+    demographics["ethnicity"] = ""
 
 measures = []
 # add measure for each codelist
@@ -330,15 +340,20 @@ for medication_key in list(medication_codelists.keys()):
                 group_by=[f"event_code_{medication_key}"],
                 small_number_suppression=False,
             ),
-            Measure(
-                id=f"event_{medication_key}_with_clinical_any_rate",
-                numerator=f"{medication_key}_with_clinical_any",
-                denominator=f"event_{medication_key}",
-                group_by=["population"],
-                small_number_suppression=True,
-            ),
         ]
     )
+    if frequency == "monthly":
+        measures.extend(
+            [
+                Measure(
+                    id=f"event_{medication_key}_with_clinical_any_rate",
+                    numerator=f"{medication_key}_with_clinical_any",
+                    denominator=f"event_{medication_key}",
+                    group_by=["population"],
+                    small_number_suppression=True,
+                ),
+            ]
+        )
 
     for d in demographics.keys():
         if d == "practice":
@@ -353,16 +368,21 @@ for medication_key in list(medication_codelists.keys()):
                     denominator="population",
                     group_by=[d],
                     small_number_suppression=suppress,
-                ),
-                Measure(
-                    id=f"event_{medication_key}_with_clinical_any_{d}_rate",
-                    numerator=f"{medication_key}_with_clinical_any",
-                    denominator=f"event_{medication_key}",
-                    group_by=[d],
-                    small_number_suppression=suppress,
-                ),
+                )
             ]
         )
+        if frequency == "monthly":
+            measures.extend(
+                [
+                    Measure(
+                        id=f"event_{medication_key}_with_clinical_any_{d}_rate",
+                        numerator=f"{medication_key}_with_clinical_any",
+                        denominator=f"event_{medication_key}",
+                        group_by=[d],
+                        small_number_suppression=suppress,
+                    ),
+                ]
+            )
 
 for clinical_key in list(clinical_event_codelists.keys()):
     measures.extend(
@@ -381,15 +401,20 @@ for clinical_key in list(clinical_event_codelists.keys()):
                 group_by=[f"event_code_{clinical_key}"],
                 small_number_suppression=False,
             ),
-            Measure(
-                id=f"event_{clinical_key}_with_medication_any_rate",
-                numerator=f"{clinical_key}_with_medication_any",
-                denominator=f"event_{clinical_key}",
-                group_by=["population"],
-                small_number_suppression=True,
-            ),
         ]
     )
+    if frequency == "monthly":
+        measures.extend(
+            [
+                Measure(
+                    id=f"event_{clinical_key}_with_medication_any_rate",
+                    numerator=f"{clinical_key}_with_medication_any",
+                    denominator=f"event_{clinical_key}",
+                    group_by=["population"],
+                    small_number_suppression=True,
+                )
+            ]
+        )
 
     for d in demographics.keys():
         if d == "practice":
@@ -404,16 +429,21 @@ for clinical_key in list(clinical_event_codelists.keys()):
                     denominator="population",
                     group_by=[d],
                     small_number_suppression=suppress,
-                ),
-                Measure(
-                    id=f"event_{clinical_key}_with_medication_any_{d}_rate",
-                    numerator=f"{clinical_key}_with_medication_any",
-                    denominator=f"event_{clinical_key}",
-                    group_by=[d],
-                    small_number_suppression=suppress,
-                ),
+                )
             ]
         )
+        if frequency == "monthly":
+            measures.extend(
+                [
+                    Measure(
+                        id=f"event_{clinical_key}_with_medication_any_{d}_rate",
+                        numerator=f"{clinical_key}_with_medication_any",
+                        denominator=f"event_{clinical_key}",
+                        group_by=[d],
+                        small_number_suppression=suppress,
+                    )
+                ]
+            )
 
 # Medication any and clinical any
 measures.extend(

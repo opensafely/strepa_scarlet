@@ -58,7 +58,10 @@ actions:
           cohort_report: output/curation/input_report_2022-07-01.html
 
   curation_measures_weekly:
-    run: cohortextractor:latest generate_measures --study-definition study_definition_report --output-dir=output/curation --skip-existing
+    run: cohortextractor:latest generate_measures
+      --study-definition study_definition_report
+      --output-dir=output/curation
+      --param frequency=weekly
     needs: [curation_weekly]
     outputs:
       moderately_sensitive:
@@ -160,7 +163,10 @@ actions:
         cohort: output/report/joined/input_report_20*.csv.gz
 
   generate_measures_report:
-    run: cohortextractor:latest generate_measures --study-definition study_definition_report --output-dir=output/report/joined
+    run: cohortextractor:latest generate_measures
+        --study-definition study_definition_report
+        --param frequency=monthly
+        --output-dir=output/report/joined
     needs: [join_cohorts_report]
     outputs:
       moderately_sensitive:
@@ -326,8 +332,9 @@ actions:
 
   generate_study_population_report_weekly_3:
     run: cohortextractor:latest generate_cohort
-      --study-definition study_definition_report_weekly
+      --study-definition study_definition_report
       --index-date-range "2023-01-26 to 2023-02-15 by week"
+      --param frequency=weekly
       --output-dir=output/report/weekly
       --output-format=csv.gz
     outputs:
@@ -335,7 +342,10 @@ actions:
         cohort: output/report/weekly/inpu*.csv.gz
 
   generate_measures_report_weekly:
-    run: cohortextractor:latest generate_measures --study-definition study_definition_report_weekly --output-dir=output/report/weekly
+    run: cohortextractor:latest generate_measures
+      --study-definition study_definition_report
+      --param frequency=weekly
+      --output-dir=output/report/weekly
     needs: [generate_study_population_report_weekly_1, generate_study_population_report_weekly_2, generate_study_population_report_weekly_3]
     outputs:
       moderately_sensitive:
