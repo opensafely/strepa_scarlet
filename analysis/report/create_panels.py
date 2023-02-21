@@ -40,9 +40,11 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_pattern_and_list(key, column_to_plot, first):
+def get_pattern_and_list(key, column_to_plot, first, frequency):
     if column_to_plot == "value":
         demographics = ["age_band", "imd", "region", "practice"]
+        if frequency == "month":
+            demographics += ["ethnicity"]
         return (
             None,
             [first] + [f"event_{key}_{d}_rate" for d in demographics],
@@ -63,9 +65,11 @@ def panels_with(measure_table, output_dir, frequency):
         first = f"event_{prefix}_rate"
         column_to_plot = "value"
         pattern, measure_list = get_pattern_and_list(
-            prefix, column_to_plot, first
+            prefix, column_to_plot, first, frequency
         )
         subset = subset_table(measure_table, pattern, measure_list)
+        if subset.empty:
+            return
         # NOTE: the denominator of these measures is not the population, use %
         chart, lgds = get_group_chart(
             subset,
@@ -95,7 +99,7 @@ def panels_loop(measure_table, output_dir, frequency):
         # Rate
         column_to_plot = "value"
         pattern, measure_list = get_pattern_and_list(
-            key, column_to_plot, first
+            key, column_to_plot, first, frequency
         )
         subset = subset_table(measure_table, pattern, measure_list)
         chart, lgds = get_group_chart(
@@ -110,11 +114,7 @@ def panels_loop(measure_table, output_dir, frequency):
             output_dir=output_dir,
             frequency=frequency,
         )
-        # TODO: TEMP FIX FOR STREP A SORE THROAT
-        title = key
-        if key == "strep_a_sore_throat":
-            title = "sore_throat_tonsillitis"
-        output_name = f"{title}_by_subgroup"
+        output_name = f"{key}_by_subgroup"
         plot_title = filename_to_title(output_name)
         write_group_chart(chart, lgds, output_dir / output_name, plot_title)
         chart.close()
@@ -122,7 +122,7 @@ def panels_loop(measure_table, output_dir, frequency):
         # Count
         column_to_plot = "numerator"
         pattern, measure_list = get_pattern_and_list(
-            key, column_to_plot, first
+            key, column_to_plot, first, frequency
         )
         subset = subset_table(measure_table, pattern, measure_list)
         chart_count, lgds_count = get_group_chart(
@@ -137,7 +137,7 @@ def panels_loop(measure_table, output_dir, frequency):
             output_dir=output_dir,
             frequency=frequency,
         )
-        output_name_count = f"{title}_by_subgroup_count"
+        output_name_count = f"{key}_by_subgroup_count"
         plot_title_count = filename_to_title(output_name_count)
         write_group_chart(
             chart_count,

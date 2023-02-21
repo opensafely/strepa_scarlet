@@ -9,7 +9,7 @@ from codelists import (
     cefalexin_codes,
     co_amoxiclav_codes,
     flucloxacillin_codes,
-    strep_a_sore_throat_codes,
+    sore_throat_tonsillitis_codes,
     sore_throat_prediction_codes,
     throat_swab_codes,
 )
@@ -61,8 +61,8 @@ study = StudyDefinition(
             "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
-    strep_a_sore_throat=patients.with_these_clinical_events(
-        codelist=strep_a_sore_throat_codes,
+    sore_throat_tonsillitis=patients.with_these_clinical_events(
+        codelist=sore_throat_tonsillitis_codes,
         between=["index_date", "last_day_of_month(index_date)"],
         returning="binary_flag",
         return_expectations={
@@ -189,8 +189,8 @@ study = StudyDefinition(
     fever_pain_diagnosis=patients.categorised_as(
         {
             "missing": "DEFAULT",
-            "sore_throat_fever_pain_prescription": "any_prescription AND strep_a_sore_throat AND sore_throat_prediction",
-            "sore_throat_throat_swab_prescription": "any_prescription AND strep_a_sore_throat AND throat_swab",
+            "sore_throat_fever_pain_prescription": "any_prescription AND sore_throat_tonsillitis AND sore_throat_prediction",
+            "sore_throat_throat_swab_prescription": "any_prescription AND sore_throat_tonsillitis AND throat_swab",
             "fever_pain_prescription": "any_prescription AND sore_throat_prediction",
             "throat_swab_prescription": "any_prescription AND throat_swab",
             "prescription": "any_prescription",

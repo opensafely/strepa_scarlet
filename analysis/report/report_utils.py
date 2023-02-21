@@ -26,7 +26,7 @@ MEDICATION_TO_CODELIST = {
 
 CLINICAL_TO_CODELIST = {
     "scarlet_fever": "codelists/user-chriswood-scarlet-fever.csv",
-    "strep_a_sore_throat": "codelists/user-chriswood-group-a-streptococcal-sore-throat.csv",
+    "sore_throat_tonsillitis": "codelists/user-chriswood-group-a-streptococcal-sore-throat.csv",
     "invasive_strep_a": "codelists/user-chriswood-invasive-group-a-strep.csv",
 }
 
@@ -113,12 +113,6 @@ def plot_measures(
 
     df_copy = df_copy.set_index("date")
     if category:
-        # TODO: TEMP FIX FOR STREP A SORE THROAT
-        df_copy[category] = df_copy[category].replace(
-            {
-                "event_strep_a_sore_throat_rate": "event_sore_throat_tonsillitis_rate"
-            }
-        )
         # Set up category to have clean labels
         repeated = autoselect_labels(df_copy[category])
         df_copy[category] = df_copy.apply(
