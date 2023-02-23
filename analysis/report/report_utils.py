@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from collections import Counter
 from pathlib import Path
-from IPython.display import display, HTML, Image
+from IPython.display import display, Markdown, HTML, Image
 import matplotlib.ticker as ticker
 
 colour_palette = sns.color_palette("Paired", 12)
@@ -29,6 +29,12 @@ CLINICAL_TO_CODELIST = {
     "sore_throat_tonsillitis": "codelists/user-chriswood-group-a-streptococcal-sore-throat.csv",
     "invasive_strep_a": "codelists/user-chriswood-invasive-group-a-strep.csv",
 }
+
+
+def get_codelist_dict():
+    with open(Path.cwd().parent.parent / "codelists" / "codelists.json") as f:
+        data = json.load(f)
+    return data["files"]
 
 
 def save_to_json(d, filename: str):
@@ -269,6 +275,7 @@ def write_group_chart(group_chart, lgds, path, plot_title):
     )
 
 
+# NOTE: These paths will only work for notebook generation, which is run on /workspace
 REPORT_DIR = Path.cwd().parent.parent / "output/report"
 RESULTS_DIR = REPORT_DIR / "results"
 WEEKLY_RESULTS_DIR = REPORT_DIR / "weekly/results"
@@ -324,3 +331,129 @@ def display_top_5(file, dir=RESULTS_DIR):
         "Count of patients with code"
     ].apply(lambda x: "{:,}".format(x))
     display(HTML(df.to_html(index=False)))
+
+
+def display_standard_medicine():
+    display(
+        HTML(
+            "<details open style='border: 1px solid #aaa;padding: 0.5em 0.5em 0.5em'><b>Counts</b>: represent patients with at least one prescription event in that week. Patients with more than one of the same prescription in a week were only counted once. Counts <=5 were redacted and all numbers were rounded to the nearest 10.<br><b>Rates</b>: divide the count by the included study population and multiply by 1,000 to achieve a rate per 1,000 registered patients.<br><b>Note</b>: Prescribing data is based on prescriptions issued within the Electronic Health Record. Prescriptions may not always be dispensed or in some cases the dispensed item may differ from the prescribed item due to the use of a <a href='https://www.nhsbsa.nhs.uk/pharmacies-gp-practices-and-appliance-contractors/serious-shortage-protocols-ssps'>Serious Shortage Protocol</a><br><b>Note</b>: Weeks run from Thursday to Wednesday to enable the extraction of the most up-to-date data</details>"
+        )
+    )
+
+
+def display_standard_clinical():
+    display(
+        HTML(
+            "<details open style='border: 1px solid #aaa;padding: 0.5em 0.5em 0.5em'><b>Counts</b>: represent patients with at least one clinical event in that week. Patients with more than one of the same clinical event in a week were only counted once. Counts <=5 were redacted and all numbers were rounded to the nearest 10.<br><b>Rates</b>: divide the count by the included study population and multiply by 1,000 to achieve a rate per 1,000 registered patients.<br><b>Note</b>: Clinical events data is based on a clinical code being added to a patient's record. This is often added by a clinician during a consultation to indicate the presence of a sign/symptom (e.g. sore throat) or that a clinical diagnosis has been made (e.g. Scarlet Fever). These codes do not necessarily indicate positive test results.<br><b>Note</b>: Weeks run from Thursday to Wednesday to enable the extraction of the most up-to-date data.</details>"
+        )
+    )
+
+
+def display_medicine(
+    medicine_path, medicine_name, start_date, end_date, results_dir
+):
+    CODELIST_DICT = get_codelist_dict()
+    try:
+        local_codelist = MEDICATION_TO_CODELIST[medicine_path]
+        codelist_name = Path(local_codelist).parts[-1]
+        codelist_url = CODELIST_DICT[codelist_name]["url"]
+    except KeyError as e:
+        raise e
+
+    display(
+        Markdown(f"### {medicine_name.title()} [(Codelist)]({codelist_url})")
+    )
+    display(
+        Markdown(
+            f"The below charts show patients prescribed {medicine_name} between {start_date} and {end_date}. The codelist used to identify {medicine_name} is [here]({codelist_url})."
+        )
+    )
+    display_standard_medicine()
+    display(
+        Markdown(
+            f"The following table shows the top 5 used codes within the {medicine_name} codelist after summing code usage over the entire study period. Codes with low usage that would have been redacted have been grouped into the category 'Other'. The proportion was computed after rounding. If more than 5 codes in the codelist are used, the proportion will not add up to 100%."
+        )
+    )
+    display_top_5(
+        f"top_5_code_table_event_code_{medicine_path}_rate.csv",
+        dir=WEEKLY_RESULTS_DIR,
+    )
+    display(
+        Markdown(
+            "The second chart illustrates top code usage over time. Codes that were in the top 5 either in the first or last week of the study period were included."
+        )
+    )
+    display_image(
+        f"event_code_{medicine_path}_rate_top_5_codes_over_time.png",
+        dir=WEEKLY_RESULTS_DIR,
+    )
+    display(
+        Markdown(
+            f"The below charts show the weekly count and rate of patients with recorded {medicine_name} events across the study period, with a breakdown by key demographic subgroups."
+        )
+    )
+    display(Markdown("##### Count"))
+    display_image(
+        f"{medicine_path}_by_subgroup_count.png", dir=WEEKLY_RESULTS_DIR
+    )
+    display(Markdown("##### Rate"))
+    display_image(f"{medicine_path}_by_subgroup.png", dir=WEEKLY_RESULTS_DIR)
+
+
+def display_clinical(
+    clinical_path,
+    clinical_name,
+    start_date,
+    end_date,
+    results_dir,
+    include_minimum=False,
+):
+    CODELIST_DICT = get_codelist_dict()
+    try:
+        local_codelist = CLINICAL_TO_CODELIST[clinical_path]
+        codelist_name = Path(local_codelist).parts[-1]
+        codelist_url = CODELIST_DICT[codelist_name]["url"]
+    except KeyError as e:
+        raise e
+
+    display(
+        Markdown(f"### {clinical_name.title()} [(Codelist)]({codelist_url})")
+    )
+    display(
+        Markdown(
+            f"The below charts show patients with recorded events of {clinical_name} between {start_date} and {end_date}. The codelist used to identify {clinical_name} is [here]({codelist_url})."
+        )
+    )
+    display_standard_clinical()
+    display(
+        Markdown(
+            f"The following table shows the 5 most used codes within the {clinical_name} codelist after summing code usage over the entire study period. Codes with low usage that would have been redacted have been grouped into the category 'Other'. The proportion was computed after rounding. If more than 5 codes in the codelist are used, the proportion will not add up to 100%."
+        )
+    )
+    display_top_5(
+        f"top_5_code_table_event_code_{clinical_path}_rate.csv",
+        dir=WEEKLY_RESULTS_DIR,
+    )
+    if not include_minimum:
+        display(
+            Markdown(
+                "The second chart illustrates top code usage over time. Codes that were in the top 5 either in the first or last week of the study period were included."
+            )
+        )
+        display_image(
+            f"event_code_{clinical_path}_rate_top_5_codes_over_time.png",
+            dir=WEEKLY_RESULTS_DIR,
+        )
+        display(
+            Markdown(
+                f"The below charts show the weekly count and rate of patients with recorded {clinical_name} events across the study period, with a breakdown by key demographic subgroups."
+            )
+        )
+        display(Markdown("##### Count"))
+        display_image(
+            f"{clinical_path}_by_subgroup_count.png", dir=WEEKLY_RESULTS_DIR
+        )
+        display(Markdown("##### Rate"))
+        display_image(
+            f"{clinical_path}_by_subgroup.png", dir=WEEKLY_RESULTS_DIR
+        )
