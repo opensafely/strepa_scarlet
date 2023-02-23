@@ -164,7 +164,6 @@ def plot_measures(
             sorted(df_copy[category].unique()),
             bbox_to_anchor=(1.04, 1),
             loc="upper left",
-            prop={"size": 6},
         )
 
     plt.tight_layout()
