@@ -38,8 +38,6 @@ def main():
     df = coerce_numeric(df)
     df["rate"] = 1000 * df["value"]
 
-    # Stacked bar chart of population measures
-    # TODO: name has extra text i.e. event_*_rate
     population_measures = df[df.group == "population"]
     # Medications
     medication_measures = [
