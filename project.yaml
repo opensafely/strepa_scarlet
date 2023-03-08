@@ -145,6 +145,17 @@ actions:
       highly_sensitive:
         cohort: output/report/in*-01.csv.gz
 
+  generate_study_population_report_monthly_5:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_report
+      --index-date-range "2023-01-01 to 2023-02-01 by month"
+      --param frequency=monthly
+      --output-dir=output/report
+      --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/report/i*-01.csv.gz
+
   join_cohorts_report:
     run: >
       python:latest python analysis/cohort_joiner.py
@@ -157,6 +168,7 @@ actions:
       generate_study_population_report_monthly_2,
       generate_study_population_report_monthly_3,
       generate_study_population_report_monthly_4,
+      generate_study_population_report_monthly_5,
       generate_study_population_report_ethnicity]
     outputs:
       highly_sensitive:
