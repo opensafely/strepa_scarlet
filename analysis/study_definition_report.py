@@ -194,7 +194,7 @@ clinical_events = [
             between=["index_date", ENDDATE],
             returning="binary_flag",
             include_date_of_match=True,
-            date_format="YYYY-MM",
+            date_format="YYYY-MM-DD",
             return_expectations={"incidence": 0.1},
         ),
         f"event_code_{clinical_key}": patients.with_these_clinical_events(
@@ -220,8 +220,8 @@ if frequency == "monthly":
                 f"{clinical_key}_with_medication_any": patients.with_these_medications(
                     codelist=all_medication_codes,
                     between=[
-                        f"event_{clinical_key}_date",
-                        f"event_{clinical_key}_date",
+                        f"event_{clinical_key}_date - 7 days",
+                        f"event_{clinical_key}_date + 14 days",
                     ],
                     returning="binary_flag",
                 )
@@ -236,7 +236,7 @@ medication_events = [
             between=["index_date", ENDDATE],
             returning="binary_flag",
             include_date_of_match=True,
-            date_format="YYYY-MM",
+            date_format="YYYY-MM-DD",
             return_expectations={"incidence": 0.1},
         ),
         f"event_code_{medication_key}": patients.with_these_medications(
@@ -262,8 +262,8 @@ if frequency == "monthly":
                 f"{medication_key}_with_clinical_any": patients.with_these_clinical_events(
                     codelist=all_clinical_codes,
                     between=[
-                        f"event_{medication_key}_date",
-                        f"event_{medication_key}_date",
+                        f"event_{medication_key}_date - 14 days",
+                        f"event_{medication_key}_date + 7 days",
                     ],
                     returning="binary_flag",
                 )
