@@ -244,12 +244,27 @@ def count_impossible_dates(dataframe, reference_date, granularity):
     return (impossible_early, future_date)
 
 
+def col_diff(input_dataframe, first_col, second_col):
+    try:
+        cols = input_dataframe[[first_col, second_col]]
+    except KeyError:
+        raise KeyError("Check that the provided keys are in the dataframe")
+    filtered = cols.dropna()
+    diff = filtered[first_col] - filtered[second_col]
+    value_counts = diff.value_counts().sort_index()
+    rounded = redact_round_series(value_counts)
+    df = rounded.to_frame(name="Count")
+    df.index.name = f"{first_col}-{second_col}"
+    return df
+
+
 def get_dataset_report(
     input_file,
     table_summary,
     column_summaries,
     impossible_early,
     impossible_date,
+    diff,
 ):
     return TEMPLATE.render(
         input_file=input_file,
@@ -257,6 +272,7 @@ def get_dataset_report(
         column_summaries=column_summaries,
         impossible_early=impossible_early,
         impossible_date=impossible_date,
+        diff=diff,
     )
 
 
@@ -282,6 +298,9 @@ def main():
         impossible_early, future_date = count_impossible_dates(
             input_dataframe, reference_date, granularity
         )
+        diff = pandas.Series(dtype="float64")
+        if hasattr(args, "col_1") and hasattr(args, "col_2"):
+            diff = col_diff(input_dataframe, args.col_1, args.col_2)
 
         output_file = output_dir / f"{get_name(input_file)}.html"
         dataset_report = get_dataset_report(
@@ -290,6 +309,7 @@ def main():
             column_summaries,
             impossible_early,
             future_date,
+            diff,
         )
         write_dataset_report(output_file, dataset_report)
 
@@ -326,6 +346,14 @@ def parse_args():
         choices=["year", "month", "day"],
         help="Date granularity of the input file",
     )
+    subparsers = parser.add_subparsers(
+        required=False, help="Optionally diff two columns"
+    )
+    diff_group = subparsers.add_parser(
+        "diff", help="Provide two column names to diff"
+    )
+    diff_group.add_argument("--col-1", required=True)
+    diff_group.add_argument("--col-2", required=True)
     return parser.parse_args()
 
 

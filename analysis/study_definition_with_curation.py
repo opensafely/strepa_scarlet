@@ -30,8 +30,8 @@ def generate_expectations_codes(codelist, incidence=0.5):
     return expectations
 
 
-start_date = "2019-01-01"
-end_date = "2022-01-01"
+start_date = "2018-01-01"
+end_date = "2018-04-01"
 
 study = StudyDefinition(
     index_date=start_date,
@@ -59,20 +59,22 @@ study = StudyDefinition(
         between=["index_date", "last_day_of_month(index_date)"],
         returning="binary_flag",
         include_date_of_match=True,
-        date_format="YYYY-MM",
+        date_format="YYYY-MM-DD",
         return_expectations={
             "incidence": 0.5,
-            "date": {"earliest": "1900-01-01", "latest": "today"},
         },
+    ),
+    scarlet_fever_date_short=patients.date_of(
+        "scarlet_fever", date_format="YYYY-MM"
     ),
     any_prescription=patients.with_these_medications(
         codelist=any_medication_codes,
         between=["index_date", "last_day_of_month(index_date)"],
         returning="binary_flag",
         include_date_of_match=True,
+        date_format="YYYY-MM-DD",
         return_expectations={
             "incidence": 0.5,
-            "date": {"earliest": "1900-01-01", "latest": "today"},
         },
     ),
     any_prescription_count=patients.with_these_medications(
@@ -108,6 +110,14 @@ study = StudyDefinition(
         between=[
             "scarlet_fever_date",
             "scarlet_fever_date",
+        ],
+        returning="binary_flag",
+    ),
+    scarlet_fever_with_medication_any_same_day_short=patients.with_these_medications(
+        codelist=any_medication_codes,
+        between=[
+            "scarlet_fever_date_short",
+            "scarlet_fever_date_short",
         ],
         returning="binary_flag",
     ),
