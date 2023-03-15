@@ -91,23 +91,24 @@ actions:
   curation_with:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_with_curation
-      --index-date-range "2019-01-01 to 2019-02-01 by month"
+      --index-date-range "2018-01-01 to 2018-04-01 by month"
       --output-dir=output/curation
       --output-format=feather
     outputs:
       highly_sensitive:
-        cohort: output/curation/input_with_curation_2019-*-01.feather
+        cohort: output/curation/input_with_curation_2018-*-01.feather
 
   dataset_report_with:
       run: python:latest python analysis/dataset_report.py
-           --input-files output/curation/input_with_curation_2019-*-01.feather
+           --input-files output/curation/input_with_curation_2018-*-01.feather
            --output-dir output/curation/
            --granularity "day"
+           diff --col-1 "scarlet_fever_date" --col-2 "any_prescription_date"
       needs: [curation_with]
       outputs:
         moderately_sensitive:
           # Only output the single summary file
-          cohort_report: output/curation/input_with_curation_2019-*-01.html
+          cohort_report: output/curation/input_with_curation_2018-*-01.html
   ### End curation check ###
 
   ### MONTHLY ###

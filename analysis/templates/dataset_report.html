@@ -31,6 +31,10 @@
         {{ impossible_early }}
         <p>Count of patients with dates after the current date</p>
         {{ impossible_date }}
+        {% if not diff.empty %}
+            <h2>Column Diff Summary</h2>
+            {{ diff }}
+        {% endif %}
     </article>
 </body>
 
