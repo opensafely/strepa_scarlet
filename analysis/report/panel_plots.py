@@ -199,10 +199,14 @@ def plot_axis(
         numeric = numeric.set_index("date")
         group_by = ["group", "year"]
     for plot_group, plot_group_data in numeric.groupby(group_by):
+        if isinstance(plot_group, tuple):
+            label = plot_group[1]
+        else:
+            label = plot_group
         ax.plot(
             plot_group_data.index,
             plot_group_data[column_to_plot],
-            label=plot_group,
+            label=label,
         )
         if ci:
             plot_cis(ax, plot_group_data)
