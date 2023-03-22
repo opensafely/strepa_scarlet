@@ -264,6 +264,7 @@ actions:
       --input-file output/report/results/measure_rounded.csv
       --practice-file output/report/results/measure_unrounded.csv
       --output-dir output/report/results
+      --xtick-frequency 3
     needs: [join_measures_rounded, join_measures_unrounded]
     outputs:
       moderately_sensitive:

@@ -230,6 +230,7 @@ def get_group_chart(
     exclude_group=None,
     output_dir=None,
     frequency="month",
+    xtick_frequency=1,
 ):
     # NOTE: constrained_layout=True available in matplotlib>=3.5
     figure = plt.figure(figsize=(columns * 6, columns * 5))
@@ -336,6 +337,9 @@ def get_group_chart(
             )
             ax.set_xticks(xticks)
             ax.set_xticklabels([x.strftime("%B %Y") for x in xticks])
+            for index, label in enumerate(ax.xaxis.get_ticklabels()):
+                if index % xtick_frequency != 0:
+                    label.set_visible(False)
         elif not stack_years and frequency == "week":
             # show 1 tick per week
             xticks = pandas.date_range(
@@ -434,6 +438,12 @@ def parse_args():
         "--exclude-group",
         help="Exclude group with this label from plot, e.g. Unknown",
     )
+    parser.add_argument(
+        "--xtick-frequency",
+        help="Display every nth xtick",
+        type=int,
+        default=1,
+    )
     return parser.parse_args()
 
 
@@ -452,6 +462,7 @@ def main():
     scale = args.scale
     confidence_intervals = args.confidence_intervals
     exclude_group = args.exclude_group
+    xtick_frequency = args.xtick_frequency
 
     measure_table = get_measure_tables(input_file)
     if practice_file:
@@ -474,6 +485,7 @@ def main():
         ci=confidence_intervals,
         exclude_group=exclude_group,
         output_dir=output_dir,
+        xtick_frequency=xtick_frequency,
     )
     write_group_chart(chart, lgds, output_dir / output_name, plot_title)
     chart.close()

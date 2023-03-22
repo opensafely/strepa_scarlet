@@ -37,6 +37,12 @@ def parse_args():
         choices=["month", "week"],
         help="Frequency of data",
     )
+    parser.add_argument(
+        "--xtick-frequency",
+        help="Display every nth xtick",
+        type=int,
+        default=1,
+    )
     return parser.parse_args()
 
 
@@ -57,7 +63,7 @@ def get_pattern_and_list(key, column_to_plot, first, frequency):
         )
 
 
-def panels_with(measure_table, output_dir, frequency):
+def panels_with(measure_table, output_dir, frequency, xtick_frequency):
     pairs = {x: "clinical_any" for x in MEDICATION_TO_CODELIST.keys()}
     pairs.update({x: "medication_any" for x in CLINICAL_TO_CODELIST.keys()})
     for event, with_key in pairs.items():
@@ -82,6 +88,7 @@ def panels_with(measure_table, output_dir, frequency):
             exclude_group="Missing",
             output_dir=output_dir,
             frequency=frequency,
+            xtick_frequency=xtick_frequency,
         )
         output_name = f"{prefix}_by_subgroup"
         plot_title = filename_to_title(output_name)
@@ -89,7 +96,7 @@ def panels_with(measure_table, output_dir, frequency):
         chart.close()
 
 
-def panels_loop(measure_table, output_dir, frequency):
+def panels_loop(measure_table, output_dir, frequency, xtick_frequency):
     for key in (
         list(MEDICATION_TO_CODELIST.keys())
         + ["medication_any", "clinical_any"]
@@ -113,6 +120,7 @@ def panels_loop(measure_table, output_dir, frequency):
             exclude_group="Missing",
             output_dir=output_dir,
             frequency=frequency,
+            xtick_frequency=xtick_frequency,
         )
         output_name = f"{key}_by_subgroup"
         plot_title = filename_to_title(output_name)
@@ -136,6 +144,7 @@ def panels_loop(measure_table, output_dir, frequency):
             exclude_group="Missing",
             output_dir=output_dir,
             frequency=frequency,
+            xtick_frequency=xtick_frequency,
         )
         output_name_count = f"{key}_by_subgroup_count"
         plot_title_count = filename_to_title(output_name_count)
@@ -154,6 +163,7 @@ def main():
     practice_file = args.practice_file
     output_dir = args.output_dir
     frequency = args.frequency
+    xtick_frequency = args.xtick_frequency
 
     measure_table = get_measure_tables(input_file)
     if practice_file:
@@ -161,8 +171,18 @@ def main():
         practice_table = practice_table[practice_table.category == "practice"]
         measure_table = pandas.concat([measure_table, practice_table])
 
-    panels_loop(measure_table, output_dir, frequency=frequency)
-    panels_with(measure_table, output_dir, frequency=frequency)
+    panels_loop(
+        measure_table,
+        output_dir,
+        frequency=frequency,
+        xtick_frequency=xtick_frequency,
+    )
+    panels_with(
+        measure_table,
+        output_dir,
+        frequency=frequency,
+        xtick_frequency=xtick_frequency,
+    )
 
 
 if __name__ == "__main__":
