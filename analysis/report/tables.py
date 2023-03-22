@@ -6,6 +6,7 @@ from report_utils import (
     get_measure_tables,
     subset_table,
 )
+import pandas
 
 
 def count_table(measure_table):
@@ -17,6 +18,18 @@ def count_table(measure_table):
     table = measure_table.pivot(
         index="date", columns="name", values="numerator"
     )
+
+    # Assert that the patient count is the same for all columns
+    denominator = measure_table.pivot(
+        index="date", columns="name", values="denominator"
+    )
+    denominator_test = denominator.to_numpy()
+    assert ((denominator_test[0] == denominator_test).all()).all()
+    denominator = denominator.iloc[:, 0]
+    denominator.name = "Patient Count"
+
+    # Add the patient count (denominator) as the first column
+    table = pandas.concat([denominator, table], axis=1)
     return table
 
 
