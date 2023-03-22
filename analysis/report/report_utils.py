@@ -312,7 +312,10 @@ def display_event_counts(file, period, dir=RESULTS_DIR):
 
 def display_table(file, dir=RESULTS_DIR):
     table = pd.read_csv(f"{dir}/{file}")
-    display(HTML(table.to_html(index=False)))
+    # Make the table fit without scrolling for export to pdf
+    # Will not necessarily work if more columns are added
+    style = "<style>.dataframe tr { font-size: 8pt; }</style>"
+    display(HTML(style + table.to_html(index=False)))
 
 
 def display_image(file, dir=RESULTS_DIR):
