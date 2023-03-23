@@ -357,7 +357,7 @@ def get_group_chart(
             ax.set_xticks(xticks)
             ax.set_xticklabels([x.strftime("%d-%m-%Y") for x in xticks])
 
-    plt.subplots_adjust(wspace=0.7, hspace=0.6)
+    plt.subplots_adjust(wspace=0.7, hspace=0.7)
     return (plt, lgds)
 
 
