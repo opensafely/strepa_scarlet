@@ -46,20 +46,21 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_pattern_and_list(key, column_to_plot, first, frequency):
+def get_pattern_and_list(key, column_to_plot, frequency):
     if column_to_plot == "value":
         demographics = ["age_band", "imd", "region", "practice"]
         if frequency == "month":
             demographics += ["ethnicity"]
         return (
             None,
-            [first] + [f"event_{key}_{d}_rate" for d in demographics],
+            [f"event_{key}_{d}_rate" for d in demographics]
+            + [f"event_{key}_rate"],
         )
     else:
         return (
             None,
-            [first]
-            + [f"event_{key}_{d}_rate" for d in ["age_band", "region"]],
+            [f"event_{key}_{d}_rate" for d in ["age_band", "region"]]
+            + [f"event_{key}_rate"],
         )
 
 
@@ -68,10 +69,17 @@ def panels_with(measure_table, output_dir, frequency, xtick_frequency):
     pairs.update({x: "medication_any" for x in CLINICAL_TO_CODELIST.keys()})
     for event, with_key in pairs.items():
         prefix = f"{event}_with_{with_key}"
-        first = f"event_{prefix}_rate"
+        order = [
+            "population",
+            "practice",
+            "age_band",
+            "region",
+            "imd",
+            "ethnicity",
+        ]
         column_to_plot = "value"
         pattern, measure_list = get_pattern_and_list(
-            prefix, column_to_plot, first, frequency
+            prefix, column_to_plot, frequency
         )
         subset = subset_table(measure_table, pattern, measure_list)
         if subset.empty:
@@ -79,7 +87,7 @@ def panels_with(measure_table, output_dir, frequency, xtick_frequency):
         # NOTE: the denominator of these measures is not the population, use %
         chart, lgds = get_group_chart(
             subset,
-            first,
+            order,
             column_to_plot=column_to_plot,
             columns=2,
             date_lines=None,
@@ -102,16 +110,23 @@ def panels_loop(measure_table, output_dir, frequency, xtick_frequency):
         + ["medication_any", "clinical_any"]
         + list(CLINICAL_TO_CODELIST.keys())
     ):
-        first = f"event_{key}_rate"
+        order = [
+            "population",
+            "practice",
+            "age_band",
+            "region",
+            "imd",
+            "ethnicity",
+        ]
         # Rate
         column_to_plot = "value"
         pattern, measure_list = get_pattern_and_list(
-            key, column_to_plot, first, frequency
+            key, column_to_plot, frequency
         )
         subset = subset_table(measure_table, pattern, measure_list)
         chart, lgds = get_group_chart(
             subset,
-            first,
+            order,
             column_to_plot=column_to_plot,
             columns=2,
             date_lines=None,
@@ -130,12 +145,12 @@ def panels_loop(measure_table, output_dir, frequency, xtick_frequency):
         # Count
         column_to_plot = "numerator"
         pattern, measure_list = get_pattern_and_list(
-            key, column_to_plot, first, frequency
+            key, column_to_plot, frequency
         )
         subset = subset_table(measure_table, pattern, measure_list)
         chart_count, lgds_count = get_group_chart(
             subset,
-            first,
+            order,
             column_to_plot=column_to_plot,
             columns=2,
             date_lines=None,

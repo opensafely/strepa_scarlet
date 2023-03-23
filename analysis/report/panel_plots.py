@@ -90,11 +90,18 @@ def is_bool_as_int(series):
         return False
 
 
-def reorder_dataframe(measure_table, first):
-    """Reorder the dataframe with rows with name matching 'first' first"""
+def reorder_dataframe(measure_table, order):
+    """Reorder the dataframe sorting first by the provided order
+    This will ignore provided strings that do not match the data"""
+    all_categories = set(measure_table.category.unique())
+    remaining = all_categories - set(order)
+
+    complete_order = order + list(remaining)
+    order_dict = {x: index for index, x in enumerate(complete_order)}
+
     copy = measure_table.copy()
-    copy["sorter"] = measure_table.name == first
-    copy = copy.sort_values("sorter", ascending=False)
+    copy["sorter"] = copy["category"].map(order_dict)
+    copy = copy.sort_values("sorter", ascending=True)
     copy = copy.drop("sorter", axis=1)
     return copy
 
@@ -181,7 +188,7 @@ def plot_axis(
     Within a figure, code to plot a single axis as a line chart
     """
     # We need to sort by date before setting it as index
-    # If a 'first' group was specified, date could be out of order
+    # If an 'order' was specified, date could be out of order
     panel_group_data = panel_group_data.sort_values("date")
     panel_group_data = panel_group_data.set_index("date")
     is_bool = is_bool_as_int(panel_group_data.group)
@@ -224,7 +231,7 @@ def plot_axis(
 
 def get_group_chart(
     measure_table,
-    first,
+    order,
     column_to_plot,
     stack_years=False,
     columns=2,
@@ -245,12 +252,8 @@ def get_group_chart(
         "ncol": 1,
     }
 
-    if first:
-        # NOTE: key param is in pandas>1.0
-        # measure_table = measure_table.sort_values(
-        #     by="name", key=lambda x: x == first, ascending=False
-        # )
-        measure_table = reorder_dataframe(measure_table, first)
+    if order:
+        measure_table = reorder_dataframe(measure_table, order)
 
     repeated = autoselect_labels(measure_table["name"])
     groups = measure_table.groupby("name", sort=False)
@@ -397,9 +400,10 @@ def parse_args():
         help="A list of one or more measure names",
     )
     parser.add_argument(
-        "--first",
+        "--order",
         required=False,
-        help="Measures pattern for plot that should appear first",
+        action="append",
+        help="List of categories for subplot order",
     )
     parser.add_argument(
         "--column-to-plot",
@@ -457,7 +461,7 @@ def main():
     practice_file = args.practice_file
     measures_pattern = args.measures_pattern
     measures_list = args.measures_list
-    first = args.first
+    order = args.order
     column_to_plot = args.column_to_plot
     stack_years = args.stack_years
     output_dir = args.output_dir
@@ -480,7 +484,7 @@ def main():
     subset = subset_table(measure_table, measures_pattern, measures_list)
     chart, lgds = get_group_chart(
         subset,
-        first=first,
+        order=order,
         column_to_plot=column_to_plot,
         stack_years=stack_years,
         columns=2,
