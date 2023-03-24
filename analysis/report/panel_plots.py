@@ -90,11 +90,18 @@ def is_bool_as_int(series):
         return False
 
 
-def reorder_dataframe(measure_table, first):
-    """Reorder the dataframe with rows with name matching 'first' first"""
+def reorder_dataframe(measure_table, order):
+    """Reorder the dataframe sorting first by the provided order
+    This will ignore provided strings that do not match the data"""
+    all_categories = set(measure_table.category.unique())
+    remaining = all_categories - set(order)
+
+    complete_order = order + list(remaining)
+    order_dict = {x: index for index, x in enumerate(complete_order)}
+
     copy = measure_table.copy()
-    copy["sorter"] = measure_table.name == first
-    copy = copy.sort_values("sorter", ascending=False)
+    copy["sorter"] = copy["category"].map(order_dict)
+    copy = copy.sort_values("sorter", ascending=True)
     copy = copy.drop("sorter", axis=1)
     return copy
 
@@ -181,7 +188,7 @@ def plot_axis(
     Within a figure, code to plot a single axis as a line chart
     """
     # We need to sort by date before setting it as index
-    # If a 'first' group was specified, date could be out of order
+    # If an 'order' was specified, date could be out of order
     panel_group_data = panel_group_data.sort_values("date")
     panel_group_data = panel_group_data.set_index("date")
     is_bool = is_bool_as_int(panel_group_data.group)
@@ -199,10 +206,14 @@ def plot_axis(
         numeric = numeric.set_index("date")
         group_by = ["group", "year"]
     for plot_group, plot_group_data in numeric.groupby(group_by):
+        if isinstance(plot_group, tuple):
+            label = plot_group[1]
+        else:
+            label = plot_group
         ax.plot(
             plot_group_data.index,
             plot_group_data[column_to_plot],
-            label=plot_group,
+            label=label,
         )
         if ci:
             plot_cis(ax, plot_group_data)
@@ -220,7 +231,7 @@ def plot_axis(
 
 def get_group_chart(
     measure_table,
-    first,
+    order,
     column_to_plot,
     stack_years=False,
     columns=2,
@@ -230,6 +241,7 @@ def get_group_chart(
     exclude_group=None,
     output_dir=None,
     frequency="month",
+    xtick_frequency=1,
 ):
     # NOTE: constrained_layout=True available in matplotlib>=3.5
     figure = plt.figure(figsize=(columns * 6, columns * 5))
@@ -240,12 +252,8 @@ def get_group_chart(
         "ncol": 1,
     }
 
-    if first:
-        # NOTE: key param is in pandas>1.0
-        # measure_table = measure_table.sort_values(
-        #     by="name", key=lambda x: x == first, ascending=False
-        # )
-        measure_table = reorder_dataframe(measure_table, first)
+    if order:
+        measure_table = reorder_dataframe(measure_table, order)
 
     repeated = autoselect_labels(measure_table["name"])
     groups = measure_table.groupby("name", sort=False)
@@ -336,6 +344,9 @@ def get_group_chart(
             )
             ax.set_xticks(xticks)
             ax.set_xticklabels([x.strftime("%B %Y") for x in xticks])
+            for index, label in enumerate(ax.xaxis.get_ticklabels()):
+                if index % xtick_frequency != 0:
+                    label.set_visible(False)
         elif not stack_years and frequency == "week":
             # show 1 tick per week
             xticks = pandas.date_range(
@@ -346,7 +357,7 @@ def get_group_chart(
             ax.set_xticks(xticks)
             ax.set_xticklabels([x.strftime("%d-%m-%Y") for x in xticks])
 
-    plt.subplots_adjust(wspace=0.7, hspace=0.6)
+    plt.subplots_adjust(wspace=0.7, hspace=0.7)
     return (plt, lgds)
 
 
@@ -389,9 +400,10 @@ def parse_args():
         help="A list of one or more measure names",
     )
     parser.add_argument(
-        "--first",
+        "--order",
         required=False,
-        help="Measures pattern for plot that should appear first",
+        action="append",
+        help="List of categories for subplot order",
     )
     parser.add_argument(
         "--column-to-plot",
@@ -434,6 +446,12 @@ def parse_args():
         "--exclude-group",
         help="Exclude group with this label from plot, e.g. Unknown",
     )
+    parser.add_argument(
+        "--xtick-frequency",
+        help="Display every nth xtick",
+        type=int,
+        default=1,
+    )
     return parser.parse_args()
 
 
@@ -443,7 +461,7 @@ def main():
     practice_file = args.practice_file
     measures_pattern = args.measures_pattern
     measures_list = args.measures_list
-    first = args.first
+    order = args.order
     column_to_plot = args.column_to_plot
     stack_years = args.stack_years
     output_dir = args.output_dir
@@ -452,6 +470,7 @@ def main():
     scale = args.scale
     confidence_intervals = args.confidence_intervals
     exclude_group = args.exclude_group
+    xtick_frequency = args.xtick_frequency
 
     measure_table = get_measure_tables(input_file)
     if practice_file:
@@ -465,7 +484,7 @@ def main():
     subset = subset_table(measure_table, measures_pattern, measures_list)
     chart, lgds = get_group_chart(
         subset,
-        first=first,
+        order=order,
         column_to_plot=column_to_plot,
         stack_years=stack_years,
         columns=2,
@@ -474,6 +493,7 @@ def main():
         ci=confidence_intervals,
         exclude_group=exclude_group,
         output_dir=output_dir,
+        xtick_frequency=xtick_frequency,
     )
     write_group_chart(chart, lgds, output_dir / output_name, plot_title)
     chart.close()
