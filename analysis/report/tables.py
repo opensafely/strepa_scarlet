@@ -23,8 +23,8 @@ def count_table(measure_table):
     denominator = measure_table.pivot(
         index="date", columns="name", values="denominator"
     )
-    denominator_test = denominator.to_numpy()
-    assert ((denominator_test[0] == denominator_test).all()).all()
+    # Ensure that all denominator columns are the same before selecting one
+    assert denominator.eq(denominator.iloc[:, 0], axis=0).all(axis=None)
     denominator = denominator.iloc[:, 0]
     denominator.name = "Patient Count"
 
