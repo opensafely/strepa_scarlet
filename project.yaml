@@ -65,7 +65,7 @@ actions:
     needs: [curation_weekly]
     outputs:
       moderately_sensitive:
-        measure_csv: output/curation/measure_event_*_rate.csv
+        measure_csv: output/curation/measure_event_*.csv
 
   curation_diagnostics:
     run: cohortextractor:latest generate_cohort
@@ -204,11 +204,12 @@ actions:
     needs: [join_cohorts_report]
     outputs:
       moderately_sensitive:
-        measure_csv: output/report/joined/measure_event_*_rate.csv
+        measure_csv: output/report/joined/measure_event_*.csv
 
   join_measures_rounded:
       run: python:latest python analysis/join_and_round.py
-           --input-files output/report/joined/measure_*_rate.csv
+           --input-files output/report/joined/measure_event_*_rate.csv
+           --input-files output/report/joined/measure_event_*_pcnt.csv
            --exclude-files output/report/joined/measure_*practice*_rate.csv
            --exclude-files output/report/joined/measure_event_code*_rate.csv
            --output-dir output/report/results
