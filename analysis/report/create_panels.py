@@ -91,7 +91,7 @@ def panels_with(measure_table, output_dir, frequency, xtick_frequency):
             column_to_plot=column_to_plot,
             columns=2,
             date_lines=None,
-            scale="percentage",
+            scale="rate",
             ci=None,
             exclude_group="Missing",
             output_dir=output_dir,

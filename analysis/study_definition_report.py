@@ -85,7 +85,6 @@ def generate_all_clinical():
 
 
 def generate_expectations_codes(codelist, incidence=0.5):
-
     expectations = {str(x): (1 - incidence) / 10 for x in codelist[0:10]}
     expectations[None] = incidence
     return expectations
@@ -348,6 +347,13 @@ for medication_key in list(medication_codelists.keys()):
                 Measure(
                     id=f"event_{medication_key}_with_clinical_any_rate",
                     numerator=f"{medication_key}_with_clinical_any",
+                    denominator="population",
+                    group_by=["population"],
+                    small_number_suppression=True,
+                ),
+                Measure(
+                    id=f"event_{medication_key}_with_clinical_any_pcnt",
+                    numerator=f"{medication_key}_with_clinical_any",
                     denominator=f"event_{medication_key}",
                     group_by=["population"],
                     small_number_suppression=True,
@@ -409,10 +415,17 @@ for clinical_key in list(clinical_event_codelists.keys()):
                 Measure(
                     id=f"event_{clinical_key}_with_medication_any_rate",
                     numerator=f"{clinical_key}_with_medication_any",
+                    denominator="population",
+                    group_by=["population"],
+                    small_number_suppression=True,
+                ),
+                Measure(
+                    id=f"event_{clinical_key}_with_medication_any_pcnt",
+                    numerator=f"{clinical_key}_with_medication_any",
                     denominator=f"event_{clinical_key}",
                     group_by=["population"],
                     small_number_suppression=True,
-                )
+                ),
             ]
         )
 
