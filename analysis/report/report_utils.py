@@ -407,7 +407,7 @@ def display_medicine(
         display(Markdown("##### Proportion with a clinical indication"))
         display(
             Markdown(
-                f"The below chart shows the monthly proportion of patients with recorded {medicine_name} events with any clinical indication listed in this report in the 14 days prior and 7 days after the prescribing event, with a breakdown by key demographic subgroups."
+                f"The below chart shows the monthly rate of patients with recorded {medicine_name} events with any clinical indication listed in this report in the 14 days prior and 7 days after the prescribing event, with a breakdown by key demographic subgroups."
             )
         )
         display_image(
@@ -479,7 +479,7 @@ def display_clinical(
             display(Markdown("##### Proportion with a medication"))
             display(
                 Markdown(
-                    f"The below chart shows the monthly proportion of patients with recorded {clinical_name} events with any prescription listed in this report in the 7 days prior and 14 days after the clinical event, with a breakdown by key demographic subgroups."
+                    f"The below chart shows the monthly rate of patients with recorded {clinical_name} events with any prescription listed in this report in the 7 days prior and 14 days after the clinical event, with a breakdown by key demographic subgroups."
                 )
             )
             display_image(
