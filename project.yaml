@@ -301,13 +301,13 @@ actions:
       --measures-list "event_sore_throat_tonsillitis_rate"
       --measures-list "event_invasive_strep_a_rate"
       --output-dir output/report/results
-      --output-name "all_diagnostics_by_year"
+      --output-name "any_clinical_event_by_year"
       --scale "rate"
       --stack-years
     needs: [join_measures_rounded]
     outputs:
       moderately_sensitive:
-        measure: output/report/results/all_diagnostics_by_year.png
+        measure: output/report/results/any_clinical_event_by_year.png
 
   event_counts_medication:
     run: >
