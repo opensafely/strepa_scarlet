@@ -404,7 +404,7 @@ def display_medicine(
     display(Markdown("##### Rate"))
     display_image(f"{medicine_path}_by_subgroup.png", dir=results_dir)
     if time_period == "month":
-        display(Markdown("##### Proportion with a group A strep clinical event of interest"))
+        display(Markdown("##### Rate with a group A strep clinical event of interest"))
         display(
             Markdown(
                 f"The below chart shows the monthly rate, broken down by key demographic subgroups, of patients with a recorded {medicine_name} prescription event AND a record of any of the potential group A strep clinical events of interest (scarlet fever, sore throat/tonsillitis or invasive group A strep) up to 14 days prior to or 7 days after the prescription event."
@@ -476,7 +476,7 @@ def display_clinical(
         display(Markdown("##### Rate"))
         display_image(f"{clinical_path}_by_subgroup.png", dir=results_dir)
         if time_period == "month":
-            display(Markdown("##### Proportion with an antibiotic of interest"))
+            display(Markdown("##### Rate with an antibiotic of interest"))
             display(
                 Markdown(
                     f"The below chart shows the monthly rate, broken down by key demographic subgroups, of patients with recorded {clinical_name} events AND a prescription for any antibiotic <a href='#prescribing'>listed in this report</a> up to 7 days prior to or 14 days after the clinical event."
