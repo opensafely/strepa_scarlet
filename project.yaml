@@ -236,6 +236,23 @@ actions:
           # Only output the single summary file
           measure_csv: output/report/results/measure_unrounded.csv
 
+
+  table1:
+    run: >
+      python:latest python analysis/report/table1.py
+      --input-file output/report/results/measure_rounded.csv
+      --output-dir output/report/results
+      --measures-pattern "event_medication_any_*_rate"
+      --measures-pattern "event_clinical_any_*_rate"
+      --include-denominator
+      --column-name "clinical_any" "medication_any"
+      --output-name "table1.html"
+    needs: [join_measures_rounded]
+    outputs:
+      moderately_sensitive:
+        tables: output/report/results/table1.html
+
+
   top_5_table_report:
     run: >
       python:latest python analysis/report/top_5_report.py
