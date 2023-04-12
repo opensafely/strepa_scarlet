@@ -144,7 +144,7 @@ actions:
     outputs:
       highly_sensitive:
         cohort: output/report/inpu*-01.csv.gz
-  
+
   generate_study_population_report_monthly_3:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_report
@@ -170,7 +170,7 @@ actions:
   generate_study_population_report_monthly_5:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_report
-      --index-date-range "2023-01-01 to 2023-02-01 by month"
+      --index-date-range "2023-01-01 to 2023-03-01 by month"
       --param frequency=monthly
       --output-dir=output/report
       --output-format=csv.gz
@@ -369,7 +369,7 @@ actions:
   generate_study_population_report_weekly_3:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_report
-      --index-date-range "2023-01-26 to 2023-03-22 by week"
+      --index-date-range "2023-01-26 to 2023-04-05 by week"
       --param frequency=weekly
       --output-dir=output/report/weekly
       --output-format=csv.gz
