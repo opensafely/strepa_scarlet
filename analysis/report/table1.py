@@ -216,7 +216,7 @@ def main():
     table1 = remove_duplicate_cols(table1)
 
     table1 = title_multiindex(table1)
-    table1.to_html(output_dir / output_name, index=True)
+    table1.to_csv(output_dir / output_name, index=True)
 
 
 if __name__ == "__main__":
