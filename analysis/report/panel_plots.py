@@ -129,6 +129,26 @@ def reorder_labels(labels):
         )
     return zip(*labels)
 
+def add_percentiles(df, period_column=None, column=None, show_outer_percentiles=True):
+    """For each period in `period_column`, compute percentiles across that
+    range.
+
+    Adds `percentile` column.
+
+    """
+    deciles = numpy.arange(0.1, 1, 0.1)
+    bottom_percentiles = numpy.arange(0.01, 0.1, 0.01)
+    top_percentiles = numpy.arange(0.91, 1, 0.01)
+    if show_outer_percentiles:
+        quantiles = numpy.concatenate((deciles, bottom_percentiles, top_percentiles))
+    else:
+        quantiles = deciles
+    df = df.groupby(period_column)[column].quantile(quantiles).reset_index()
+    df = df.rename(index=str, columns={"level_1": "percentile"})
+    # create integer range of percentiles
+    df["percentile"] = df["percentile"].apply(lambda x: x * 100)
+    return df
+
 
 def write_deciles_table(measure_table, output_dir, filename):
     """
@@ -138,7 +158,7 @@ def write_deciles_table(measure_table, output_dir, filename):
 
     num_practices = measure_table.groupby("date")["group"].count()
     num_practices = num_practices.apply(lambda x: round_values(x, 10))
-    deciles_table = charts.add_percentiles(
+    deciles_table = add_percentiles(
         measure_table,
         period_column="date",
         column="value",
