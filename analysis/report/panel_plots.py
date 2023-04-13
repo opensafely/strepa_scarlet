@@ -5,11 +5,11 @@ import numpy
 import re
 import operator
 import math
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter
 from dateutil import parser
-from ebmdatalab import charts
 from report_utils import (
     coerce_numeric,
     round_values,
@@ -72,9 +72,9 @@ def is_bool_as_int(series):
     """Does series have bool values but an int dtype?"""
     # numpy.nan will ensure an int series becomes a float series, so we need to
     # check for both int and float
-    if not pandas.api.types.is_bool_dtype(
+    if not pandas.api.types.is_bool_dtype(series) and pandas.api.types.is_numeric_dtype(
         series
-    ) and pandas.api.types.is_numeric_dtype(series):
+    ):
         series = series.dropna()
         return ((series == 0) | (series == 1)).all()
     elif not pandas.api.types.is_bool_dtype(
@@ -124,11 +124,14 @@ def reorder_labels(labels):
             else:
                 highest = math.inf
             max_val[(handle, label)] = highest
-        return zip(
-            *dict(sorted(max_val.items(), key=operator.itemgetter(1))).keys()
-        )
+        return zip(*dict(sorted(max_val.items(), key=operator.itemgetter(1))).keys())
     return zip(*labels)
 
+
+# NOTE: the following functions have been copied from
+# https://github.com/ebmdatalab/datalab-pandas/charts.py and modified
+# due to a bug where the 6th outer decile is repeated as a result of
+# floating point precision in numpy.arrange
 def add_percentiles(df, period_column=None, column=None, show_outer_percentiles=True):
     """For each period in `period_column`, compute percentiles across that
     range.
@@ -150,6 +153,96 @@ def add_percentiles(df, period_column=None, column=None, show_outer_percentiles=
     return df
 
 
+def deciles_chart(
+    df,
+    period_column=None,
+    column=None,
+    title="",
+    ylabel="",
+    show_outer_percentiles=True,
+    show_legend=True,
+    ax=None,
+):
+    """period_column must be dates / datetimes"""
+    sns.set_style("whitegrid", {"grid.color": ".9"})
+    if not ax:
+        fig, ax = plt.subplots(1, 1)
+    df = add_percentiles(
+        df,
+        period_column=period_column,
+        column=column,
+        show_outer_percentiles=show_outer_percentiles,
+    )
+    linestyles = {
+        "decile": {"color": "b", "line": "b--", "linewidth": 1, "label": "decile"},
+        "median": {"color": "b", "line": "b-", "linewidth": 1.5, "label": "median"},
+        "percentile": {
+            "color": "b",
+            "line": "b:",
+            "linewidth": 0.8,
+            "label": "1st-9th, 91st-99th percentile",
+        },
+    }
+    label_seen = []
+    for percentile in range(1, 100):  # plot each decile line
+        data = df[df["percentile"] == percentile]
+        add_label = False
+
+        if percentile == 50:
+            style = linestyles["median"]
+            add_label = True
+        elif show_outer_percentiles and (percentile < 10 or percentile > 90):
+            style = linestyles["percentile"]
+            if "percentile" not in label_seen:
+                label_seen.append("percentile")
+                add_label = True
+        else:
+            style = linestyles["decile"]
+            if "decile" not in label_seen:
+                label_seen.append("decile")
+                add_label = True
+        if add_label:
+            label = style["label"]
+        else:
+            label = "_nolegend_"
+
+        ax.plot(
+            data[period_column],
+            data[column],
+            style["line"],
+            linewidth=style["linewidth"],
+            color=style["color"],
+            label=label,
+        )
+    ax.set_ylabel(ylabel, size=15, alpha=0.6)
+    if title:
+        ax.set_title(title, size=18)
+    # set ymax across all subplots as largest value across dataset
+    ax.set_ylim([0, df[column].max() * 1.05])
+    ax.tick_params(labelsize=12)
+    ax.set_xlim(
+        [df[period_column].min(), df[period_column].max()]
+    )  # set x axis range as full date range
+
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=90)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%B %Y"))
+    if show_legend:
+        ax.legend(
+            bbox_to_anchor=(1.1, 0.8),  # arbitrary location in axes
+            #  specified as (x0, y0, w, h)
+            loc=6,  # which part of the bounding box should
+            #  be placed at bbox_to_anchor
+            ncol=1,  # number of columns in the legend
+            fontsize=12,
+            borderaxespad=0.0,
+        )  # padding between the axes and legend
+        #  specified in font-size units
+    # rotates and right aligns the x labels, and moves the bottom of the
+    # axes up to make room for them
+    plt.gcf().autofmt_xdate()
+    return plt
+
+
 def write_deciles_table(measure_table, output_dir, filename):
     """
     Output a deciles table, including a count of practices
@@ -165,9 +258,7 @@ def write_deciles_table(measure_table, output_dir, filename):
     )
     deciles_table = deciles_table.set_index("date")
     deciles_table["practice_count_per_date"] = num_practices
-    deciles_table.to_csv(
-        output_dir / f"deciles_table_{filename}.csv", index=True
-    )
+    deciles_table.to_csv(output_dir / f"deciles_table_{filename}.csv", index=True)
 
 
 def add_deciles_plot(
@@ -185,7 +276,7 @@ def add_deciles_plot(
 
     write_deciles_table(numeric, output_dir, filename)
 
-    charts.deciles_chart(
+    deciles_chart(
         numeric,
         period_column="date",
         column=column_to_plot,
@@ -213,9 +304,7 @@ def plot_axis(
     panel_group_data = panel_group_data.set_index("date")
     is_bool = is_bool_as_int(panel_group_data.group)
     if is_bool:
-        panel_group_data.group = panel_group_data.group.astype(int).astype(
-            bool
-        )
+        panel_group_data.group = panel_group_data.group.astype(int).astype(bool)
     numeric = coerce_numeric(panel_group_data)
     group_by = ["group"]
     # TODO: we may need to handle weekly data differently
@@ -239,9 +328,7 @@ def plot_axis(
             plot_cis(ax, plot_group_data)
     # NOTE: Use the last group_by, which will be "year" for stack_years
     handles, labels = ax.get_legend_handles_labels()
-    handles_reordered, labels_reordered = reorder_labels(
-        list(zip(handles, labels))
-    )
+    handles_reordered, labels_reordered = reorder_labels(list(zip(handles, labels)))
     ax.legend(handles_reordered, labels_reordered, **lgd_params)
     if date_lines:
         min_date = min(panel_group_data.index)
@@ -341,9 +428,7 @@ def get_group_chart(
         if column_to_plot == "numerator":
             ax.set_ylabel("Count of patients")
     if exclude_group:
-        plt.xlabel(
-            f"*Those with '{exclude_group}' category excluded from each plot"
-        )
+        plt.xlabel(f"*Those with '{exclude_group}' category excluded from each plot")
     # Deciles chart code globally calls plt.gcf().autofmt_xdate()
     # So we have to turn the axes back on here
     for ax in plt.gcf().get_axes():
