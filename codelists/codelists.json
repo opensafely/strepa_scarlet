@@ -66,22 +66,22 @@
       "downloaded_at": "2023-01-11 17:29:41.155409Z",
       "sha": "8b849b5b785d80306e488d0109640c8c1d2da01b"
     },
-    "user-chriswood-scarlet-fever.csv": {
-      "id": "user/chriswood/scarlet-fever/1ba70f02",
-      "url": "https://codelists.opensafely.org/codelist/user/chriswood/scarlet-fever/1ba70f02/",
-      "downloaded_at": "2023-01-18 10:05:55.582534Z",
+    "opensafely-scarlet-fever.csv": {
+      "id": "opensafely/scarlet-fever/1ba70f02",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/scarlet-fever/1ba70f02/",
+      "downloaded_at": "2023-04-11 11:11:24.308557Z",
       "sha": "d38b3b6598edbf666a5bb6488374c51ef3da718b"
     },
-    "user-chriswood-invasive-group-a-strep.csv": {
-      "id": "user/chriswood/invasive-group-a-strep/42344205",
-      "url": "https://codelists.opensafely.org/codelist/user/chriswood/invasive-group-a-strep/42344205/",
-      "downloaded_at": "2023-01-18 10:05:56.125079Z",
+    "opensafely-invasive-group-a-strep.csv": {
+      "id": "opensafely/invasive-group-a-strep/42344205",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/invasive-group-a-strep/42344205/",
+      "downloaded_at": "2023-04-11 11:11:24.699205Z",
       "sha": "7b9e7a1166e4d93b93017a2f3c055b79888dafff"
     },
-    "user-chriswood-group-a-streptococcal-sore-throat.csv": {
-      "id": "user/chriswood/group-a-streptococcal-sore-throat/2924ced0",
-      "url": "https://codelists.opensafely.org/codelist/user/chriswood/group-a-streptococcal-sore-throat/2924ced0/",
-      "downloaded_at": "2023-01-18 10:05:56.653193Z",
+    "opensafely-group-a-streptococcal-sore-throat.csv": {
+      "id": "opensafely/group-a-streptococcal-sore-throat/2924ced0",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/group-a-streptococcal-sore-throat/2924ced0/",
+      "downloaded_at": "2023-04-11 11:11:25.077257Z",
       "sha": "2e630cd8290548fcfb5fc729c012f496f810c1b4"
     }
   }

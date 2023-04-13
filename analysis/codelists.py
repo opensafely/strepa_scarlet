@@ -51,19 +51,19 @@ flucloxacillin_codes = codelist_from_csv(
 )
 
 scarlet_fever_codes = codelist_from_csv(
-    "codelists/user-chriswood-scarlet-fever.csv",
+    "codelists/opensafely-scarlet-fever.csv",
     system="snomed",
     column="code",
 )
 
 invasive_strep_a_codes = codelist_from_csv(
-    "codelists/user-chriswood-invasive-group-a-strep.csv",
+    "codelists/opensafely-invasive-group-a-strep.csv",
     system="snomed",
     column="code",
 )
 
 sore_throat_tonsillitis_codes = codelist_from_csv(
-    "codelists/user-chriswood-group-a-streptococcal-sore-throat.csv",
+    "codelists/opensafely-group-a-streptococcal-sore-throat.csv",
     system="snomed",
     column="code",
 )

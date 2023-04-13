@@ -25,9 +25,9 @@ MEDICATION_TO_CODELIST = {
 }
 
 CLINICAL_TO_CODELIST = {
-    "scarlet_fever": "codelists/user-chriswood-scarlet-fever.csv",
-    "sore_throat_tonsillitis": "codelists/user-chriswood-group-a-streptococcal-sore-throat.csv",
-    "invasive_strep_a": "codelists/user-chriswood-invasive-group-a-strep.csv",
+    "scarlet_fever": "codelists/opensafely-scarlet-fever.csv",
+    "sore_throat_tonsillitis": "codelists/opensafely-group-a-streptococcal-sore-throat.csv",
+    "invasive_strep_a": "codelists/opensafely-invasive-group-a-strep.csv",
 }
 
 
@@ -404,7 +404,11 @@ def display_medicine(
     display(Markdown("##### Rate"))
     display_image(f"{medicine_path}_by_subgroup.png", dir=results_dir)
     if time_period == "month":
-        display(Markdown("##### Rate with a group A strep clinical event of interest"))
+        display(
+            Markdown(
+                "##### Rate with a group A strep clinical event of interest"
+            )
+        )
         display(
             Markdown(
                 f"The below chart shows the monthly rate, broken down by key demographic subgroups, of patients with a recorded {medicine_name} prescription event AND a record of any of the potential group A strep clinical events of interest (scarlet fever, sore throat/tonsillitis or invasive group A strep) up to 14 days prior to or 7 days after the prescription event."

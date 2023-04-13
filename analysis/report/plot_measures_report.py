@@ -64,6 +64,7 @@ def main():
         category="name",
         frequency=frequency,
     )
+
     # Clinical
     clinical_measures = [
         f"event_{x}_rate" for x in list(CLINICAL_TO_CODELIST.keys())
@@ -89,35 +90,68 @@ def main():
         category="name",
         frequency=frequency,
     )
-    return
-    # for each group, plot the measure
-    for group, df_subset in df.groupby("name"):
-        if "practice" in group:
-            continue
-        df_subset["rate"] = df_subset["value"] * 1000
 
-        if len(df_subset["group"].unique()) == 1:
-            # no breakdown
+    # Only the monthly data has "with" measures
+    if frequency == "month":
+        # Medications with clinical
+        medication_with_clinical_measures = [
+            f"event_{x}_with_clinical_any_rate"
+            for x in list(MEDICATION_TO_CODELIST.keys())
+        ]
+        medications_with_clinical = population_measures[
+            population_measures.name.str.contains(
+                "|".join(medication_with_clinical_measures)
+            )
+        ]
+        plot_measures(
+            medications_with_clinical,
+            filename=output_dir
+            / "medications_with_clinical_bar_measures_count",
+            column_to_plot="numerator",
+            y_label="Count of patients",
+            as_bar=False,
+            category="name",
+            frequency=frequency,
+        )
+        plot_measures(
+            medications_with_clinical,
+            filename=output_dir / "medications_with_clinical_bar_measures",
+            column_to_plot="rate",
+            y_label="Rate per 1000",
+            as_bar=False,
+            category="name",
+            frequency=frequency,
+        )
 
-            plot_measures(
-                df_subset,
-                filename=output_dir / f"plot_measures_{group}",
-                column_to_plot="rate",
-                y_label="Rate per 1000",
-                as_bar=False,
-                category=None,
-                frequency=frequency,
+        # Clinical with medication
+        clinical_with_medication_measures = [
+            f"event_{x}_with_medication_any_rate"
+            for x in list(CLINICAL_TO_CODELIST.keys())
+        ]
+        clinical_with_medication = population_measures[
+            population_measures.name.str.contains(
+                "|".join(clinical_with_medication_measures)
             )
-        else:
-            plot_measures(
-                df_subset,
-                filename=output_dir / f"plot_measures_{group}",
-                column_to_plot="rate",
-                y_label="Rate per 1000",
-                as_bar=False,
-                category="group",
-                frequency=frequency,
-            )
+        ]
+        plot_measures(
+            clinical_with_medication,
+            filename=output_dir
+            / "clinical_with_medication_bar_measures_count",
+            column_to_plot="numerator",
+            y_label="Count of patients",
+            as_bar=False,
+            category="name",
+            frequency=frequency,
+        )
+        plot_measures(
+            clinical_with_medication,
+            filename=output_dir / "clinical_with_medication_bar_measures",
+            column_to_plot="rate",
+            y_label="Rate per 1000",
+            as_bar=False,
+            category="name",
+            frequency=frequency,
+        )
 
 
 if __name__ == "__main__":

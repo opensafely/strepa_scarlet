@@ -98,6 +98,12 @@ else:
     end_date = "2022-01-01"
 
 demographics = {
+    "sex": patients.sex(
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": {"M": 0.49, "F": 0.51}},
+        }
+    ),
     "age_band": (
         patients.categorised_as(
             {
@@ -288,7 +294,8 @@ study = StudyDefinition(
         NOT died AND
         age >= 0 AND
         age < 120 AND
-        age_band != "missing"
+        age_band != "missing" AND
+        (sex = "M" OR sex = "F")
         """,
         registered=patients.registered_as_of(
             "index_date",
