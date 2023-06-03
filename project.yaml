@@ -265,6 +265,7 @@ actions:
       python:latest python analysis/report/create_panels.py
       --input-file output/report/results/measure_rounded.csv
       --practice-file output/report/results/measure_unrounded.csv
+      --panels "population" "practice" "age_band" "region" "imd" "ethnicity"
       --output-dir output/report/results
       --xtick-frequency 3
     needs: [join_measures_rounded, join_measures_unrounded]
@@ -451,6 +452,7 @@ actions:
       python:latest python analysis/report/create_panels.py
       --input-file output/report/weekly/results/measure_rounded_weekly.csv
       --practice-file output/report/weekly/results/measure_unrounded_weekly.csv
+      --panels "population" "practice" "age_band" "region" "imd"
       --output-dir output/report/weekly/results
       --frequency week
     needs: [join_measures_rounded_weekly, join_measures_unrounded_weekly]
