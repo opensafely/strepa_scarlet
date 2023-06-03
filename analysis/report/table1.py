@@ -2,6 +2,10 @@ import pathlib
 import argparse
 import pandas
 import fnmatch
+import re
+import math
+import operator
+from report_utils import ci_95_proportion
 
 """
 Generate table1 from joined measures file.
@@ -11,7 +15,11 @@ provided column names
 
 
 def get_measure_tables(input_file):
-    measure_table = pandas.read_csv(input_file)
+    measure_table = pandas.read_csv(
+        input_file,
+        dtype={"numerator": "Int32", "denominator": "Int32", "value": float},
+        na_values="[REDACTED]",
+    )
 
     return measure_table
 
@@ -85,21 +93,22 @@ def get_percentages(df, include_denominator):
     After computation is complete reconvert numeric to string and replace
     nan with "REDACTED" again
     """
-    rate = (1000 * df.numerator / df.denominator).round(1).astype(str)
-    rate = rate.replace("nan", "[REDACTED]")
 
     percent = df.groupby(level=0).transform(transform_percentage)
     percent = percent.replace("nan (nan)", "[REDACTED]")
 
     if include_denominator:
-        percent["rate"] = rate
+        cis = ci_95_proportion(df, scale=1000)
+        percent["rate"] = cis.apply(
+            lambda x: f"{x.rate:.2f} ({x.lci:.2f} to {x.uci:.2f})", axis=1
+        )
     else:
         percent = percent.drop("denominator", axis=1)
     percent = percent.rename(
         columns={
             "numerator": "No. with event (%)",
             "denominator": "No. registered patients (%)",
-            "rate": "Rate per 1,000",
+            "rate": "Rate per 1,000 (95% CI)",
         }
     )
     return percent
@@ -136,6 +145,50 @@ def title_multiindex(df):
         ]
     df.index = pandas.MultiIndex.from_tuples(titled)
     return df
+
+
+def reorder_dashes(data):
+    max_val = {}
+    level_1_values = data.index.get_level_values(1)
+    for label in level_1_values:
+        matches = re.findall(r"\d+", label)
+        if matches:
+            highest = max([int(m) for m in matches])
+        else:
+            highest = math.inf
+        max_val[label] = highest
+    d = dict(
+        zip(
+            dict(sorted(max_val.items(), key=operator.itemgetter(1))).keys(),
+            range(len(data.index)),
+        )
+    )
+    data["sorter"] = level_1_values.map(d)
+    data = data.sort_values("sorter")
+    data = data.drop("sorter", axis=1)
+    return data
+
+
+def reorder_dataframe(df):
+    # Use a dataframe to preserve order
+    # TODO: investigate use of sort_values
+    reordered = pandas.DataFrame()
+    for category, data in df.groupby(level=0):
+        level_1_values = data.index.get_level_values(1)
+        if any("-" in label for label in level_1_values):
+            data = reorder_dashes(data)
+        if "Missing" in level_1_values:
+            reordered = pandas.concat(
+                [
+                    data.drop(labels=(category, "Missing")).append(
+                        data.loc[(category, "Missing")]
+                    ),
+                    reordered,
+                ]
+            )
+        else:
+            reordered = pandas.concat([data, reordered])
+    return reordered
 
 
 def match_paths(files, pattern):
@@ -198,8 +251,6 @@ def main():
         sub = subset[subset.name.str.contains(column)]
         sub = sub.set_index(["category", "group"])
         sub = sub[["numerator", "denominator"]]
-        # Dataframe must be numeric to compute percentages
-        sub = sub.apply(pandas.to_numeric, errors="coerce")
         # NOTE: may not be true total, could pull from total measure
         overall = sub.loc[sub.iloc[0].name[0]].sum()
         overall.name = ("Total", "")
@@ -216,7 +267,8 @@ def main():
     table1 = remove_duplicate_cols(table1)
 
     table1 = title_multiindex(table1)
-    table1.to_csv(output_dir / output_name, index=True)
+    table1 = reorder_dataframe(table1)
+    table1.to_html(output_dir / output_name, index=True)
 
 
 if __name__ == "__main__":

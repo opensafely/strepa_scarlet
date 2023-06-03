@@ -87,6 +87,19 @@ def round_values(x, base=10, redact=False, redaction_threshold=5):
     return rounded
 
 
+def ci_95_proportion(df, scale=1):
+    # NOTE: do not assume df has value
+    # See formula:
+    # https://sphweb.bumc.bu.edu/otlt/MPH-Modules/PH717-QuantCore/PH717-Module6-RandomError/PH717-Module6-RandomError12.html
+    cis = pd.DataFrame()
+    val = df.numerator / df.denominator
+    sd = np.sqrt(((val * (1 - val)) / df.denominator))
+    cis["rate"] = scale * (val)
+    cis["lci"] = scale * (val - 1.96 * sd)
+    cis["uci"] = scale * (val + 1.96 * sd)
+    return cis
+
+
 def plot_measures(
     df,
     filename: str,
