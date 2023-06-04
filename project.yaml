@@ -541,3 +541,17 @@ actions:
   #    moderately_sensitive:
   #      tables: output/report/results/table1.html
 
+  plot_measure_report_paper:
+    run: >
+      python:latest python analysis/report/plot_measures_report.py
+      --measure-path output/report/results/measure_rounded.csv
+      --output-dir output/report/results
+      --date-lines "2020-03-01" "2021-03-01"
+      --use-groups
+      --log-scale
+      --mark-seasons
+      --legend-inside
+    needs: [join_measures_rounded]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/*_bar_measure*.jpeg

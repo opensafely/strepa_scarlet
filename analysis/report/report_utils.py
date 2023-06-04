@@ -13,6 +13,19 @@ import matplotlib.ticker as ticker
 colour_palette = sns.color_palette("Paired", 12)
 ticker.Locator.MAXTICKS = 10000
 
+
+SMALL_SIZE = 18
+MEDIUM_SIZE = 20
+BIGGER_SIZE = 22
+
+plt.rc("font", size=SMALL_SIZE)  # controls default text sizes
+plt.rc("axes", titlesize=SMALL_SIZE)  # fontsize of the axes title
+plt.rc("axes", labelsize=MEDIUM_SIZE)  # fontsize of the x and y labels
+plt.rc("xtick", labelsize=SMALL_SIZE)  # fontsize of the tick labels
+plt.rc("ytick", labelsize=SMALL_SIZE)  # fontsize of the tick labels
+plt.rc("legend", fontsize=MEDIUM_SIZE)  # legend fontsize
+plt.rc("figure", titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
 MEDICATION_TO_CODELIST = {
     "amoxicillin": "codelists/opensafely-amoxicillin-oral.csv",
     "azithromycin": "codelists/opensafely-azithromycin-oral.csv",
@@ -28,6 +41,20 @@ CLINICAL_TO_CODELIST = {
     "scarlet_fever": "codelists/opensafely-scarlet-fever.csv",
     "sore_throat_tonsillitis": "codelists/opensafely-group-a-streptococcal-sore-throat.csv",
     "invasive_strep_a": "codelists/opensafely-invasive-group-a-strep.csv",
+}
+
+GROUPED_MEDICATIONS = {
+    "group_1": [
+        "phenoxymethylpenicillin",
+    ],
+    "group_2": [
+        "flucloxacillin",
+        "amoxicillin",
+        "clarithromycin",
+        "erythromycin",
+        "azithromycin",
+    ],
+    "group_3": ["cefalexin", "co_amoxiclav"],
 }
 
 
@@ -121,6 +148,10 @@ def plot_measures(
     as_bar: bool = False,
     category: str = None,
     frequency: str = "month",
+    log_scale: bool = False,
+    legend_inside: bool = False,
+    mark_seasons: bool = False,
+    date_lines: list = [],
 ):
     """Produce time series plot from measures table.  One line is plotted for each sub
     category within the category column. Saves output as jpeg file.
@@ -134,12 +165,17 @@ def plot_measures(
     df_copy = df.copy()
 
     sns.set_style("darkgrid")
-    fig, ax = plt.subplots(figsize=(18, 8))
+    fig, ax = plt.subplots(figsize=(18, 10))
 
     plt.rcParams["axes.prop_cycle"] = plt.cycler(color=colour_palette)
+    if log_scale:
+        plt.yscale("log")
 
     # NOTE: finite filter for dummy data
-    y_max = df[np.isfinite(df[column_to_plot])][column_to_plot].max() * 1.05
+    y_max = (
+        df_copy[np.isfinite(df_copy[column_to_plot])][column_to_plot].max()
+        * 1.50
+    )
     # Ignore timestamp - this could be done at load time
     df_copy["date"] = df_copy["date"].dt.date
 
@@ -174,6 +210,42 @@ def plot_measures(
         )
         ax.set_xticks(xticks)
         ax.set_xticklabels([x.strftime("%B %Y") for x in xticks])
+
+        if mark_seasons:
+            # TODO: check whether this works for weekly
+            df_copy["gas_year"] = pd.to_datetime(df_copy.index).to_period(
+                "A-Aug"
+            )
+            for year, data in df_copy.groupby(["gas_year", "name"]):
+                data_sorted = data.dropna(subset=[column_to_plot]).sort_values(
+                    column_to_plot
+                )
+                if data_sorted.empty:
+                    continue
+                data_min = data_sorted.iloc[0]
+                data_max = data_sorted.iloc[-1]
+                plt.annotate(
+                    int(data_min[column_to_plot]),
+                    xy=(data_min.name, data_min[column_to_plot]),
+                    xytext=(0, 25),
+                    textcoords="offset points",
+                    verticalalignment="bottom",
+                    arrowprops=dict(facecolor="black", shrink=0.025),
+                    horizontalalignment="left"
+                    if (data_min.name.month % 2) == 1
+                    else "right",
+                    fontsize=12,
+                )
+                plt.annotate(
+                    int(data_max[column_to_plot]),
+                    xy=(data_max.name, data_max[column_to_plot]),
+                    xytext=(0, -25),
+                    textcoords="offset points",
+                    verticalalignment="top",
+                    arrowprops=dict(facecolor="blue", shrink=0.025),
+                    fontsize=12,
+                )
+
     elif frequency == "week":
         xticks = pd.date_range(
             start=df_copy.index.min(), end=df_copy.index.max(), freq="W-THU"
@@ -181,22 +253,32 @@ def plot_measures(
         ax.set_xticks(xticks)
         ax.set_xticklabels([x.strftime("%d-%m-%Y") for x in xticks])
 
+    if log_scale:
+        ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
+        ax.yaxis.get_major_formatter().set_scientific(False)
+        y_label = f"Log {y_label.lower()}"
+
     plt.ylabel(y_label)
     plt.xlabel("Date")
     plt.xticks(rotation="vertical")
-    plt.xticks(fontsize=8)
+    plt.xticks(fontsize=14)
 
     plt.ylim(
-        bottom=0,
-        top=1000 if df_copy[column_to_plot].isnull().values.all() else y_max,
+        top=1000 if df_copy[column_to_plot].isnull().all() else y_max,
     )
 
     if category:
-        plt.legend(
-            sorted(df_copy[category].unique()),
-            bbox_to_anchor=(1.04, 1),
-            loc="upper left",
-        )
+        if legend_inside:
+            plt.legend(
+                sorted(df_copy[category].unique()),
+                ncol=3,
+            )
+        else:
+            plt.legend(
+                sorted(df_copy[category].unique()),
+                bbox_to_anchor=(1.04, 1),
+                loc="upper left",
+            )
 
     if date_lines:
         min_date = min(df_copy.index)
