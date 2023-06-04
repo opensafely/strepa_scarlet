@@ -378,7 +378,7 @@ def get_group_chart(
     lgd_params = {
         "bbox_to_anchor": (1, 1),
         "loc": "upper left",
-        "fontsize": "x-small",
+        "fontsize": "10",
         "ncol": 1,
     }
 
