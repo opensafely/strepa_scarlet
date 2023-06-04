@@ -522,7 +522,8 @@ def parse_args():
     parser.add_argument(
         "--order",
         required=False,
-        action="append",
+        nargs="+",
+        default=[],
         help="List of categories for subplot order",
     )
     parser.add_argument(
