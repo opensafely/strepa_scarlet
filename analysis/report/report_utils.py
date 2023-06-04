@@ -100,6 +100,19 @@ def ci_95_proportion(df, scale=1):
     return cis
 
 
+def parse_date(date_str):
+    return pd.to_datetime(date_str).date()
+
+
+def add_date_lines(vlines, min_date, max_date):
+    for date in vlines:
+        if date >= min_date and date <= max_date:
+            try:
+                plt.axvline(x=date, color="orange", ls="--")
+            except parser._parser.ParserError:
+                continue
+
+
 def plot_measures(
     df,
     filename: str,
@@ -185,6 +198,10 @@ def plot_measures(
             loc="upper left",
         )
 
+    if date_lines:
+        min_date = min(df_copy.index)
+        max_date = max(df_copy.index)
+        add_date_lines(date_lines, min_date, max_date)
     plt.tight_layout()
 
     plt.savefig(f"{filename}.jpeg")

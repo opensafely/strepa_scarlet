@@ -9,8 +9,9 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter
-from dateutil import parser
 from report_utils import (
+    parse_date,
+    add_date_lines,
     coerce_numeric,
     round_values,
     drop_zero_denominator_rows,
@@ -470,16 +471,6 @@ def get_path(*args):
     return pathlib.Path(*args).resolve()
 
 
-def add_date_lines(vlines, min_date, max_date):
-    for date in vlines:
-        date_obj = pandas.to_datetime(date)
-        if date_obj >= min_date and date_obj <= max_date:
-            try:
-                plt.axvline(x=date_obj, color="orange", ls="--")
-            except parser._parser.ParserError:
-                continue
-
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -535,6 +526,7 @@ def parse_args():
     parser.add_argument(
         "--date-lines",
         nargs="+",
+        type=parse_date,
         help="Vertical date lines",
     )
     choices = ["percentage", "rate"]
