@@ -555,3 +555,22 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/results/*_bar_measure*.jpeg
+
+  pheno_panel_plot_paper:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_rounded.csv
+      --measures-list "event_phenoxymethylpenicillin_with_clinical_any_age_band_rate"
+      --measures-list "event_phenoxymethylpenicillin_with_clinical_any_region_rate"
+      --measures-list "event_phenoxymethylpenicillin_with_clinical_any_ethnicity_rate"
+      --measures-list "event_phenoxymethylpenicillin_with_clinical_any_imd_rate"
+      --order "age_band" "region" "ethnicity" "imd"
+      --output-dir output/report/results
+      --output-name "phenoxymethylpenicillin_with_clinical_any_by_subgroup"
+      --exclude-group "Missing"
+      --scale "rate"
+      --xtick-frequency 3
+    needs: [join_measures_rounded]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/phenoxymethylpenicillin_with_clinical_any_by_subgroup.png
