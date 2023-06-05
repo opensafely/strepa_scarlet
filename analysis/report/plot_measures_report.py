@@ -1,14 +1,24 @@
 import pandas as pd
+import numpy as np
 import argparse
 import pathlib
+import matplotlib.pyplot as plt
+import seaborn as sns
 from report_utils import (
+    add_date_lines,
+    autoselect_labels,
+    colour_palette,
+    translate_group,
     parse_date,
-    plot_measures,
     coerce_numeric,
     MEDICATION_TO_CODELIST,
     CLINICAL_TO_CODELIST,
     GROUPED_MEDICATIONS,
 )
+
+import matplotlib.ticker as ticker
+
+ticker.Locator.MAXTICKS = 10000
 
 
 def group_medications(medications_df):
@@ -26,6 +36,236 @@ def group_medications(medications_df):
         medications["rate"] = 1000 * medications["value"]
         by_line.append(medications)
     return pd.concat(by_line)
+
+
+# NOTE: bug with pandas 1.01, cannot do pivot with MultiIndex
+def MultiIndex_pivot(
+    df: pd.DataFrame,
+    index: str = None,
+    columns: str = None,
+    values: str = None,
+) -> pd.DataFrame:
+    """
+    https://github.com/pandas-dev/pandas/issues/23955
+    Usage:
+    df.pipe(MultiIndex_pivot, index = ['idx_column1', 'idx_column2'],
+            columns = ['col_column1', 'col_column2'], values = 'bar')
+    """
+    output_df = df.copy(deep=True)
+    if index is None:
+        names = list(output_df.index.names)
+        output_df.reset_index(drop=True, inplace=True)
+    else:
+        names = index
+    output_df = output_df.assign(
+        tuples_index=[tuple(i) for i in output_df[names].values]
+    )
+    if isinstance(columns, list):
+        output_df = output_df.assign(
+            tuples_columns=[tuple(i) for i in output_df[columns].values]
+        )
+        output_df = output_df.pivot(
+            index="tuples_index", columns="tuples_columns", values=values
+        )
+        output_df.columns = pd.MultiIndex.from_tuples(
+            [((x[0],) + x[1]) for x in output_df.columns],
+            names=[None] + columns,
+        )
+    else:
+        output_df = output_df.pivot(
+            index="tuples_index", columns=columns, values=values
+        )
+    output_df.index = pd.MultiIndex.from_tuples(output_df.index, names=names)
+    return output_df
+
+
+def produce_min_max_table(df, column_to_plot):
+    table = df.pipe(
+        MultiIndex_pivot,
+        index=["name", "type"],
+        columns="gas_year",
+        values=["numerator", "rate"],
+    )
+    if column_to_plot == "numerator":
+        return table["numerator"]
+    else:
+        table.numerator = table.numerator.astype(float)
+        table.rate = table.rate.astype(float)
+        ratio = table["rate"]["2023"] / table["rate"]["2018"]
+
+        # See formula of ci irr:
+        # https://researchonline.lshtm.ac.uk/id/eprint/251164/1/pmed.1001270.s005.pdf
+        sd_log_ir = np.sqrt(
+            (1 / table["numerator"]["2023"]) + (1 / table["numerator"]["2018"])
+        )
+        lci = np.exp(np.log(ratio) - 1.96 * sd_log_ir)
+        uci = np.exp(np.log(ratio) + 1.96 * sd_log_ir)
+        cis = pd.concat([ratio, lci, uci], axis=1)
+
+        rr = cis.apply(
+            lambda x: f"{x[0]:.2f} ({x[1]:.2f} to {x[2]:.2f})", axis=1
+        )
+        rr.name = "Rate Ratio (95% CI) 2023 v 2018"
+        return pd.concat([table["rate"].round(2), rr], axis=1)
+
+
+def plot_measures(
+    df,
+    output_dir: pathlib.Path,
+    filename: str,
+    column_to_plot: str,
+    y_label: str,
+    as_bar: bool = False,
+    category: str = None,
+    frequency: str = "month",
+    log_scale: bool = False,
+    legend_inside: bool = False,
+    mark_seasons: bool = False,
+    date_lines: list = [],
+):
+    """Produce time series plot from measures table. One line is plotted for
+    each sub category within the category column. Saves output as jpeg file.
+    Args:
+        df: A measure table
+        column_to_plot: Column name for y-axis values
+        y_label: Label to use for y-axis
+        as_bar: Boolean indicating if bar chart should be plotted instead of
+                line chart.
+        category: Name of column indicating different categories
+    """
+    df_copy = df.copy()
+
+    sns.set_style("darkgrid")
+    fig, ax = plt.subplots(figsize=(18, 10))
+    plt.rcParams["axes.prop_cycle"] = plt.cycler(color=colour_palette)
+    if log_scale:
+        plt.yscale("log")
+
+    # NOTE: finite filter for dummy data
+    y_max = (
+        df_copy[np.isfinite(df_copy[column_to_plot])][column_to_plot].max()
+        * 1.50
+    )
+    # Ignore timestamp - this could be done at load time
+    df_copy["date"] = df_copy["date"].dt.date
+
+    df_copy = df_copy.set_index("date")
+    if category:
+        # Set up category to have clean labels
+        repeated = autoselect_labels(df_copy[category])
+        df_copy[category] = df_copy.apply(
+            lambda x: translate_group(
+                x[category], x[category], repeated, True
+            ),
+            axis=1,
+        )
+        if as_bar:
+            df_copy.pivot(columns=category, values=column_to_plot).plot.bar(
+                ax=ax, stacked=True
+            )
+            y_max = (
+                df_copy.groupby(["date"])[column_to_plot].sum().max() * 1.05
+            )
+        else:
+            df_copy.groupby(category)[column_to_plot].plot(ax=ax)
+    else:
+        if as_bar:
+            df_copy[column_to_plot].bar(ax=ax, legend=False)
+        else:
+            df_copy[column_to_plot].plot(ax=ax, legend=False)
+
+    if frequency == "month":
+        xticks = pd.date_range(
+            start=df_copy.index.min(), end=df_copy.index.max(), freq="MS"
+        )
+        ax.set_xticks(xticks)
+        ax.set_xticklabels([x.strftime("%B %Y") for x in xticks])
+
+        if mark_seasons:
+            # TODO: check whether this works for weekly
+            df_copy["gas_year"] = pd.to_datetime(df_copy.index).to_period(
+                "A-Aug"
+            )
+            mins_and_maxes = []
+            for year, data in df_copy.groupby(["gas_year", "name"]):
+                data_sorted = data.dropna(subset=[column_to_plot]).sort_values(
+                    column_to_plot
+                )
+                if data_sorted.empty:
+                    continue
+                data_min = data_sorted.iloc[0]
+                data_max = data_sorted.iloc[-1]
+                plt.annotate(
+                    int(data_min[column_to_plot]),
+                    xy=(data_min.name, data_min[column_to_plot]),
+                    xytext=(0, 25),
+                    textcoords="offset points",
+                    verticalalignment="bottom",
+                    arrowprops=dict(facecolor="black", shrink=0.025),
+                    horizontalalignment="left"
+                    if (data_min.name.month % 2) == 1
+                    else "right",
+                    fontsize=12,
+                )
+                plt.annotate(
+                    int(data_max[column_to_plot]),
+                    xy=(data_max.name, data_max[column_to_plot]),
+                    xytext=(0, -25),
+                    textcoords="offset points",
+                    verticalalignment="top",
+                    arrowprops=dict(facecolor="blue", shrink=0.025),
+                    fontsize=12,
+                )
+                data_min["type"] = "min"
+                data_max["type"] = "max"
+                mins_and_maxes.append(data_min)
+                mins_and_maxes.append(data_max)
+            table = produce_min_max_table(
+                pd.concat(mins_and_maxes, axis=1).T, column_to_plot
+            )
+            table.to_html(output_dir / f"{filename}_table.html")
+
+    elif frequency == "week":
+        xticks = pd.date_range(
+            start=df_copy.index.min(), end=df_copy.index.max(), freq="W-THU"
+        )
+        ax.set_xticks(xticks)
+        ax.set_xticklabels([x.strftime("%d-%m-%Y") for x in xticks])
+
+    if log_scale:
+        ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
+        ax.yaxis.get_major_formatter().set_scientific(False)
+        y_label = f"Log {y_label.lower()}"
+
+    plt.ylabel(y_label)
+    plt.xlabel("Date")
+    plt.xticks(rotation="vertical")
+    plt.xticks(fontsize=14)
+
+    plt.ylim(
+        top=1000 if df_copy[column_to_plot].isnull().all() else y_max,
+    )
+
+    if category:
+        if legend_inside:
+            plt.legend(
+                sorted(df_copy[category].unique()),
+                ncol=3,
+            )
+        else:
+            plt.legend(
+                sorted(df_copy[category].unique()),
+                bbox_to_anchor=(1.04, 1),
+                loc="upper left",
+            )
+    if date_lines:
+        min_date = min(df_copy.index)
+        max_date = max(df_copy.index)
+        add_date_lines(date_lines, min_date, max_date)
+    plt.tight_layout()
+
+    plt.savefig(output_dir / f"{filename}.jpeg")
+    plt.close()
 
 
 def parse_args():
@@ -102,7 +342,8 @@ def main():
 
     plot_measures(
         medications,
-        filename=output_dir / "medications_bar_measures_count",
+        output_dir=output_dir,
+        filename="medications_bar_measures_count",
         column_to_plot="numerator",
         y_label="Count of patients",
         as_bar=False,
@@ -115,7 +356,8 @@ def main():
     )
     plot_measures(
         medications,
-        filename=output_dir / "medications_bar_measures",
+        output_dir=output_dir,
+        filename="medications_bar_measures",
         column_to_plot="rate",
         y_label="Rate per 1000 patients",
         as_bar=False,
@@ -136,7 +378,8 @@ def main():
     ]
     plot_measures(
         clinical,
-        filename=output_dir / "clinical_bar_measures_count",
+        output_dir=output_dir,
+        filename="clinical_bar_measures_count",
         column_to_plot="numerator",
         y_label="Count of patients",
         as_bar=False,
@@ -149,7 +392,8 @@ def main():
     )
     plot_measures(
         clinical,
-        filename=output_dir / "clinical_bar_measures",
+        output_dir=output_dir,
+        filename="clinical_bar_measures",
         column_to_plot="rate",
         y_label="Rate per 1000 patients",
         as_bar=False,
@@ -179,8 +423,8 @@ def main():
             )
         plot_measures(
             medications_with_clinical,
-            filename=output_dir
-            / "medications_with_clinical_bar_measures_count",
+            output_dir=output_dir,
+            filename="medications_with_clinical_bar_measures_count",
             column_to_plot="numerator",
             y_label="Count of patients",
             as_bar=False,
@@ -193,7 +437,8 @@ def main():
         )
         plot_measures(
             medications_with_clinical,
-            filename=output_dir / "medications_with_clinical_bar_measures",
+            output_dir=output_dir,
+            filename="medications_with_clinical_bar_measures",
             column_to_plot="rate",
             y_label="Rate per 1000",
             as_bar=False,
@@ -217,8 +462,8 @@ def main():
         ]
         plot_measures(
             clinical_with_medication,
-            filename=output_dir
-            / "clinical_with_medication_bar_measures_count",
+            output_dir=output_dir,
+            filename="clinical_with_medication_bar_measures_count",
             column_to_plot="numerator",
             y_label="Count of patients",
             as_bar=False,
@@ -231,7 +476,8 @@ def main():
         )
         plot_measures(
             clinical_with_medication,
-            filename=output_dir / "clinical_with_medication_bar_measures",
+            output_dir=output_dir,
+            filename="clinical_with_medication_bar_measures",
             column_to_plot="rate",
             y_label="Rate per 1000",
             as_bar=False,

@@ -259,6 +259,7 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/results/*_bar_measures*.jpeg
+        tables: output/report/results/*_bar_measures*table.html
 
   panel_plots:
     run: >
@@ -555,6 +556,7 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/results/*_bar_measure*.jpeg
+        tables: output/report/results/*_bar_measures*_table.html
 
   pheno_panel_plot_paper:
     run: >
