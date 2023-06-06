@@ -146,6 +146,13 @@ def title_multiindex(df):
 
 
 def reorder_dashes(data):
+    """
+    Some strings (i.e. numbers that contain dashes) should be sorted
+    numerically rather than alphabetically
+    Assuming a dash implies a range, sort the categories by the max number
+    contained in each string
+    Strings with no numbers will be sorted last
+    """
     max_val = {}
     level_1_values = data.index.get_level_values(1)
     for label in level_1_values:
