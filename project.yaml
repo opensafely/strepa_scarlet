@@ -204,7 +204,8 @@ actions:
     needs: [join_cohorts_report]
     outputs:
       moderately_sensitive:
-        measure_csv: output/report/joined/measure_event_*.csv
+        measure_csv: output/report/joined/measure_event_*_rate.csv
+        measure_pcnt_csv: output/report/joined/measure_event_*_pcnt.csv
 
   join_measures_rounded:
       run: python:latest python analysis/join_and_round.py
