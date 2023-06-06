@@ -527,21 +527,20 @@ actions:
 
   ### Actions for paper ###
 
-  ### RUN LOCALLY: use functions not currently available on OS image ###
-  #table1:
-  #  run: >
-  #    python:latest python analysis/report/table1.py
-  #    --input-file output/report/results/measure_rounded.csv
-  #    --output-dir output/report/results/paper
-  #    --measures-pattern "event_clinical_any_*_rate"
-  #    --measures-pattern "event_medication_any_*_rate"
-  #    --include-denominator
-  #    --column-name "clinical_any" "medication_any"
-  #    --output-name "table1.html"
-  #  needs: [join_measures_rounded]
-  #  outputs:
-  #    moderately_sensitive:
-  #      tables: output/report/results/paper/table1.html
+  table1:
+    run: >
+      python:latest python analysis/report/table1.py
+      --input-file output/report/results/measure_rounded.csv
+      --output-dir output/report/results/paper
+      --measures-pattern "event_clinical_any_*_rate"
+      --measures-pattern "event_medication_any_*_rate"
+      --include-denominator
+      --column-name "clinical_any" "medication_any"
+      --output-name "table1.html"
+    needs: [join_measures_rounded]
+    outputs:
+      moderately_sensitive:
+        tables: output/report/results/paper/table1.html
 
   plot_measure_report_paper:
     run: >

@@ -17,7 +17,7 @@ provided column names
 def get_measure_tables(input_file):
     measure_table = pandas.read_csv(
         input_file,
-        dtype={"numerator": "Int32", "denominator": "Int32", "value": float},
+        dtype={"numerator": float, "denominator": float, "value": float},
         na_values="[REDACTED]",
     )
 
@@ -100,6 +100,8 @@ def get_percentages(df, include_denominator):
     if include_denominator:
         cis = ci_95_proportion(df, scale=1000)
         rate = ci_to_str(cis)
+        rate = rate.replace("nan (nan to nan)", "[REDACTED]")
+        percent["rate"] = rate
     else:
         percent = percent.drop("denominator", axis=1)
     percent = percent.rename(
@@ -115,7 +117,7 @@ def get_percentages(df, include_denominator):
 def remove_duplicate_cols(df):
     denoms = df.loc[:, (slice(None), "No. registered patients (%)")]
     equal = denoms.eq(denoms.iloc[:, 0], axis=0).all(1)
-    skip_total = equal.drop("Total")
+    skip_total = equal.drop(("Total", ""))
     if skip_total.all():
         shared_denom = denoms[denoms.columns[0]]
         shared_denom.name = (
