@@ -324,6 +324,8 @@ def main():
     mark_seasons = args.mark_seasons
     date_lines = args.date_lines
 
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     df = pd.read_csv(measure_path, parse_dates=["date"])
     df = coerce_numeric(df)
     df["rate"] = 1000 * df["value"]

@@ -157,6 +157,8 @@ def main():
     frequency = args.frequency
     xtick_frequency = args.xtick_frequency
 
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     measure_table = get_measure_tables(input_file)
     if practice_file:
         practice_table = get_measure_tables(practice_file)

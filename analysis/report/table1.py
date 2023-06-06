@@ -241,6 +241,8 @@ def main():
     columns = args.column_names
     include_denominator = args.include_denominator
 
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     measure_table = get_measure_tables(input_file)
 
     end_date = measure_table.date.max()

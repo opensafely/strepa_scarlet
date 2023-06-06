@@ -259,7 +259,6 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/results/*_bar_measures*.jpeg
-        tables: output/report/results/*_bar_measures*table.html
 
   panel_plots:
     run: >
@@ -531,7 +530,7 @@ actions:
   #  run: >
   #    python:latest python analysis/report/table1.py
   #    --input-file output/report/results/measure_rounded.csv
-  #    --output-dir output/report/results
+  #    --output-dir output/report/results/paper
   #    --measures-pattern "event_clinical_any_*_rate"
   #    --measures-pattern "event_medication_any_*_rate"
   #    --include-denominator
@@ -540,13 +539,13 @@ actions:
   #  needs: [join_measures_rounded]
   #  outputs:
   #    moderately_sensitive:
-  #      tables: output/report/results/table1.html
+  #      tables: output/report/results/paper/table1.html
 
   plot_measure_report_paper:
     run: >
       python:latest python analysis/report/plot_measures_report.py
       --measure-path output/report/results/measure_rounded.csv
-      --output-dir output/report/results
+      --output-dir output/report/results/paper
       --date-lines "2020-03-01" "2021-03-01"
       --use-groups
       --log-scale
@@ -555,8 +554,8 @@ actions:
     needs: [join_measures_rounded]
     outputs:
       moderately_sensitive:
-        measure: output/report/results/*_bar_measure*.jpeg
-        tables: output/report/results/*_bar_measures*_table.html
+        measure: output/report/results/paper/*_bar_measure*.jpeg
+        tables: output/report/results/paper/*_bar_measures_table.html
 
   pheno_panel_plot_paper:
     run: >
@@ -567,7 +566,7 @@ actions:
       --measures-list "event_phenoxymethylpenicillin_with_clinical_any_ethnicity_rate"
       --measures-list "event_phenoxymethylpenicillin_with_clinical_any_imd_rate"
       --order "age_band" "region" "ethnicity" "imd"
-      --output-dir output/report/results
+      --output-dir output/report/results/paper
       --output-name "phenoxymethylpenicillin_with_clinical_any_by_subgroup"
       --exclude-group "Missing"
       --scale "rate"
@@ -575,4 +574,4 @@ actions:
     needs: [join_measures_rounded]
     outputs:
       moderately_sensitive:
-        measure: output/report/results/phenoxymethylpenicillin_with_clinical_any_by_subgroup.png
+        measure: output/report/results/paper/phenoxymethylpenicillin_with_clinical_any_by_subgroup.png
