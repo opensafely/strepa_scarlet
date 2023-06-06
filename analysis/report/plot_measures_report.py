@@ -5,6 +5,8 @@ import pathlib
 import matplotlib.pyplot as plt
 import seaborn as sns
 from report_utils import (
+    ci_to_str,
+    ci_95_proportion,
     add_date_lines,
     autoselect_labels,
     colour_palette,
@@ -80,12 +82,15 @@ def MultiIndex_pivot(
     return output_df
 
 
-def produce_min_max_table(df, column_to_plot):
+    df.numerator = df.numerator.astype(float)
+    df.denominator = df.denominator.astype(float)
+    cis = ci_95_proportion(df, scale=1000)
+    df["cis"] = ci_to_str(cis)
     table = df.pipe(
         MultiIndex_pivot,
         index=["name", "type"],
         columns="gas_year",
-        values=["numerator", "rate"],
+        values=["numerator", "rate", "cis"],
     )
     if column_to_plot == "numerator":
         return table["numerator"]
@@ -96,18 +101,16 @@ def produce_min_max_table(df, column_to_plot):
 
         # See formula of ci irr:
         # https://researchonline.lshtm.ac.uk/id/eprint/251164/1/pmed.1001270.s005.pdf
-        sd_log_ir = np.sqrt(
+        sd_log_irr = np.sqrt(
             (1 / table["numerator"]["2023"]) + (1 / table["numerator"]["2018"])
         )
-        lci = np.exp(np.log(ratio) - 1.96 * sd_log_ir)
-        uci = np.exp(np.log(ratio) + 1.96 * sd_log_ir)
-        cis = pd.concat([ratio, lci, uci], axis=1)
+        lci = np.exp(np.log(ratio) - 1.96 * sd_log_irr)
+        uci = np.exp(np.log(ratio) + 1.96 * sd_log_irr)
+        rr_cis = pd.concat([ratio, lci, uci], axis=1)
 
-        rr = cis.apply(
-            lambda x: f"{x[0]:.2f} ({x[1]:.2f} to {x[2]:.2f})", axis=1
-        )
-        rr.name = "Rate Ratio (95% CI) 2023 v 2018"
-        return pd.concat([table["rate"].round(2), rr], axis=1)
+        rr_cis_str = ci_to_str(rr_cis)
+        rr_cis_str.name = "Rate Ratio (95% CI) 2023 v 2018"
+        return pd.concat([table["cis"], rr_cis_str], axis=1)
 
 
 def plot_measures(

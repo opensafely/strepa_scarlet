@@ -5,7 +5,7 @@ import fnmatch
 import re
 import math
 import operator
-from report_utils import ci_95_proportion
+from report_utils import ci_95_proportion, ci_to_str
 
 """
 Generate table1 from joined measures file.
@@ -99,9 +99,7 @@ def get_percentages(df, include_denominator):
 
     if include_denominator:
         cis = ci_95_proportion(df, scale=1000)
-        percent["rate"] = cis.apply(
-            lambda x: f"{x.rate:.2f} ({x.lci:.2f} to {x.uci:.2f})", axis=1
-        )
+        rate = ci_to_str(cis)
     else:
         percent = percent.drop("denominator", axis=1)
     percent = percent.rename(

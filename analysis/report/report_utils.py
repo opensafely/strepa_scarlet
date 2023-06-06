@@ -110,10 +110,16 @@ def ci_95_proportion(df, scale=1):
     cis = pd.DataFrame()
     val = df.numerator / df.denominator
     sd = np.sqrt(((val * (1 - val)) / df.denominator))
-    cis["rate"] = scale * (val)
-    cis["lci"] = scale * (val - 1.96 * sd)
-    cis["uci"] = scale * (val + 1.96 * sd)
+    cis[0] = scale * (val)
+    cis[1] = scale * (val - 1.96 * sd)
+    cis[2] = scale * (val + 1.96 * sd)
     return cis
+
+
+def ci_to_str(ci_df):
+    return ci_df.apply(
+        lambda x: f"{x[0]:.2f} ({x[1]:.2f} to {x[2]:.2f})", axis=1
+    )
 
 
 def parse_date(date_str):
