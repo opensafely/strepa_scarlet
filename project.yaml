@@ -551,6 +551,7 @@ actions:
       --use-groups
       --log-scale
       --mark-seasons
+      --produce-season-table
       --legend-inside
       --base-fontsize 18
     needs: [join_measures_rounded]

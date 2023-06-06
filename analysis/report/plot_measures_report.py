@@ -82,13 +82,14 @@ def MultiIndex_pivot(
     return output_df
 
 
+def produce_min_max_table(df, column_to_plot, category):
     df.numerator = df.numerator.astype(float)
     df.denominator = df.denominator.astype(float)
     cis = ci_95_proportion(df, scale=1000)
     df["cis"] = ci_to_str(cis)
     table = df.pipe(
         MultiIndex_pivot,
-        index=["name", "type"],
+        index=[category, "type"],
         columns="gas_year",
         values=["numerator", "rate", "cis"],
     )
@@ -125,6 +126,7 @@ def plot_measures(
     log_scale: bool = False,
     legend_inside: bool = False,
     mark_seasons: bool = False,
+    produce_season_table: bool = False,
     date_lines: list = [],
 ):
     """Produce time series plot from measures table. One line is plotted for
@@ -185,13 +187,13 @@ def plot_measures(
         ax.set_xticks(xticks)
         ax.set_xticklabels([x.strftime("%B %Y") for x in xticks])
 
-        if mark_seasons:
+        if produce_season_table or mark_seasons:
             # TODO: check whether this works for weekly
             df_copy["gas_year"] = pd.to_datetime(df_copy.index).to_period(
                 "A-Aug"
             )
             mins_and_maxes = []
-            for year, data in df_copy.groupby(["gas_year", "name"]):
+            for year, data in df_copy.groupby(["gas_year", category]):
                 data_sorted = data.dropna(subset=[column_to_plot]).sort_values(
                     column_to_plot
                 )
@@ -199,35 +201,39 @@ def plot_measures(
                     continue
                 data_min = data_sorted.iloc[0]
                 data_max = data_sorted.iloc[-1]
-                plt.annotate(
-                    int(data_min[column_to_plot]),
-                    xy=(data_min.name, data_min[column_to_plot]),
-                    xytext=(0, 25),
-                    textcoords="offset points",
-                    verticalalignment="bottom",
-                    arrowprops=dict(facecolor="black", shrink=0.025),
-                    horizontalalignment="left"
-                    if (data_min.name.month % 2) == 1
-                    else "right",
-                    fontsize=12,
-                )
-                plt.annotate(
-                    int(data_max[column_to_plot]),
-                    xy=(data_max.name, data_max[column_to_plot]),
-                    xytext=(0, -25),
-                    textcoords="offset points",
-                    verticalalignment="top",
-                    arrowprops=dict(facecolor="blue", shrink=0.025),
-                    fontsize=12,
-                )
+                if mark_seasons:
+                    plt.annotate(
+                        int(data_min[column_to_plot]),
+                        xy=(data_min.name, data_min[column_to_plot]),
+                        xytext=(0, 25),
+                        textcoords="offset points",
+                        verticalalignment="bottom",
+                        arrowprops=dict(facecolor="black", shrink=0.025),
+                        horizontalalignment="left"
+                        if (data_min.name.month % 2) == 1
+                        else "right",
+                        fontsize=12,
+                    )
+                    plt.annotate(
+                        int(data_max[column_to_plot]),
+                        xy=(data_max.name, data_max[column_to_plot]),
+                        xytext=(0, -25),
+                        textcoords="offset points",
+                        verticalalignment="top",
+                        arrowprops=dict(facecolor="blue", shrink=0.025),
+                        fontsize=12,
+                    )
                 data_min["type"] = "min"
                 data_max["type"] = "max"
                 mins_and_maxes.append(data_min)
                 mins_and_maxes.append(data_max)
-            table = produce_min_max_table(
-                pd.concat(mins_and_maxes, axis=1).T, column_to_plot
-            )
-            table.to_html(output_dir / f"{filename}_table.html")
+            if produce_season_table:
+                table = produce_min_max_table(
+                    pd.concat(mins_and_maxes, axis=1).T,
+                    column_to_plot,
+                    category,
+                )
+                table.to_html(output_dir / f"{filename}_table.html")
 
     elif frequency == "week":
         xticks = pd.date_range(
@@ -308,6 +314,11 @@ def parse_args():
         help="Mark the max and min of each season",
     )
     parser.add_argument(
+        "--produce-season-table",
+        action="store_true",
+        help="Generate a table with the max and min of each season",
+    )
+    parser.add_argument(
         "--date-lines",
         nargs="+",
         type=parse_date,
@@ -333,6 +344,7 @@ def main():
     use_groups = args.use_groups
     legend_inside = args.legend_inside
     mark_seasons = args.mark_seasons
+    produce_season_table = args.produce_season_table
     date_lines = args.date_lines
     base_fontsize = args.base_fontsize
 
@@ -352,9 +364,7 @@ def main():
     medications = population_measures[
         population_measures.name.str.contains("|".join(medication_measures))
     ]
-    if use_groups:
-        medications = group_medications(medications)
-
+    # NOTE: too many medications to annotate counts on plot
     plot_measures(
         medications,
         output_dir=output_dir,
@@ -366,9 +376,11 @@ def main():
         frequency=frequency,
         log_scale=log_scale,
         legend_inside=legend_inside,
-        mark_seasons=mark_seasons,
+        mark_seasons=False,
+        produce_season_table=produce_season_table,
         date_lines=date_lines,
     )
+    # NOTE: too many medications to annotate counts on plot
     plot_measures(
         medications,
         output_dir=output_dir,
@@ -380,9 +392,44 @@ def main():
         frequency=frequency,
         log_scale=log_scale,
         legend_inside=legend_inside,
-        mark_seasons=mark_seasons,
+        mark_seasons=False,
+        produce_season_table=produce_season_table,
         date_lines=date_lines,
     )
+
+    if use_groups:
+        medications = group_medications(medications)
+
+        plot_measures(
+            medications,
+            output_dir=output_dir,
+            filename="medications_grouped_bar_measures_count",
+            column_to_plot="numerator",
+            y_label="Count of patients",
+            as_bar=False,
+            category="name",
+            frequency=frequency,
+            log_scale=log_scale,
+            legend_inside=legend_inside,
+            mark_seasons=mark_seasons,
+            produce_season_table=produce_season_table,
+            date_lines=date_lines,
+        )
+        plot_measures(
+            medications,
+            output_dir=output_dir,
+            filename="medications_grouped_bar_measures",
+            column_to_plot="rate",
+            y_label="Rate per 1000 patients",
+            as_bar=False,
+            category="name",
+            frequency=frequency,
+            log_scale=log_scale,
+            legend_inside=legend_inside,
+            mark_seasons=mark_seasons,
+            produce_season_table=produce_season_table,
+            date_lines=date_lines,
+        )
 
     # Clinical
     clinical_measures = [
@@ -403,6 +450,7 @@ def main():
         log_scale=log_scale,
         legend_inside=legend_inside,
         mark_seasons=mark_seasons,
+        produce_season_table=produce_season_table,
         date_lines=date_lines,
     )
     plot_measures(
@@ -417,6 +465,7 @@ def main():
         log_scale=log_scale,
         legend_inside=legend_inside,
         mark_seasons=mark_seasons,
+        produce_season_table=produce_season_table,
         date_lines=date_lines,
     )
 
@@ -432,10 +481,7 @@ def main():
                 "|".join(medication_with_clinical_measures)
             )
         ]
-        if use_groups:
-            medications_with_clinical = group_medications(
-                medications_with_clinical
-            )
+        # NOTE: too many medications to annotate counts on plot
         plot_measures(
             medications_with_clinical,
             output_dir=output_dir,
@@ -447,9 +493,11 @@ def main():
             frequency=frequency,
             log_scale=log_scale,
             legend_inside=legend_inside,
-            mark_seasons=mark_seasons,
+            mark_seasons=False,
+            produce_season_table=produce_season_table,
             date_lines=date_lines,
         )
+        # NOTE: too many medications to annotate counts on plot
         plot_measures(
             medications_with_clinical,
             output_dir=output_dir,
@@ -461,9 +509,44 @@ def main():
             frequency=frequency,
             log_scale=log_scale,
             legend_inside=legend_inside,
-            mark_seasons=mark_seasons,
+            mark_seasons=False,
+            produce_season_table=produce_season_table,
             date_lines=date_lines,
         )
+        if use_groups:
+            medications_with_clinical = group_medications(
+                medications_with_clinical
+            )
+            plot_measures(
+                medications_with_clinical,
+                output_dir=output_dir,
+                filename="medications_grouped_with_clinical_bar_measures_count",
+                column_to_plot="numerator",
+                y_label="Count of patients",
+                as_bar=False,
+                category="name",
+                frequency=frequency,
+                log_scale=log_scale,
+                legend_inside=legend_inside,
+                mark_seasons=mark_seasons,
+                produce_season_table=produce_season_table,
+                date_lines=date_lines,
+            )
+            plot_measures(
+                medications_with_clinical,
+                output_dir=output_dir,
+                filename="medications_grouped_with_clinical_bar_measures",
+                column_to_plot="rate",
+                y_label="Rate per 1000",
+                as_bar=False,
+                category="name",
+                frequency=frequency,
+                log_scale=log_scale,
+                legend_inside=legend_inside,
+                mark_seasons=mark_seasons,
+                produce_season_table=produce_season_table,
+                date_lines=date_lines,
+            )
 
         # Clinical with medication
         clinical_with_medication_measures = [
@@ -487,6 +570,7 @@ def main():
             log_scale=log_scale,
             legend_inside=legend_inside,
             mark_seasons=mark_seasons,
+            produce_season_table=produce_season_table,
             date_lines=date_lines,
         )
         plot_measures(
@@ -501,6 +585,7 @@ def main():
             log_scale=log_scale,
             legend_inside=legend_inside,
             mark_seasons=mark_seasons,
+            produce_season_table=produce_season_table,
             date_lines=date_lines,
         )
 
