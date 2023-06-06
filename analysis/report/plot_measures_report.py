@@ -86,32 +86,40 @@ def produce_min_max_table(df, column_to_plot, category):
     df.numerator = df.numerator.astype(float)
     df.denominator = df.denominator.astype(float)
     cis = ci_95_proportion(df, scale=1000)
-    df["cis"] = ci_to_str(cis)
+    df["Rate (95% CI)"] = ci_to_str(cis)
+    df = df.rename({"numerator": "Count"}, axis=1)
     table = df.pipe(
         MultiIndex_pivot,
         index=[category, "type"],
         columns="gas_year",
-        values=["numerator", "rate", "cis"],
+        values=["Count", "rate", "Rate (95% CI)"],
     )
     if column_to_plot == "numerator":
-        return table["numerator"]
+        table["Count"] = table["Count"].applymap(lambda x: f"{x:.0f}")
+        return table["Count"]
     else:
-        table.numerator = table.numerator.astype(float)
+        table.Count = table.Count.astype(float)
         table.rate = table.rate.astype(float)
         ratio = table["rate"]["2023"] / table["rate"]["2018"]
 
         # See formula of ci irr:
         # https://researchonline.lshtm.ac.uk/id/eprint/251164/1/pmed.1001270.s005.pdf
         sd_log_irr = np.sqrt(
-            (1 / table["numerator"]["2023"]) + (1 / table["numerator"]["2018"])
+            (1 / table["Count"]["2023"]) + (1 / table["Count"]["2018"])
         )
         lci = np.exp(np.log(ratio) - 1.96 * sd_log_irr)
         uci = np.exp(np.log(ratio) + 1.96 * sd_log_irr)
         rr_cis = pd.concat([ratio, lci, uci], axis=1)
 
         rr_cis_str = ci_to_str(rr_cis)
-        rr_cis_str.name = "Rate Ratio (95% CI) 2023 v 2018"
-        return pd.concat([table["cis"], rr_cis_str], axis=1)
+        rr_cis_str.name = ("2023 v 2018", "Rate Ratio (95% CI)")
+
+        # Create table with count, rate (95% CI)
+        table["Count"] = table["Count"].applymap(lambda x: f"{x:.0f}")
+        count_cis = (table[["Count", "Rate (95% CI)"]]).swaplevel(axis=1)
+        cols = count_cis.columns.get_level_values(0).unique()
+        reordered = count_cis.reindex(columns=cols, level="gas_year")
+        return pd.concat([reordered, rr_cis_str], axis=1)
 
 
 def plot_measures(
