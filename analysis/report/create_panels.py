@@ -7,6 +7,7 @@ from report_utils import (
     get_measure_tables,
     subset_table,
     write_group_chart,
+    set_fontsize,
     MEDICATION_TO_CODELIST,
     CLINICAL_TO_CODELIST,
 )
@@ -48,6 +49,12 @@ def parse_args():
         help="Display every nth xtick",
         type=int,
         default=1,
+    )
+    parser.add_argument(
+        "--base-fontsize",
+        help="Default text size",
+        type=int,
+        default=10,
     )
     return parser.parse_args()
 
@@ -156,8 +163,10 @@ def main():
     output_dir = args.output_dir
     frequency = args.frequency
     xtick_frequency = args.xtick_frequency
+    base_fontsize = args.base_fontsize
 
     output_dir.mkdir(parents=True, exist_ok=True)
+    set_fontsize(base_fontsize)
 
     measure_table = get_measure_tables(input_file)
     if practice_file:

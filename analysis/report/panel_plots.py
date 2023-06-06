@@ -22,6 +22,7 @@ from report_utils import (
     subset_table,
     write_group_chart,
     colour_palette,
+    set_fontsize,
 )
 import matplotlib.ticker as ticker
 
@@ -574,6 +575,12 @@ def parse_args():
         type=int,
         default=1,
     )
+    parser.add_argument(
+        "--base-fontsize",
+        help="Default text size",
+        type=int,
+        default=10,
+    )
     return parser.parse_args()
 
 
@@ -593,8 +600,10 @@ def main():
     confidence_intervals = args.confidence_intervals
     exclude_group = args.exclude_group
     xtick_frequency = args.xtick_frequency
+    base_fontsize = args.base_fontsize
 
     output_dir.mkdir(parents=True, exist_ok=True)
+    set_fontsize(base_fontsize)
 
     measure_table = get_measure_tables(input_file)
     if practice_file:

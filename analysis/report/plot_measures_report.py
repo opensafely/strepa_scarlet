@@ -11,6 +11,7 @@ from report_utils import (
     translate_group,
     parse_date,
     coerce_numeric,
+    set_fontsize,
     MEDICATION_TO_CODELIST,
     CLINICAL_TO_CODELIST,
     GROUPED_MEDICATIONS,
@@ -309,7 +310,14 @@ def parse_args():
         type=parse_date,
         help="Vertical date lines",
     )
+    parser.add_argument(
+        "--base-fontsize",
+        help="Default text size",
+        type=int,
+        default=10,
+    )
     args = parser.parse_args()
+
     return args
 
 
@@ -323,8 +331,10 @@ def main():
     legend_inside = args.legend_inside
     mark_seasons = args.mark_seasons
     date_lines = args.date_lines
+    base_fontsize = args.base_fontsize
 
     output_dir.mkdir(parents=True, exist_ok=True)
+    set_fontsize(base_fontsize)
 
     df = pd.read_csv(measure_path, parse_dates=["date"])
     df = coerce_numeric(df)

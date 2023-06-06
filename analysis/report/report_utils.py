@@ -11,18 +11,6 @@ from IPython.display import display, Markdown, HTML, Image
 
 colour_palette = sns.color_palette("Paired", 12)
 
-SMALL_SIZE = 18
-MEDIUM_SIZE = 20
-BIGGER_SIZE = 22
-
-plt.rc("font", size=SMALL_SIZE)  # controls default text sizes
-plt.rc("axes", titlesize=SMALL_SIZE)  # fontsize of the axes title
-plt.rc("axes", labelsize=MEDIUM_SIZE)  # fontsize of the x and y labels
-plt.rc("xtick", labelsize=SMALL_SIZE)  # fontsize of the tick labels
-plt.rc("ytick", labelsize=SMALL_SIZE)  # fontsize of the tick labels
-plt.rc("legend", fontsize=MEDIUM_SIZE)  # legend fontsize
-plt.rc("figure", titlesize=BIGGER_SIZE)  # fontsize of the figure title
-
 MEDICATION_TO_CODELIST = {
     "amoxicillin": "codelists/opensafely-amoxicillin-oral.csv",
     "azithromycin": "codelists/opensafely-azithromycin-oral.csv",
@@ -53,6 +41,10 @@ GROUPED_MEDICATIONS = {
     ],
     "group_3": ["cefalexin", "co_amoxiclav"],
 }
+
+
+def set_fontsize(base_fontsize):
+    plt.rc("font", size=base_fontsize)  # controls default text sizes
 
 
 def get_codelist_dict():

@@ -255,6 +255,7 @@ actions:
       python:latest python analysis/report/plot_measures_report.py
       --measure-path output/report/results/measure_rounded.csv
       --output-dir output/report/results
+      --base-fontsize 14
     needs: [join_measures_rounded]
     outputs:
       moderately_sensitive:
@@ -442,6 +443,7 @@ actions:
       --measure-path output/report/weekly/results/measure_rounded_weekly.csv
       --output-dir output/report/weekly/results
       --frequency week
+      --base-fontsize 14
     needs: [join_measures_rounded_weekly]
     outputs:
       moderately_sensitive:
@@ -551,6 +553,7 @@ actions:
       --log-scale
       --mark-seasons
       --legend-inside
+      --base-fontsize 18
     needs: [join_measures_rounded]
     outputs:
       moderately_sensitive:
@@ -571,6 +574,7 @@ actions:
       --exclude-group "Missing"
       --scale "rate"
       --xtick-frequency 3
+      --base-fontsize 18
     needs: [join_measures_rounded]
     outputs:
       moderately_sensitive:
