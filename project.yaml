@@ -204,7 +204,8 @@ actions:
     needs: [join_cohorts_report]
     outputs:
       moderately_sensitive:
-        measure_csv: output/report/joined/measure_event_*.csv
+        measure_csv: output/report/joined/measure_event_*_rate.csv
+        measure_pcnt_csv: output/report/joined/measure_event_*_pcnt.csv
 
   join_measures_rounded:
       run: python:latest python analysis/join_and_round.py
@@ -237,22 +238,6 @@ actions:
           measure_csv: output/report/results/measure_unrounded.csv
 
 
-  table1:
-    run: >
-      python:latest python analysis/report/table1.py
-      --input-file output/report/results/measure_rounded.csv
-      --output-dir output/report/results
-      --measures-pattern "event_medication_any_*_rate"
-      --measures-pattern "event_clinical_any_*_rate"
-      --include-denominator
-      --column-name "clinical_any" "medication_any"
-      --output-name "table1.html"
-    needs: [join_measures_rounded]
-    outputs:
-      moderately_sensitive:
-        tables: output/report/results/table1.html
-
-
   top_5_table_report:
     run: >
       python:latest python analysis/report/top_5_report.py
@@ -271,6 +256,7 @@ actions:
       python:latest python analysis/report/plot_measures_report.py
       --measure-path output/report/results/measure_rounded.csv
       --output-dir output/report/results
+      --base-fontsize 14
     needs: [join_measures_rounded]
     outputs:
       moderately_sensitive:
@@ -281,6 +267,7 @@ actions:
       python:latest python analysis/report/create_panels.py
       --input-file output/report/results/measure_rounded.csv
       --practice-file output/report/results/measure_unrounded.csv
+      --panels "population" "practice" "age_band" "region" "imd" "ethnicity"
       --output-dir output/report/results
       --xtick-frequency 3
     needs: [join_measures_rounded, join_measures_unrounded]
@@ -457,6 +444,7 @@ actions:
       --measure-path output/report/weekly/results/measure_rounded_weekly.csv
       --output-dir output/report/weekly/results
       --frequency week
+      --base-fontsize 14
     needs: [join_measures_rounded_weekly]
     outputs:
       moderately_sensitive:
@@ -467,6 +455,7 @@ actions:
       python:latest python analysis/report/create_panels.py
       --input-file output/report/weekly/results/measure_rounded_weekly.csv
       --practice-file output/report/weekly/results/measure_unrounded_weekly.csv
+      --panels "population" "practice" "age_band" "region" "imd"
       --output-dir output/report/weekly/results
       --frequency week
     needs: [join_measures_rounded_weekly, join_measures_unrounded_weekly]
@@ -535,3 +524,59 @@ actions:
     outputs:
       moderately_sensitive:
         notebook: output/report/report_weekly.html
+
+
+  ### Actions for paper ###
+
+  table1:
+    run: >
+      python:latest python analysis/report/table1.py
+      --input-file output/report/results/measure_rounded.csv
+      --output-dir output/report/results/paper
+      --measures-pattern "event_clinical_any_*_rate"
+      --measures-pattern "event_medication_any_*_rate"
+      --include-denominator
+      --column-name "clinical_any" "medication_any"
+      --output-name "table1.html"
+    needs: [join_measures_rounded]
+    outputs:
+      moderately_sensitive:
+        tables: output/report/results/paper/table1.html
+
+  plot_measure_report_paper:
+    run: >
+      python:latest python analysis/report/plot_measures_report.py
+      --measure-path output/report/results/measure_rounded.csv
+      --output-dir output/report/results/paper
+      --date-lines "2020-03-01" "2021-03-01"
+      --use-groups
+      --log-scale
+      --mark-seasons
+      --produce-season-table
+      --legend-inside
+      --base-fontsize 18
+    needs: [join_measures_rounded]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/paper/*_bar_measure*.jpeg
+        tables: output/report/results/paper/*_bar_measures_table.html
+
+  pheno_panel_plot_paper:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_rounded.csv
+      --measures-list "event_phenoxymethylpenicillin_with_clinical_any_age_band_rate"
+      --measures-list "event_phenoxymethylpenicillin_with_clinical_any_region_rate"
+      --measures-list "event_phenoxymethylpenicillin_with_clinical_any_ethnicity_rate"
+      --measures-list "event_phenoxymethylpenicillin_with_clinical_any_imd_rate"
+      --order "age_band" "region" "ethnicity" "imd"
+      --output-dir output/report/results/paper
+      --output-name "phenoxymethylpenicillin_with_clinical_any_by_subgroup"
+      --exclude-group "Missing"
+      --scale "rate"
+      --xtick-frequency 3
+      --base-fontsize 18
+    needs: [join_measures_rounded]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/paper/phenoxymethylpenicillin_with_clinical_any_by_subgroup.png

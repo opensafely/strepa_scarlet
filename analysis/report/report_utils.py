@@ -8,10 +8,8 @@ import seaborn as sns
 from collections import Counter
 from pathlib import Path
 from IPython.display import display, Markdown, HTML, Image
-import matplotlib.ticker as ticker
 
 colour_palette = sns.color_palette("Paired", 12)
-ticker.Locator.MAXTICKS = 10000
 
 MEDICATION_TO_CODELIST = {
     "amoxicillin": "codelists/opensafely-amoxicillin-oral.csv",
@@ -29,6 +27,24 @@ CLINICAL_TO_CODELIST = {
     "sore_throat_tonsillitis": "codelists/opensafely-group-a-streptococcal-sore-throat.csv",
     "invasive_strep_a": "codelists/opensafely-invasive-group-a-strep.csv",
 }
+
+GROUPED_MEDICATIONS = {
+    "group_1": [
+        "phenoxymethylpenicillin",
+    ],
+    "group_2": [
+        "flucloxacillin",
+        "amoxicillin",
+        "clarithromycin",
+        "erythromycin",
+        "azithromycin",
+    ],
+    "group_3": ["cefalexin", "co_amoxiclav"],
+}
+
+
+def set_fontsize(base_fontsize):
+    plt.rc("font", size=base_fontsize)  # controls default text sizes
 
 
 def get_codelist_dict():
@@ -87,95 +103,33 @@ def round_values(x, base=10, redact=False, redaction_threshold=5):
     return rounded
 
 
-def plot_measures(
-    df,
-    filename: str,
-    column_to_plot: str,
-    y_label: str,
-    as_bar: bool = False,
-    category: str = None,
-    frequency: str = "month",
-):
-    """Produce time series plot from measures table.  One line is plotted for each sub
-    category within the category column. Saves output as jpeg file.
-    Args:
-        df: A measure table
-        column_to_plot: Column name for y-axis values
-        y_label: Label to use for y-axis
-        as_bar: Boolean indicating if bar chart should be plotted instead of line chart. Only valid if no categories.
-        category: Name of column indicating different categories
-    """
-    df_copy = df.copy()
+def ci_95_proportion(df, scale=1):
+    # NOTE: do not assume df has value
+    # See formula:
+    # https://sphweb.bumc.bu.edu/otlt/MPH-Modules/PH717-QuantCore/PH717-Module6-RandomError/PH717-Module6-RandomError12.html
+    cis = pd.DataFrame()
+    val = df.numerator / df.denominator
+    sd = np.sqrt(((val * (1 - val)) / df.denominator))
+    cis[0] = scale * (val)
+    cis[1] = scale * (val - 1.96 * sd)
+    cis[2] = scale * (val + 1.96 * sd)
+    return cis
 
-    sns.set_style("darkgrid")
-    fig, ax = plt.subplots(figsize=(18, 8))
 
-    plt.rcParams["axes.prop_cycle"] = plt.cycler(color=colour_palette)
-
-    # NOTE: finite filter for dummy data
-    y_max = df[np.isfinite(df[column_to_plot])][column_to_plot].max() * 1.05
-    # Ignore timestamp - this could be done at load time
-    df_copy["date"] = df_copy["date"].dt.date
-
-    df_copy = df_copy.set_index("date")
-    if category:
-        # Set up category to have clean labels
-        repeated = autoselect_labels(df_copy[category])
-        df_copy[category] = df_copy.apply(
-            lambda x: translate_group(
-                x[category], x[category], repeated, True
-            ),
-            axis=1,
-        )
-        if as_bar:
-            df_copy.pivot(columns=category, values=column_to_plot).plot.bar(
-                ax=ax, stacked=True
-            )
-            y_max = (
-                df_copy.groupby(["date"])[column_to_plot].sum().max() * 1.05
-            )
-        else:
-            df_copy.groupby(category)[column_to_plot].plot(ax=ax)
-    else:
-        if as_bar:
-            df_copy[column_to_plot].bar(ax=ax, legend=False)
-        else:
-            df_copy[column_to_plot].plot(ax=ax, legend=False)
-
-    if frequency == "month":
-        xticks = pd.date_range(
-            start=df_copy.index.min(), end=df_copy.index.max(), freq="MS"
-        )
-        ax.set_xticks(xticks)
-        ax.set_xticklabels([x.strftime("%B %Y") for x in xticks])
-    elif frequency == "week":
-        xticks = pd.date_range(
-            start=df_copy.index.min(), end=df_copy.index.max(), freq="W-THU"
-        )
-        ax.set_xticks(xticks)
-        ax.set_xticklabels([x.strftime("%d-%m-%Y") for x in xticks])
-
-    plt.ylabel(y_label)
-    plt.xlabel("Date")
-    plt.xticks(rotation="vertical")
-    plt.xticks(fontsize=8)
-
-    plt.ylim(
-        bottom=0,
-        top=1000 if df_copy[column_to_plot].isnull().values.all() else y_max,
+def ci_to_str(ci_df):
+    return ci_df.apply(
+        lambda x: f"{x[0]:.2f} ({x[1]:.2f} to {x[2]:.2f})", axis=1
     )
 
-    if category:
-        plt.legend(
-            sorted(df_copy[category].unique()),
-            bbox_to_anchor=(1.04, 1),
-            loc="upper left",
-        )
 
-    plt.tight_layout()
+def parse_date(date_str):
+    return pd.to_datetime(date_str).date()
 
-    plt.savefig(f"{filename}.jpeg")
-    plt.close()
+
+def add_date_lines(vlines, min_date, max_date):
+    for date in vlines:
+        if date >= min_date and date <= max_date:
+            plt.axvline(x=date, color="orange", ls="--")
 
 
 def coerce_numeric(table):

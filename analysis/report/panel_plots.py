@@ -9,8 +9,9 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter
-from dateutil import parser
 from report_utils import (
+    parse_date,
+    add_date_lines,
     coerce_numeric,
     round_values,
     drop_zero_denominator_rows,
@@ -21,6 +22,7 @@ from report_utils import (
     subset_table,
     write_group_chart,
     colour_palette,
+    set_fontsize,
 )
 import matplotlib.ticker as ticker
 
@@ -72,9 +74,9 @@ def is_bool_as_int(series):
     """Does series have bool values but an int dtype?"""
     # numpy.nan will ensure an int series becomes a float series, so we need to
     # check for both int and float
-    if not pandas.api.types.is_bool_dtype(series) and pandas.api.types.is_numeric_dtype(
+    if not pandas.api.types.is_bool_dtype(
         series
-    ):
+    ) and pandas.api.types.is_numeric_dtype(series):
         series = series.dropna()
         return ((series == 0) | (series == 1)).all()
     elif not pandas.api.types.is_bool_dtype(
@@ -124,7 +126,9 @@ def reorder_labels(labels):
             else:
                 highest = math.inf
             max_val[(handle, label)] = highest
-        return zip(*dict(sorted(max_val.items(), key=operator.itemgetter(1))).keys())
+        return zip(
+            *dict(sorted(max_val.items(), key=operator.itemgetter(1))).keys()
+        )
     return zip(*labels)
 
 
@@ -132,7 +136,9 @@ def reorder_labels(labels):
 # https://github.com/ebmdatalab/datalab-pandas/charts.py and modified
 # due to a bug where the 6th outer decile is repeated as a result of
 # floating point precision in numpy.arrange
-def add_percentiles(df, period_column=None, column=None, show_outer_percentiles=True):
+def add_percentiles(
+    df, period_column=None, column=None, show_outer_percentiles=True
+):
     """For each period in `period_column`, compute percentiles across that
     range.
 
@@ -143,7 +149,9 @@ def add_percentiles(df, period_column=None, column=None, show_outer_percentiles=
     bottom_percentiles = numpy.arange(0.01, 0.1, 0.01)
     top_percentiles = numpy.arange(0.91, 1, 0.01)
     if show_outer_percentiles:
-        quantiles = numpy.concatenate((deciles, bottom_percentiles, top_percentiles))
+        quantiles = numpy.concatenate(
+            (deciles, bottom_percentiles, top_percentiles)
+        )
     else:
         quantiles = deciles
     df = df.groupby(period_column)[column].quantile(quantiles).reset_index()
@@ -174,8 +182,18 @@ def deciles_chart(
         show_outer_percentiles=show_outer_percentiles,
     )
     linestyles = {
-        "decile": {"color": "b", "line": "b--", "linewidth": 1, "label": "decile"},
-        "median": {"color": "b", "line": "b-", "linewidth": 1.5, "label": "median"},
+        "decile": {
+            "color": "b",
+            "line": "b--",
+            "linewidth": 1,
+            "label": "decile",
+        },
+        "median": {
+            "color": "b",
+            "line": "b-",
+            "linewidth": 1.5,
+            "label": "median",
+        },
         "percentile": {
             "color": "b",
             "line": "b:",
@@ -258,7 +276,9 @@ def write_deciles_table(measure_table, output_dir, filename):
     )
     deciles_table = deciles_table.set_index("date")
     deciles_table["practice_count_per_date"] = num_practices
-    deciles_table.to_csv(output_dir / f"deciles_table_{filename}.csv", index=True)
+    deciles_table.to_csv(
+        output_dir / f"deciles_table_{filename}.csv", index=True
+    )
 
 
 def add_deciles_plot(
@@ -304,9 +324,11 @@ def plot_axis(
     panel_group_data = panel_group_data.set_index("date")
     is_bool = is_bool_as_int(panel_group_data.group)
     if is_bool:
-        panel_group_data.group = panel_group_data.group.astype(int).astype(bool)
+        panel_group_data.group = panel_group_data.group.astype(int).astype(
+            bool
+        )
     numeric = coerce_numeric(panel_group_data)
-    group_by = ["group"]
+    group_by = "group"
     # TODO: we may need to handle weekly data differently
     if stack_years and len(numeric.group.unique()) == 1:
         numeric = numeric.reset_index()
@@ -328,7 +350,9 @@ def plot_axis(
             plot_cis(ax, plot_group_data)
     # NOTE: Use the last group_by, which will be "year" for stack_years
     handles, labels = ax.get_legend_handles_labels()
-    handles_reordered, labels_reordered = reorder_labels(list(zip(handles, labels)))
+    handles_reordered, labels_reordered = reorder_labels(
+        list(zip(handles, labels))
+    )
     ax.legend(handles_reordered, labels_reordered, **lgd_params)
     if date_lines:
         min_date = min(panel_group_data.index)
@@ -355,7 +379,7 @@ def get_group_chart(
     lgd_params = {
         "bbox_to_anchor": (1, 1),
         "loc": "upper left",
-        "fontsize": "x-small",
+        "fontsize": "10",
         "ncol": 1,
     }
 
@@ -428,7 +452,9 @@ def get_group_chart(
         if column_to_plot == "numerator":
             ax.set_ylabel("Count of patients")
     if exclude_group:
-        plt.xlabel(f"*Those with '{exclude_group}' category excluded from each plot")
+        plt.xlabel(
+            f"*Those with '{exclude_group}' category excluded from each plot"
+        )
     # Deciles chart code globally calls plt.gcf().autofmt_xdate()
     # So we have to turn the axes back on here
     for ax in plt.gcf().get_axes():
@@ -470,16 +496,6 @@ def get_path(*args):
     return pathlib.Path(*args).resolve()
 
 
-def add_date_lines(vlines, min_date, max_date):
-    for date in vlines:
-        date_obj = pandas.to_datetime(date)
-        if date_obj >= min_date and date_obj <= max_date:
-            try:
-                plt.axvline(x=date_obj, color="orange", ls="--")
-            except parser._parser.ParserError:
-                continue
-
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -507,7 +523,8 @@ def parse_args():
     parser.add_argument(
         "--order",
         required=False,
-        action="append",
+        nargs="+",
+        default=[],
         help="List of categories for subplot order",
     )
     parser.add_argument(
@@ -535,6 +552,7 @@ def parse_args():
     parser.add_argument(
         "--date-lines",
         nargs="+",
+        type=parse_date,
         help="Vertical date lines",
     )
     choices = ["percentage", "rate"]
@@ -557,6 +575,12 @@ def parse_args():
         type=int,
         default=1,
     )
+    parser.add_argument(
+        "--base-fontsize",
+        help="Default text size",
+        type=int,
+        default=10,
+    )
     return parser.parse_args()
 
 
@@ -576,6 +600,10 @@ def main():
     confidence_intervals = args.confidence_intervals
     exclude_group = args.exclude_group
     xtick_frequency = args.xtick_frequency
+    base_fontsize = args.base_fontsize
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    set_fontsize(base_fontsize)
 
     measure_table = get_measure_tables(input_file)
     if practice_file:

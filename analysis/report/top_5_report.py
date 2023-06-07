@@ -11,6 +11,7 @@ from report_utils import (
     MEDICATION_TO_CODELIST,
     CLINICAL_TO_CODELIST,
     colour_palette,
+    set_fontsize,
 )
 
 
@@ -49,7 +50,6 @@ def group_low_values(df, count_column, code_column, threshold):
     if (suppressed_count > 0) | (
         (suppressed_count == 0) & (len(suppressed_df) != len(df))
     ):
-
         # redact counts <= threshold
         df.loc[df[count_column] <= threshold, count_column] = np.nan
 
@@ -325,6 +325,10 @@ def main():
     input_file = args.input_file
     output_dir = args.output_dir
     frequency = args.frequency
+    base_fontsize = args.base_fontsize
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    set_fontsize(base_fontsize)
 
     measure_table = get_measure_tables(input_file)
     measure_table = coerce_numeric(measure_table)
@@ -355,7 +359,6 @@ def main():
                 .reset_index()
             )
         else:
-
             term_column = "term"
             code_df = (
                 code_df.groupby(["group", "date"])[["numerator"]]
@@ -429,6 +432,12 @@ def parse_args():
         default="month",
         choices=["month", "week"],
         help="The frequency of the data",
+    )
+    parser.add_argument(
+        "--base-fontsize",
+        help="Default text size",
+        type=int,
+        default=10,
     )
     return parser.parse_args()
 
