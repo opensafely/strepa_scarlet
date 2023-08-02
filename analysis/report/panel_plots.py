@@ -251,7 +251,6 @@ def deciles_chart(
             loc=6,  # which part of the bounding box should
             #  be placed at bbox_to_anchor
             ncol=1,  # number of columns in the legend
-            fontsize=12,
             borderaxespad=0.0,
         )  # padding between the axes and legend
         #  specified in font-size units
@@ -379,7 +378,6 @@ def get_group_chart(
     lgd_params = {
         "bbox_to_anchor": (1, 1),
         "loc": "upper left",
-        "fontsize": "10",
         "ncol": 1,
     }
 
@@ -457,11 +455,12 @@ def get_group_chart(
         )
     # Deciles chart code globally calls plt.gcf().autofmt_xdate()
     # So we have to turn the axes back on here
+    # Use relative terms i.e. small (rather than 7) so basefontsize can scale
     for ax in plt.gcf().get_axes():
         ax.tick_params(labelbottom=True)
         ax.get_xticklabels("auto")
         ax.set_xlabel("")
-        ax.tick_params(axis="x", labelsize=7, rotation=90)
+        ax.tick_params(axis="x", labelsize="small", rotation=90)
         ax.tick_params(axis="y", labelsize="small")
         ax.yaxis.label.set_alpha(1.0)
         ax.yaxis.label.set_fontsize("small")

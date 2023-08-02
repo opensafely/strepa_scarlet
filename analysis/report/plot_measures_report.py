@@ -258,7 +258,7 @@ def plot_measures(
     plt.ylabel(y_label)
     plt.xlabel("Date")
     plt.xticks(rotation="vertical")
-    plt.xticks(fontsize=14)
+    plt.xticks(fontsize="medium")
 
     plt.ylim(
         top=1000 if df_copy[column_to_plot].isnull().all() else y_max,
