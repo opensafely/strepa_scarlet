@@ -270,7 +270,7 @@ def plot_top_codes_over_time(
 
     plt.figure(figsize=(10, 6))
     # seaborn styling
-    sns.set_style("darkgrid")
+    sns.set_style("whitegrid")
     plt.rcParams["axes.prop_cycle"] = plt.cycler(color=colour_palette)
     ax = plt.gca()
 

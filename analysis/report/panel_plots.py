@@ -400,7 +400,7 @@ def get_group_chart(
 
     lgds = []
     for index, panel in enumerate(groups):
-        sns.set_style("darkgrid")
+        sns.set_style("whitegrid")
         # set the color palette using matplotlib
         plt.rcParams["axes.prop_cycle"] = plt.cycler(color=colour_palette)
 

@@ -149,7 +149,7 @@ def plot_measures(
     """
     df_copy = df.copy()
 
-    sns.set_style("darkgrid")
+    sns.set_style("whitegrid")
     fig, ax = plt.subplots(figsize=(18, 10))
     plt.rcParams["axes.prop_cycle"] = plt.cycler(color=colour_palette)
     if log_scale:
