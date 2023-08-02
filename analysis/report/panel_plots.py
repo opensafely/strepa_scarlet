@@ -16,6 +16,7 @@ from report_utils import (
     drop_zero_denominator_rows,
     filename_to_title,
     autoselect_labels,
+    is_bool_as_int,
     translate_group,
     get_measure_tables,
     subset_table,
@@ -69,28 +70,6 @@ def plot_cis(ax, data):
         (data["ci95hi"]),
         alpha=0.1,
     )
-
-
-def is_bool_as_int(series):
-    """Does series have bool values but an int dtype?"""
-    # numpy.nan will ensure an int series becomes a float series, so we need to
-    # check for both int and float
-    if not pandas.api.types.is_bool_dtype(
-        series
-    ) and pandas.api.types.is_numeric_dtype(series):
-        series = series.dropna()
-        return ((series == 0) | (series == 1)).all()
-    elif not pandas.api.types.is_bool_dtype(
-        series
-    ) and pandas.api.types.is_object_dtype(series):
-        try:
-            series = series.astype(int)
-        except ValueError:
-            return False
-        series = series.dropna()
-        return ((series == 0) | (series == 1)).all()
-    else:
-        return False
 
 
 def reorder_dataframe(measure_table, order):

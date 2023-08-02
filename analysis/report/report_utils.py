@@ -137,6 +137,28 @@ def add_date_lines(vlines, min_date, max_date):
             plt.axvline(x=date, color="orange", ls="--")
 
 
+def is_bool_as_int(series):
+    """Does series have bool values but an int dtype?"""
+    # numpy.nan will ensure an int series becomes a float series, so we need to
+    # check for both int and float
+    if not pd.api.types.is_bool_dtype(
+        series
+    ) and pd.api.types.is_numeric_dtype(series):
+        series = series.dropna()
+        return ((series == 0) | (series == 1)).all()
+    elif not pd.api.types.is_bool_dtype(
+        series
+    ) and pd.api.types.is_object_dtype(series):
+        try:
+            series = series.astype(int)
+        except ValueError:
+            return False
+        series = series.dropna()
+        return ((series == 0) | (series == 1)).all()
+    else:
+        return False
+
+
 def reorder_dashes(data, level=1):
     """
     Some strings (i.e. numbers that contain dashes) should be sorted

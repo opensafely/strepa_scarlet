@@ -1,8 +1,14 @@
 import pathlib
 import argparse
 import pandas
-import fnmatch
-from report_utils import ci_95_proportion, ci_to_str, reorder_dashes
+from report_utils import (
+    ci_95_proportion,
+    ci_to_str,
+    get_measure_tables,
+    is_bool_as_int,
+    match_paths,
+    reorder_dashes,
+)
 
 """
 Generate table1 from joined measures file.
@@ -11,16 +17,9 @@ provided column names
 """
 
 
-def get_measure_tables(input_file):
-    measure_table = pandas.read_csv(
-        input_file,
-        dtype={"numerator": float, "denominator": float, "value": float},
-        na_values="[REDACTED]",
-    )
-
-    return measure_table
-
-
+# NOTE: this is slightly different than the utils subset_table
+# because it takes a list of patterns
+# TODO: standardise to one subset_table
 def subset_table(measure_table, measures_pattern, date):
     """
     Given either a pattern of list of names, extract the subset of a joined
@@ -42,28 +41,6 @@ def subset_table(measure_table, measures_pattern, date):
         raise ValueError("Patterns did not match any rows")
 
     return table_subset
-
-
-def is_bool_as_int(series):
-    """Does series have bool values but an int dtype?"""
-    # numpy.nan will ensure an int series becomes a float series, so we need to
-    # check for both int and float
-    if not pandas.api.types.is_bool_dtype(
-        series
-    ) and pandas.api.types.is_numeric_dtype(series):
-        series = series.dropna()
-        return ((series == 0) | (series == 1)).all()
-    elif not pandas.api.types.is_bool_dtype(
-        series
-    ) and pandas.api.types.is_object_dtype(series):
-        try:
-            series = series.astype(int)
-        except ValueError:
-            return False
-        series = series.dropna()
-        return ((series == 0) | (series == 1)).all()
-    else:
-        return False
 
 
 def series_to_bool(series):
@@ -163,10 +140,6 @@ def reorder_dataframe(df):
         else:
             reordered = pandas.concat([data, reordered])
     return reordered
-
-
-def match_paths(files, pattern):
-    return fnmatch.filter(files, pattern)
 
 
 def parse_args():
