@@ -28,18 +28,19 @@ CLINICAL_TO_CODELIST = {
     "invasive_strep_a": "codelists/opensafely-invasive-group-a-strep.csv",
 }
 
+# NOTE: use dashes instead of underscores do autolabel doesn't remove
 GROUPED_MEDICATIONS = {
-    "group_1": [
+    "group-1": [
         "phenoxymethylpenicillin",
     ],
-    "group_2": [
+    "group-2": [
         "flucloxacillin",
         "amoxicillin",
         "clarithromycin",
         "erythromycin",
         "azithromycin",
     ],
-    "group_3": ["cefalexin", "co_amoxiclav"],
+    "group-3": ["cefalexin", "co_amoxiclav"],
 }
 
 

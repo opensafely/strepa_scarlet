@@ -16,29 +16,11 @@ from report_utils import (
     set_fontsize,
     MEDICATION_TO_CODELIST,
     CLINICAL_TO_CODELIST,
-    GROUPED_MEDICATIONS,
 )
 
 import matplotlib.ticker as ticker
 
 ticker.Locator.MAXTICKS = 10000
-
-
-def group_medications(medications_df):
-    by_line = []
-    for line, meds in GROUPED_MEDICATIONS.items():
-        medications = (
-            medications_df[medications_df.name.str.contains("|".join(meds))]
-            .groupby("date", as_index=False)
-            .agg({"numerator": "sum", "denominator": lambda x: x.iloc[0]})
-        )
-        medications["name"] = line
-        medications["value"] = (
-            medications["numerator"] / medications["denominator"]
-        )
-        medications["rate"] = 1000 * medications["value"]
-        by_line.append(medications)
-    return pd.concat(by_line)
 
 
 # NOTE: bug with pandas 1.01, cannot do pivot with MultiIndex
@@ -307,11 +289,6 @@ def parse_args():
         help="Display y axis on log scale",
     )
     parser.add_argument(
-        "--use-groups",
-        action="store_true",
-        help="Group medications into first, second, and third line",
-    )
-    parser.add_argument(
         "--legend-inside",
         action="store_true",
         help="Place the legend inside the plot",
@@ -349,7 +326,6 @@ def main():
     output_dir = args.output_dir
     frequency = args.frequency
     log_scale = args.log_scale
-    use_groups = args.use_groups
     legend_inside = args.legend_inside
     mark_seasons = args.mark_seasons
     produce_season_table = args.produce_season_table
@@ -404,40 +380,6 @@ def main():
         produce_season_table=produce_season_table,
         date_lines=date_lines,
     )
-
-    if use_groups:
-        medications = group_medications(medications)
-
-        plot_measures(
-            medications,
-            output_dir=output_dir,
-            filename="medications_grouped_bar_measures_count",
-            column_to_plot="numerator",
-            y_label="Count of patients",
-            as_bar=False,
-            category="name",
-            frequency=frequency,
-            log_scale=log_scale,
-            legend_inside=legend_inside,
-            mark_seasons=mark_seasons,
-            produce_season_table=produce_season_table,
-            date_lines=date_lines,
-        )
-        plot_measures(
-            medications,
-            output_dir=output_dir,
-            filename="medications_grouped_bar_measures",
-            column_to_plot="rate",
-            y_label="Rate per 1000 patients",
-            as_bar=False,
-            category="name",
-            frequency=frequency,
-            log_scale=log_scale,
-            legend_inside=legend_inside,
-            mark_seasons=mark_seasons,
-            produce_season_table=produce_season_table,
-            date_lines=date_lines,
-        )
 
     # Clinical
     clinical_measures = [
@@ -521,40 +463,6 @@ def main():
             produce_season_table=produce_season_table,
             date_lines=date_lines,
         )
-        if use_groups:
-            medications_with_clinical = group_medications(
-                medications_with_clinical
-            )
-            plot_measures(
-                medications_with_clinical,
-                output_dir=output_dir,
-                filename="medications_grouped_with_clinical_bar_measures_count",
-                column_to_plot="numerator",
-                y_label="Count of patients",
-                as_bar=False,
-                category="name",
-                frequency=frequency,
-                log_scale=log_scale,
-                legend_inside=legend_inside,
-                mark_seasons=mark_seasons,
-                produce_season_table=produce_season_table,
-                date_lines=date_lines,
-            )
-            plot_measures(
-                medications_with_clinical,
-                output_dir=output_dir,
-                filename="medications_grouped_with_clinical_bar_measures",
-                column_to_plot="rate",
-                y_label="Rate per 1000",
-                as_bar=False,
-                category="name",
-                frequency=frequency,
-                log_scale=log_scale,
-                legend_inside=legend_inside,
-                mark_seasons=mark_seasons,
-                produce_season_table=produce_season_table,
-                date_lines=date_lines,
-            )
 
         # Clinical with medication
         clinical_with_medication_measures = [
