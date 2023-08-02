@@ -51,8 +51,11 @@ def series_to_bool(series):
 
 
 def transform_percentage(x):
+    """
+    Return (comma delimited) x and column percentage
+    """
     transformed = (
-        x.map("{:.0f}".format)
+        x.map("{:,.0f}".format)
         + " ("
         + (((x / x.sum()) * 100).round(1)).astype(str)
         + ")"

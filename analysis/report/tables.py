@@ -7,17 +7,7 @@ from report_utils import (
     subset_table,
 )
 import pandas
-
-
-def round_or_skip(x):
-    """
-    Try to return a value
-    If it fails, return the original value
-    """
-    try:
-        return round(float(x))
-    except Exception:
-        return x
+import numpy
 
 
 def count_table(measure_table):
@@ -96,10 +86,10 @@ def main():
     table = count_table(subset)
     table.index.name = table.index.name.title()
     table.index = table.index.strftime("%d-%m-%y")
-    # NOTE: applymap is by value (so very slow), but we have a mix of strings
-    # and numbers (REDACTED) so pandas.to_numeric will not work
-    # and the tables are small
-    table = table.applymap(round_or_skip)
+    # NOTE: applymap is by value (so very slow), but the tables are small
+    table = table.applymap(
+        lambda x: f"{x:,.0f}" if ~numpy.isnan(x) else "[REDACTED]"
+    )
     table.to_csv(output_dir / output_name)
 
 

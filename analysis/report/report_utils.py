@@ -324,8 +324,8 @@ def format_season_table(df, column_to_plot, category):
     rr_cis_str = ci_to_str(rr_cis)
     rr_cis_str.name = ("2023 v 2018", "Rate Ratio (95% CI)")
 
-    # Create table with count, rate (95% CI)
-    table["Count"] = table["Count"].applymap(lambda x: f"{x:.0f}")
+    # Create table with (comma delimited) count, rate (95% CI)
+    table["Count"] = table["Count"].applymap(lambda x: f"{x:,.0f}")
     count_cis = (table[["Count", "Rate (95% CI)"]]).swaplevel(axis=1)
     cols = count_cis.columns.get_level_values(0).unique()
     reordered = count_cis.reindex(columns=cols, level="gas_year")
