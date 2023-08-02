@@ -12,7 +12,6 @@ from matplotlib.ticker import FuncFormatter
 from report_utils import (
     parse_date,
     add_date_lines,
-    coerce_numeric,
     round_values,
     drop_zero_denominator_rows,
     filename_to_title,
@@ -292,8 +291,7 @@ def add_deciles_plot(
     Manually adjust the legend, label size and roation to match
     Retuns the legend so it can be included in the layout
     """
-    numeric = coerce_numeric(measure_table)
-    numeric = drop_zero_denominator_rows(numeric)
+    numeric = drop_zero_denominator_rows(measure_table)
 
     write_deciles_table(numeric, output_dir, filename)
 
@@ -329,16 +327,15 @@ def plot_axis(
         panel_group_data.group = panel_group_data.group.astype(int).astype(
             bool
         )
-    numeric = coerce_numeric(panel_group_data)
     group_by = "group"
     # TODO: we may need to handle weekly data differently
-    if stack_years and len(numeric.group.unique()) == 1:
-        numeric = numeric.reset_index()
-        numeric["year"] = numeric["date"].dt.year
-        numeric["date"] = numeric["date"].dt.month_name()
-        numeric = numeric.set_index("date")
+    if stack_years and len(panel_group_data.group.unique()) == 1:
+        panel_group_data = panel_group_data.reset_index()
+        panel_group_data["year"] = panel_group_data["date"].dt.year
+        panel_group_data["date"] = panel_group_data["date"].dt.month_name()
+        panel_group_data = panel_group_data.set_index("date")
         group_by = ["group", "year"]
-    for plot_group, plot_group_data in numeric.groupby(group_by):
+    for plot_group, plot_group_data in panel_group_data.groupby(group_by):
         if isinstance(plot_group, tuple):
             label = plot_group[1]
         else:
@@ -484,11 +481,11 @@ def get_group_chart(
         ax.set_xlabel("")
         ax.tick_params(axis="x", labelsize="small", rotation=90)
         ax.tick_params(axis="y", labelsize="small")
+        # Undoing deciles plot setting
         ax.yaxis.label.set_alpha(1.0)
         ax.yaxis.label.set_fontsize("small")
         ax.set_ylim(bottom=0)
 
-        # TODO: this will apply the same date range limits to each axis
         if not stack_years and frequency == "month":
             xticks = pandas.date_range(
                 start=measure_table["date"].min(),

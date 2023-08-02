@@ -8,9 +8,9 @@ from report_utils import (
     add_date_lines,
     autoselect_labels,
     colour_palette,
+    get_measure_tables,
     translate_group,
     parse_date,
-    coerce_numeric,
     set_fontsize,
     make_season_table,
     annotate_seasons,
@@ -115,7 +115,7 @@ def plot_measures(
     if log_scale:
         ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
         ax.yaxis.get_major_formatter().set_scientific(False)
-        y_label = f"Log {y_label.lower()}"
+        y_label = f"{y_label} (displayed on log scale)"
 
     plt.ylabel(y_label)
     plt.xlabel("Date")
@@ -215,8 +215,7 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
     set_fontsize(base_fontsize)
 
-    df = pd.read_csv(measure_path, parse_dates=["date"])
-    df = coerce_numeric(df)
+    df = get_measure_tables(measure_path)
     df["rate"] = 1000 * df["value"]
 
     population_measures = df[df.group == "population"]

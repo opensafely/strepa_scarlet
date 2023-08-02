@@ -120,9 +120,10 @@ def ci_95_proportion(df, scale=1):
     return cis
 
 
-def ci_to_str(ci_df):
+def ci_to_str(ci_df, decimals=2):
     return ci_df.apply(
-        lambda x: f"{x[0]:.2f} ({x[1]:.2f} to {x[2]:.2f})", axis=1
+        lambda x: f"{x[0]:.{decimals}f} ({x[1]:.{decimals}f} to {x[2]:.{decimals}f})",
+        axis=1,
     )
 
 
@@ -134,24 +135,6 @@ def add_date_lines(vlines, min_date, max_date):
     for date in vlines:
         if date >= min_date and date <= max_date:
             plt.axvline(x=date, color="orange", ls="--")
-
-
-def coerce_numeric(table):
-    """
-    The denominator and value columns should contain only numeric values
-    Other values, such as the REDACTED string, or values introduced by error,
-    should not be plotted
-    Use a copy to avoid SettingWithCopyWarning
-    Leave NaN values in df so missing data are not inferred
-    """
-    coerced = table.copy()
-    coerced["numerator"] = pd.to_numeric(coerced["numerator"], errors="coerce")
-    coerced["denominator"] = pd.to_numeric(
-        coerced["denominator"], errors="coerce"
-    )
-    coerced["value"] = pd.to_numeric(coerced["value"], errors="coerce")
-    coerced["group"] = coerced["group"].astype(str)
-    return coerced
 
 
 def reorder_dashes(data, level=1):
@@ -234,7 +217,12 @@ def translate_group(group_var, label, repeated, autolabel=False):
 
 def get_measure_tables(input_file):
     # The `date` column is assigned by the measures framework.
-    measure_table = pd.read_csv(input_file, parse_dates=["date"])
+    measure_table = pd.read_csv(
+        input_file,
+        parse_dates=["date"],
+        dtype={"numerator": float, "denominator": float, "value": float},
+        na_values="[REDACTED]",
+    )
 
     return measure_table
 
@@ -281,10 +269,6 @@ def MultiIndex_pivot(
 
 
 def format_season_table(df, column_to_plot, category):
-    # df.numerator = df.numerator.astype(float)
-    # df.denominator = df.denominator.astype(float)
-    df.numerator = pd.to_numeric(df.numerator, errors="coerce")
-    df.denominator = pd.to_numeric(df.denominator, errors="coerce")
     cis = ci_95_proportion(df, scale=1000)
     df["Rate (95% CI)"] = ci_to_str(cis)
     df = df.rename({"numerator": "Count"}, axis=1)
