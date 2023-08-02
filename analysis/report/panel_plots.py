@@ -313,6 +313,7 @@ def plot_axis(
     date_lines,
     ci,
     lgd_params,
+    hide_legend,
 ):
     """
     Within a figure, code to plot a single axis as a line chart
@@ -352,7 +353,8 @@ def plot_axis(
     handles_reordered, labels_reordered = reorder_labels(
         list(zip(handles, labels))
     )
-    ax.legend(handles_reordered, labels_reordered, **lgd_params)
+    if not hide_legend:
+        ax.legend(handles_reordered, labels_reordered, **lgd_params)
     if date_lines:
         min_date = min(panel_group_data.index)
         max_date = max(panel_group_data.index)
@@ -372,9 +374,8 @@ def get_group_chart(
     output_dir=None,
     frequency="month",
     xtick_frequency=1,
+    hide_legend=False,
 ):
-    # NOTE: constrained_layout=True available in matplotlib>=3.5
-    figure = plt.figure(figsize=(columns * 6, columns * 5))
     lgd_params = {
         "bbox_to_anchor": (1, 1),
         "loc": "upper left",
@@ -395,6 +396,9 @@ def get_group_chart(
     rows = total_plots // columns
     if total_plots % columns > 0:
         rows = rows + 1
+
+    # NOTE: constrained_layout=True available in matplotlib>=3.5
+    figure = plt.figure(figsize=(12 + 6 * (columns - 1), 4.8 * rows))
 
     lgds = []
     for index, panel in enumerate(groups):
@@ -438,9 +442,11 @@ def get_group_chart(
                 date_lines,
                 ci,
                 lgd_params,
+                hide_legend,
             )
         lgd = ax.get_legend()
-        lgds.append(lgd)
+        if lgd:
+            lgds.append(lgd)
 
         # Global plot settings
         if scale == "percentage":
@@ -487,8 +493,11 @@ def get_group_chart(
             )
             ax.set_xticks(xticks)
             ax.set_xticklabels([x.strftime("%d-%m-%Y") for x in xticks])
-
-    plt.subplots_adjust(wspace=0.7, hspace=0.7)
+    if hide_legend:
+        wspace = 0.2
+    else:
+        wspace = 0.6
+    plt.subplots_adjust(wspace=wspace, hspace=0.7)
     return (plt, lgds)
 
 
@@ -581,6 +590,17 @@ def parse_args():
         type=int,
         default=10,
     )
+    parser.add_argument(
+        "--hide-legend",
+        help="Do not show legend",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--columns",
+        help="Number of columns in display",
+        type=int,
+        default=2,
+    )
     return parser.parse_args()
 
 
@@ -601,11 +621,14 @@ def main():
     exclude_group = args.exclude_group
     xtick_frequency = args.xtick_frequency
     base_fontsize = args.base_fontsize
+    hide_legend = args.hide_legend
+    columns = args.columns
 
     output_dir.mkdir(parents=True, exist_ok=True)
     set_fontsize(base_fontsize)
 
     measure_table = get_measure_tables(input_file)
+
     if practice_file:
         practice_table = get_measure_tables(practice_file)
         practice_table = practice_table[practice_table.category == "practice"]
@@ -620,13 +643,14 @@ def main():
         order=order,
         column_to_plot=column_to_plot,
         stack_years=stack_years,
-        columns=2,
+        columns=columns,
         date_lines=date_lines,
         scale=scale,
         ci=confidence_intervals,
         exclude_group=exclude_group,
         output_dir=output_dir,
         xtick_frequency=xtick_frequency,
+        hide_legend=hide_legend,
     )
     write_group_chart(chart, lgds, output_dir / output_name, plot_title)
     chart.close()
