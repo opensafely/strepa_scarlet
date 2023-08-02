@@ -1,6 +1,9 @@
+import operator
 import re
 import json
+import math
 import pandas as pd
+from pandas.api.types import is_numeric_dtype
 import numpy as np
 import fnmatch
 import matplotlib.pyplot as plt
@@ -151,6 +154,38 @@ def coerce_numeric(table):
     return coerced
 
 
+def reorder_dashes(data, level=1):
+    """
+    Some strings (i.e. numbers that contain dashes) should be sorted
+    numerically rather than alphabetically
+    Assuming a dash implies a range, sort the categories by the max number
+    contained in each string
+    Strings with no numbers will be sorted last
+    """
+    max_val = {}
+    level_values = data.index.get_level_values(level)
+    if any("-" in label for label in level_values):
+        for label in level_values:
+            matches = re.findall(r"\d+", label)
+            if matches:
+                highest = max([int(m) for m in matches])
+            else:
+                highest = math.inf
+            max_val[label] = highest
+        d = dict(
+            zip(
+                dict(
+                    sorted(max_val.items(), key=operator.itemgetter(1))
+                ).keys(),
+                range(len(data.index)),
+            )
+        )
+        data["sorter"] = level_values.map(d)
+        data = data.sort_values("sorter")
+        data = data.drop("sorter", axis=1)
+    return data
+
+
 def drop_zero_denominator_rows(measure_table):
     """
     Zero-denominator rows could cause the deciles to be computed incorrectly, so should
@@ -202,6 +237,157 @@ def get_measure_tables(input_file):
     measure_table = pd.read_csv(input_file, parse_dates=["date"])
 
     return measure_table
+
+
+# NOTE: bug with pandas 1.01, cannot do pivot with MultiIndex
+def MultiIndex_pivot(
+    df: pd.DataFrame,
+    index: str = None,
+    columns: str = None,
+    values: str = None,
+) -> pd.DataFrame:
+    """
+    https://github.com/pandas-dev/pandas/issues/23955
+    Usage:
+    df.pipe(MultiIndex_pivot, index = ['idx_column1', 'idx_column2'],
+            columns = ['col_column1', 'col_column2'], values = 'bar')
+    """
+    output_df = df.copy(deep=True)
+    if index is None:
+        names = list(output_df.index.names)
+        output_df.reset_index(drop=True, inplace=True)
+    else:
+        names = index
+    output_df = output_df.assign(
+        tuples_index=[tuple(i) for i in output_df[names].values]
+    )
+    if isinstance(columns, list):
+        output_df = output_df.assign(
+            tuples_columns=[tuple(i) for i in output_df[columns].values]
+        )
+        output_df = output_df.pivot(
+            index="tuples_index", columns="tuples_columns", values=values
+        )
+        output_df.columns = pd.MultiIndex.from_tuples(
+            [((x[0],) + x[1]) for x in output_df.columns],
+            names=[None] + columns,
+        )
+    else:
+        output_df = output_df.pivot(
+            index="tuples_index", columns=columns, values=values
+        )
+    output_df.index = pd.MultiIndex.from_tuples(output_df.index, names=names)
+    return output_df
+
+
+def format_season_table(df, column_to_plot, category):
+    # df.numerator = df.numerator.astype(float)
+    # df.denominator = df.denominator.astype(float)
+    df.numerator = pd.to_numeric(df.numerator, errors="coerce")
+    df.denominator = pd.to_numeric(df.denominator, errors="coerce")
+    cis = ci_95_proportion(df, scale=1000)
+    df["Rate (95% CI)"] = ci_to_str(cis)
+    df = df.rename({"numerator": "Count"}, axis=1)
+
+    # Reformat the year to the season
+    df["gas_year_int"] = df["gas_year"].apply(lambda x: x.year)
+    df["gas_year"] = df.apply(
+        lambda x: f"{x.gas_year_int-1}/{x.gas_year_int % 100}", axis=1
+    )
+    df = df.drop("gas_year_int", axis=1)
+
+    table = df.pipe(
+        MultiIndex_pivot,
+        index=[category, "type"],
+        columns="gas_year",
+        values=["Count", "value", "Rate (95% CI)"],
+    )
+    table.Count = table.Count.astype(float)
+    table.value = table.value.astype(float)
+    ratio = table["value"]["2022/23"] / table["value"]["2017/18"]
+
+    # See formula of ci irr:
+    # https://researchonline.lshtm.ac.uk/id/eprint/251164/1/pmed.1001270.s005.pdf
+    sd_log_irr = np.sqrt(
+        (1 / table["Count"]["2022/23"]) + (1 / table["Count"]["2017/18"])
+    )
+    lci = np.exp(np.log(ratio) - 1.96 * sd_log_irr)
+    uci = np.exp(np.log(ratio) + 1.96 * sd_log_irr)
+    rr_cis = pd.concat([ratio, lci, uci], axis=1)
+
+    rr_cis_str = ci_to_str(rr_cis)
+    rr_cis_str.name = ("2023 v 2018", "Rate Ratio (95% CI)")
+
+    # Create table with count, rate (95% CI)
+    table["Count"] = table["Count"].applymap(lambda x: f"{x:.0f}")
+    count_cis = (table[["Count", "Rate (95% CI)"]]).swaplevel(axis=1)
+    cols = count_cis.columns.get_level_values(0).unique()
+    reordered = count_cis.reindex(columns=cols, level="gas_year")
+    return pd.concat([reordered, rr_cis_str], axis=1)
+
+
+# NOTE: requires that the date is the index
+def make_season_table(df, category, column_to_plot, output_dir, filename=None):
+    df["gas_year"] = pd.to_datetime(df.index).to_period("A-Aug")
+    mins_and_maxes = []
+    # In order for sorting to work, must be numeric
+    assert is_numeric_dtype(df[column_to_plot])
+    for year, data in df.groupby(["gas_year", category]):
+        data_sorted = data.dropna(subset=[column_to_plot]).sort_values(
+            column_to_plot
+        )
+        if data_sorted.empty:
+            continue
+        data_min = data_sorted.iloc[0]
+        data_max = data_sorted.iloc[-1]
+        data_min["type"] = "min"
+        data_max["type"] = "max"
+        mins_and_maxes.append(data_min)
+        mins_and_maxes.append(data_max)
+    table = pd.concat(mins_and_maxes, axis=1).T
+    if filename:
+        formatted = format_season_table(table, column_to_plot, category)
+        formatted = reorder_dashes(formatted, level=0)
+        formatted.to_html(output_dir / f"{filename}_table.html")
+    return table
+
+
+def annotate_seasons(season_table, column_to_plot, ax):
+    # TODO: check whether this works for weekly
+    # NOTE: experimenting with just displaying a marker for max
+    """
+    min_table = season_table[season_table.type == "min"]
+    for _, data_min in min_table.iterrows():
+        plt.annotate(
+            int(data_min[column_to_plot]),
+            xy=(data_min.name, data_min[column_to_plot]),
+            xytext=(0, 25),
+            textcoords="offset points",
+            verticalalignment="bottom",
+            arrowprops=dict(facecolor="black", shrink=0.025),
+            horizontalalignment="left"
+            if (data_min.name.month % 2) == 1
+            else "right",
+        )
+    """
+    max_table = season_table[season_table.type == "max"]
+    ax.scatter(
+        max_table.index,
+        max_table[column_to_plot].values,
+        marker="x",
+        color="k",
+    )
+    """
+    for _, data_max in max_table.iterrows():
+        plt.annotate(
+            int(data_max[column_to_plot]),
+            xy=(data_max.name, data_max[column_to_plot]),
+            xytext=(0, -25),
+            textcoords="offset points",
+            verticalalignment="top",
+            arrowprops=dict(facecolor="blue", shrink=0.025),
+        )
+    """
 
 
 def match_paths(files, pattern):

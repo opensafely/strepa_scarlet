@@ -23,6 +23,8 @@ from report_utils import (
     write_group_chart,
     colour_palette,
     set_fontsize,
+    make_season_table,
+    annotate_seasons,
 )
 import matplotlib.ticker as ticker
 
@@ -375,6 +377,8 @@ def get_group_chart(
     frequency="month",
     xtick_frequency=1,
     hide_legend=False,
+    produce_season_table=False,
+    mark_seasons=False,
 ):
     lgd_params = {
         "bbox_to_anchor": (1, 1),
@@ -444,6 +448,18 @@ def get_group_chart(
                 lgd_params,
                 hide_legend,
             )
+            # Save the season table only if there is more than one group
+            more_than_one_group = panel_group_data.group.nunique() > 1
+            if (produce_season_table or mark_seasons) and more_than_one_group:
+                season_table = make_season_table(
+                    panel_group_data.set_index("date"),
+                    "group",
+                    column_to_plot,
+                    output_dir,
+                    panel_group_data.iloc[0]["name"],
+                )
+                if mark_seasons:
+                    annotate_seasons(season_table, column_to_plot, ax)
         lgd = ax.get_legend()
         if lgd:
             lgds.append(lgd)
@@ -601,6 +617,16 @@ def parse_args():
         type=int,
         default=2,
     )
+    parser.add_argument(
+        "--mark-seasons",
+        action="store_true",
+        help="Mark the max and min of each season",
+    )
+    parser.add_argument(
+        "--produce-season-table",
+        action="store_true",
+        help="Generate a table with the max and min of each season",
+    )
     return parser.parse_args()
 
 
@@ -623,6 +649,8 @@ def main():
     base_fontsize = args.base_fontsize
     hide_legend = args.hide_legend
     columns = args.columns
+    mark_seasons = args.mark_seasons
+    produce_season_table = args.produce_season_table
 
     output_dir.mkdir(parents=True, exist_ok=True)
     set_fontsize(base_fontsize)
@@ -638,6 +666,25 @@ def main():
 
     # Parse the names field to determine which subset to use
     subset = subset_table(measure_table, measures_pattern, measures_list)
+    # We will only save the season table if there is one group per-plot
+    # Otherwise see the individual plots
+    # TODO: turn 'name' into a nice label
+    one_group_per_plot = (
+        subset.groupby("category")["group"].nunique() == 1
+    ).all()
+    if produce_season_table and one_group_per_plot:
+        repeated = autoselect_labels(subset["name"])
+        subset["name"] = subset.apply(
+            lambda x: translate_group(x["name"], x["name"], repeated, True),
+            axis=1,
+        )
+        make_season_table(
+            subset.set_index("date"),
+            "name",
+            column_to_plot,
+            output_dir,
+            output_name,
+        )
     chart, lgds = get_group_chart(
         subset,
         order=order,
@@ -651,6 +698,8 @@ def main():
         output_dir=output_dir,
         xtick_frequency=xtick_frequency,
         hide_legend=hide_legend,
+        produce_season_table=produce_season_table,
+        mark_seasons=mark_seasons,
     )
     write_group_chart(chart, lgds, output_dir / output_name, plot_title)
     chart.close()

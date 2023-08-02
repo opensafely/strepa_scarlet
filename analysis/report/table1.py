@@ -2,10 +2,7 @@ import pathlib
 import argparse
 import pandas
 import fnmatch
-import re
-import math
-import operator
-from report_utils import ci_95_proportion, ci_to_str
+from report_utils import ci_95_proportion, ci_to_str, reorder_dashes
 
 """
 Generate table1 from joined measures file.
@@ -147,43 +144,13 @@ def title_multiindex(df):
     return df
 
 
-def reorder_dashes(data):
-    """
-    Some strings (i.e. numbers that contain dashes) should be sorted
-    numerically rather than alphabetically
-    Assuming a dash implies a range, sort the categories by the max number
-    contained in each string
-    Strings with no numbers will be sorted last
-    """
-    max_val = {}
-    level_1_values = data.index.get_level_values(1)
-    for label in level_1_values:
-        matches = re.findall(r"\d+", label)
-        if matches:
-            highest = max([int(m) for m in matches])
-        else:
-            highest = math.inf
-        max_val[label] = highest
-    d = dict(
-        zip(
-            dict(sorted(max_val.items(), key=operator.itemgetter(1))).keys(),
-            range(len(data.index)),
-        )
-    )
-    data["sorter"] = level_1_values.map(d)
-    data = data.sort_values("sorter")
-    data = data.drop("sorter", axis=1)
-    return data
-
-
 def reorder_dataframe(df):
     # Use a dataframe to preserve order
     # TODO: investigate use of sort_values
     reordered = pandas.DataFrame()
     for category, data in df.groupby(level=0):
         level_1_values = data.index.get_level_values(1)
-        if any("-" in label for label in level_1_values):
-            data = reorder_dashes(data)
+        data = reorder_dashes(data)
         if "Missing" in level_1_values:
             reordered = pandas.concat(
                 [
