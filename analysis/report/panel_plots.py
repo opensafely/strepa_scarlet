@@ -464,6 +464,7 @@ def get_group_chart(
         ax.tick_params(axis="y", labelsize="small")
         ax.yaxis.label.set_alpha(1.0)
         ax.yaxis.label.set_fontsize("small")
+        ax.set_ylim(bottom=0)
 
         # TODO: this will apply the same date range limits to each axis
         if not stack_years and frequency == "month":
