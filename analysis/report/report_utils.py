@@ -328,9 +328,19 @@ def make_season_table(df, category, column_to_plot, output_dir, filename=None):
         data_max["type"] = "max"
         mins_and_maxes.append(data_min)
         mins_and_maxes.append(data_max)
-    table = pd.concat(mins_and_maxes, axis=1).T
+    try:
+        table = pd.concat(mins_and_maxes, axis=1).T
+        # Concatting and transposing seems to lose types
+        table.numerator = pd.to_numeric(table.numerator, errors="coerce")
+        table.denominator = pd.to_numeric(table.denominator, errors="coerce")
+    except ValueError:
+        return None
     if filename:
-        formatted = format_season_table(table, column_to_plot, category)
+        # If too much is redacted, we cannot make the table
+        try:
+            formatted = format_season_table(table, column_to_plot, category)
+        except KeyError:
+            return None
         formatted = reorder_dashes(formatted, level=0)
         formatted.to_html(output_dir / f"{filename}_table.html")
     return table
