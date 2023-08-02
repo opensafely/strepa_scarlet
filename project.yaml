@@ -270,6 +270,7 @@ actions:
       --panels "population" "practice" "age_band" "region" "imd" "ethnicity"
       --output-dir output/report/results
       --xtick-frequency 3
+      --base-fontsize 14
     needs: [join_measures_rounded, join_measures_unrounded]
     outputs:
       moderately_sensitive:
@@ -527,7 +528,6 @@ actions:
 
 
   ### Actions for paper ###
-
   table1:
     run: >
       python:latest python analysis/report/table1.py
@@ -543,23 +543,62 @@ actions:
       moderately_sensitive:
         tables: output/report/results/paper/table1.html
 
-  plot_measure_report_paper:
+  group_medications:
     run: >
-      python:latest python analysis/report/plot_measures_report.py
+      python:latest python analysis/report/group_medications.py
       --measure-path output/report/results/measure_rounded.csv
       --output-dir output/report/results/paper
-      --date-lines "2020-03-01" "2021-03-01"
-      --use-groups
-      --log-scale
-      --mark-seasons
-      --produce-season-table
-      --legend-inside
-      --base-fontsize 18
     needs: [join_measures_rounded]
     outputs:
       moderately_sensitive:
-        measure: output/report/results/paper/*_bar_measure*.jpeg
-        tables: output/report/results/paper/*_bar_measures_table.html
+        tables: output/report/results/paper/grouped_measures.csv
+
+
+  figure_1:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_rounded.csv
+      --measures-list "event_sore_throat_tonsillitis_rate"
+      --measures-list "event_scarlet_fever_rate"
+      --measures-list "event_invasive_strep_a_rate"
+      --output-dir output/report/results/paper
+      --output-name "gas_clinical_events"
+      --date-lines "2020-03-01" "2021-03-01"
+      --column-to-plot "numerator"
+      --hide-legend
+      --columns 1
+      --base-fontsize 12
+      --xtick-frequency 2
+      --produce-season-table
+      --mark-seasons
+    needs: [join_measures_rounded]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/paper/gas_clinical_events.png
+        tables: output/report/results/paper/gas_clinical_events_table.html
+
+  figure_2:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/paper/grouped_measures.csv
+      --measures-list "event_group-1_with_clinical_any_rate"
+      --measures-list "event_group-2_with_clinical_any_rate"
+      --measures-list "event_group-3_with_clinical_any_rate"
+      --output-dir output/report/results/paper
+      --output-name "grouped_medications_with"
+      --date-lines "2020-03-01" "2021-03-01"
+      --column-to-plot "numerator"
+      --hide-legend
+      --columns 1
+      --base-fontsize 12
+      --xtick-frequency 2
+      --produce-season-table
+      --mark-seasons
+    needs: [group_medications]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/paper/grouped_medications_with.png
+        tables: output/report/results/paper/grouped_medications_with_table.html
 
   pheno_panel_plot_paper:
     run: >
@@ -575,8 +614,66 @@ actions:
       --exclude-group "Missing"
       --scale "rate"
       --xtick-frequency 3
-      --base-fontsize 18
+      --produce-season-table
+      --base-fontsize 12
+      --columns 1
     needs: [join_measures_rounded]
     outputs:
       moderately_sensitive:
         measure: output/report/results/paper/phenoxymethylpenicillin_with_clinical_any_by_subgroup.png
+        tables: output/report/results/paper/event_phenoxymethylpenicillin_with_clinical_any_age_band_rate_table.html
+
+  supplemental_antibiotics_groups:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/paper/grouped_measures.csv
+      --measures-list "event_group-1_rate"
+      --measures-list "event_group-2_rate"
+      --measures-list "event_group-3_rate"
+      --output-dir output/report/results/paper
+      --output-name "grouped_medications"
+      --date-lines "2020-03-01" "2021-03-01"
+      --column-to-plot "numerator"
+      --hide-legend
+      --columns 1
+      --base-fontsize 12
+      --xtick-frequency 2
+      --produce-season-table
+      --mark-seasons
+    needs: [group_medications]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/paper/grouped_medications.png
+        tables: output/report/results/paper/grouped_medications_table.html
+
+
+  supplemental_antibiotic_with_gas:
+    run: >
+      python:latest python analysis/report/panel_plots.py
+      --input-file output/report/results/measure_rounded.csv
+      --measures-pattern "event_*_with_clinical_any_rate"
+      --output-dir output/report/results/paper
+      --output-name "antibiotic_with_clinical_any"
+      --date-lines "2020-03-01" "2021-03-01"
+      --column-to-plot "numerator"
+      --hide-legend
+      --columns 1
+      --base-fontsize 12
+      --xtick-frequency 2
+      --produce-season-table
+      --mark-seasons
+    needs: [join_measures_rounded]
+    outputs:
+      moderately_sensitive:
+        measure: output/report/results/paper/antibiotic_with_clinical_any.png
+        tables: output/report/results/paper/antibiotic_with_clinical_any_table.html
+
+  supplemental_table_with_pcnt:
+    run: >
+      python:latest python analysis/report/pcnt_table.py
+      --input-file output/report/results/measure_rounded.csv
+      --output-dir output/report/results/paper
+    needs: [join_measures_rounded]
+    outputs:
+      moderately_sensitive:
+        tables: output/report/results/paper/pcnt_with_indication.html
