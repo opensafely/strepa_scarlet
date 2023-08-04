@@ -12,17 +12,19 @@ from matplotlib.ticker import FuncFormatter
 from report_utils import (
     parse_date,
     add_date_lines,
-    coerce_numeric,
     round_values,
     drop_zero_denominator_rows,
     filename_to_title,
     autoselect_labels,
+    is_bool_as_int,
     translate_group,
     get_measure_tables,
     subset_table,
     write_group_chart,
     colour_palette,
     set_fontsize,
+    make_season_table,
+    annotate_seasons,
 )
 import matplotlib.ticker as ticker
 
@@ -68,28 +70,6 @@ def plot_cis(ax, data):
         (data["ci95hi"]),
         alpha=0.1,
     )
-
-
-def is_bool_as_int(series):
-    """Does series have bool values but an int dtype?"""
-    # numpy.nan will ensure an int series becomes a float series, so we need to
-    # check for both int and float
-    if not pandas.api.types.is_bool_dtype(
-        series
-    ) and pandas.api.types.is_numeric_dtype(series):
-        series = series.dropna()
-        return ((series == 0) | (series == 1)).all()
-    elif not pandas.api.types.is_bool_dtype(
-        series
-    ) and pandas.api.types.is_object_dtype(series):
-        try:
-            series = series.astype(int)
-        except ValueError:
-            return False
-        series = series.dropna()
-        return ((series == 0) | (series == 1)).all()
-    else:
-        return False
 
 
 def reorder_dataframe(measure_table, order):
@@ -251,7 +231,6 @@ def deciles_chart(
             loc=6,  # which part of the bounding box should
             #  be placed at bbox_to_anchor
             ncol=1,  # number of columns in the legend
-            fontsize=12,
             borderaxespad=0.0,
         )  # padding between the axes and legend
         #  specified in font-size units
@@ -291,8 +270,7 @@ def add_deciles_plot(
     Manually adjust the legend, label size and roation to match
     Retuns the legend so it can be included in the layout
     """
-    numeric = coerce_numeric(measure_table)
-    numeric = drop_zero_denominator_rows(numeric)
+    numeric = drop_zero_denominator_rows(measure_table)
 
     write_deciles_table(numeric, output_dir, filename)
 
@@ -314,6 +292,7 @@ def plot_axis(
     date_lines,
     ci,
     lgd_params,
+    hide_legend,
 ):
     """
     Within a figure, code to plot a single axis as a line chart
@@ -327,16 +306,15 @@ def plot_axis(
         panel_group_data.group = panel_group_data.group.astype(int).astype(
             bool
         )
-    numeric = coerce_numeric(panel_group_data)
     group_by = "group"
     # TODO: we may need to handle weekly data differently
-    if stack_years and len(numeric.group.unique()) == 1:
-        numeric = numeric.reset_index()
-        numeric["year"] = numeric["date"].dt.year
-        numeric["date"] = numeric["date"].dt.month_name()
-        numeric = numeric.set_index("date")
+    if stack_years and len(panel_group_data.group.unique()) == 1:
+        panel_group_data = panel_group_data.reset_index()
+        panel_group_data["year"] = panel_group_data["date"].dt.year
+        panel_group_data["date"] = panel_group_data["date"].dt.month_name()
+        panel_group_data = panel_group_data.set_index("date")
         group_by = ["group", "year"]
-    for plot_group, plot_group_data in numeric.groupby(group_by):
+    for plot_group, plot_group_data in panel_group_data.groupby(group_by):
         if isinstance(plot_group, tuple):
             label = plot_group[1]
         else:
@@ -353,7 +331,8 @@ def plot_axis(
     handles_reordered, labels_reordered = reorder_labels(
         list(zip(handles, labels))
     )
-    ax.legend(handles_reordered, labels_reordered, **lgd_params)
+    if not hide_legend:
+        ax.legend(handles_reordered, labels_reordered, **lgd_params)
     if date_lines:
         min_date = min(panel_group_data.index)
         max_date = max(panel_group_data.index)
@@ -373,13 +352,13 @@ def get_group_chart(
     output_dir=None,
     frequency="month",
     xtick_frequency=1,
+    hide_legend=False,
+    produce_season_table=False,
+    mark_seasons=False,
 ):
-    # NOTE: constrained_layout=True available in matplotlib>=3.5
-    figure = plt.figure(figsize=(columns * 6, columns * 5))
     lgd_params = {
         "bbox_to_anchor": (1, 1),
         "loc": "upper left",
-        "fontsize": "10",
         "ncol": 1,
     }
 
@@ -398,9 +377,12 @@ def get_group_chart(
     if total_plots % columns > 0:
         rows = rows + 1
 
+    # NOTE: constrained_layout=True available in matplotlib>=3.5
+    figure = plt.figure(figsize=(12 + 6 * (columns - 1), 4.8 * rows))
+
     lgds = []
     for index, panel in enumerate(groups):
-        sns.set_style("darkgrid")
+        sns.set_style("whitegrid")
         # set the color palette using matplotlib
         plt.rcParams["axes.prop_cycle"] = plt.cycler(color=colour_palette)
 
@@ -440,9 +422,23 @@ def get_group_chart(
                 date_lines,
                 ci,
                 lgd_params,
+                hide_legend,
             )
+            # Save the season table only if there is more than one group
+            more_than_one_group = panel_group_data.group.nunique() > 1
+            if (produce_season_table or mark_seasons) and more_than_one_group:
+                season_table = make_season_table(
+                    panel_group_data.set_index("date"),
+                    "group",
+                    column_to_plot,
+                    output_dir,
+                    panel_group_data.iloc[0]["name"],
+                )
+                if mark_seasons:
+                    annotate_seasons(season_table, column_to_plot, ax)
         lgd = ax.get_legend()
-        lgds.append(lgd)
+        if lgd:
+            lgds.append(lgd)
 
         # Global plot settings
         if scale == "percentage":
@@ -457,16 +453,18 @@ def get_group_chart(
         )
     # Deciles chart code globally calls plt.gcf().autofmt_xdate()
     # So we have to turn the axes back on here
+    # Use relative terms i.e. small (rather than 7) so basefontsize can scale
     for ax in plt.gcf().get_axes():
         ax.tick_params(labelbottom=True)
         ax.get_xticklabels("auto")
         ax.set_xlabel("")
-        ax.tick_params(axis="x", labelsize=7, rotation=90)
+        ax.tick_params(axis="x", labelsize="small", rotation=90)
         ax.tick_params(axis="y", labelsize="small")
+        # Undoing deciles plot setting
         ax.yaxis.label.set_alpha(1.0)
         ax.yaxis.label.set_fontsize("small")
+        ax.set_ylim(bottom=0)
 
-        # TODO: this will apply the same date range limits to each axis
         if not stack_years and frequency == "month":
             xticks = pandas.date_range(
                 start=measure_table["date"].min(),
@@ -487,8 +485,11 @@ def get_group_chart(
             )
             ax.set_xticks(xticks)
             ax.set_xticklabels([x.strftime("%d-%m-%Y") for x in xticks])
-
-    plt.subplots_adjust(wspace=0.7, hspace=0.7)
+    if hide_legend:
+        wspace = 0.2
+    else:
+        wspace = 0.6
+    plt.subplots_adjust(wspace=wspace, hspace=0.7)
     return (plt, lgds)
 
 
@@ -581,6 +582,27 @@ def parse_args():
         type=int,
         default=10,
     )
+    parser.add_argument(
+        "--hide-legend",
+        help="Do not show legend",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--columns",
+        help="Number of columns in display",
+        type=int,
+        default=2,
+    )
+    parser.add_argument(
+        "--mark-seasons",
+        action="store_true",
+        help="Mark the max and min of each season",
+    )
+    parser.add_argument(
+        "--produce-season-table",
+        action="store_true",
+        help="Generate a table with the max and min of each season",
+    )
     return parser.parse_args()
 
 
@@ -601,11 +623,16 @@ def main():
     exclude_group = args.exclude_group
     xtick_frequency = args.xtick_frequency
     base_fontsize = args.base_fontsize
+    hide_legend = args.hide_legend
+    columns = args.columns
+    mark_seasons = args.mark_seasons
+    produce_season_table = args.produce_season_table
 
     output_dir.mkdir(parents=True, exist_ok=True)
     set_fontsize(base_fontsize)
 
     measure_table = get_measure_tables(input_file)
+
     if practice_file:
         practice_table = get_measure_tables(practice_file)
         practice_table = practice_table[practice_table.category == "practice"]
@@ -615,18 +642,40 @@ def main():
 
     # Parse the names field to determine which subset to use
     subset = subset_table(measure_table, measures_pattern, measures_list)
+    # We will only save the season table if there is one group per-plot
+    # Otherwise see the individual plots
+    # TODO: turn 'name' into a nice label
+    one_group_per_plot = (
+        subset.groupby("category")["group"].nunique() == 1
+    ).all()
+    if produce_season_table and one_group_per_plot:
+        repeated = autoselect_labels(subset["name"])
+        subset["name"] = subset.apply(
+            lambda x: translate_group(x["name"], x["name"], repeated, True),
+            axis=1,
+        )
+        make_season_table(
+            subset.set_index("date"),
+            "name",
+            column_to_plot,
+            output_dir,
+            output_name,
+        )
     chart, lgds = get_group_chart(
         subset,
         order=order,
         column_to_plot=column_to_plot,
         stack_years=stack_years,
-        columns=2,
+        columns=columns,
         date_lines=date_lines,
         scale=scale,
         ci=confidence_intervals,
         exclude_group=exclude_group,
         output_dir=output_dir,
         xtick_frequency=xtick_frequency,
+        hide_legend=hide_legend,
+        produce_season_table=produce_season_table,
+        mark_seasons=mark_seasons,
     )
     write_group_chart(chart, lgds, output_dir / output_name, plot_title)
     chart.close()

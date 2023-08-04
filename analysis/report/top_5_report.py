@@ -6,19 +6,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from report_utils import (
-    coerce_numeric,
     round_values,
+    get_measure_tables,
     MEDICATION_TO_CODELIST,
     CLINICAL_TO_CODELIST,
     colour_palette,
     set_fontsize,
 )
-
-
-def get_measure_tables(input_file):
-    measure_table = pd.read_csv(input_file, dtype=str)
-
-    return measure_table
 
 
 def write_csv(df, path, **kwargs):
@@ -270,7 +264,7 @@ def plot_top_codes_over_time(
 
     plt.figure(figsize=(10, 6))
     # seaborn styling
-    sns.set_style("darkgrid")
+    sns.set_style("whitegrid")
     plt.rcParams["axes.prop_cycle"] = plt.cycler(color=colour_palette)
     ax = plt.gca()
 
@@ -331,7 +325,6 @@ def main():
     set_fontsize(base_fontsize)
 
     measure_table = get_measure_tables(input_file)
-    measure_table = coerce_numeric(measure_table)
 
     all_codes = {**MEDICATION_TO_CODELIST, **CLINICAL_TO_CODELIST}
 

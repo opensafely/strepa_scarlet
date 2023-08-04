@@ -1,11 +1,14 @@
 import pathlib
 import argparse
 import pandas
-import fnmatch
-import re
-import math
-import operator
-from report_utils import ci_95_proportion, ci_to_str
+from report_utils import (
+    ci_95_proportion,
+    ci_to_str,
+    get_measure_tables,
+    is_bool_as_int,
+    match_paths,
+    reorder_dashes,
+)
 
 """
 Generate table1 from joined measures file.
@@ -14,16 +17,9 @@ provided column names
 """
 
 
-def get_measure_tables(input_file):
-    measure_table = pandas.read_csv(
-        input_file,
-        dtype={"numerator": float, "denominator": float, "value": float},
-        na_values="[REDACTED]",
-    )
-
-    return measure_table
-
-
+# NOTE: this is slightly different than the utils subset_table
+# because it takes a list of patterns
+# TODO: standardise to one subset_table
 def subset_table(measure_table, measures_pattern, date):
     """
     Given either a pattern of list of names, extract the subset of a joined
@@ -47,28 +43,6 @@ def subset_table(measure_table, measures_pattern, date):
     return table_subset
 
 
-def is_bool_as_int(series):
-    """Does series have bool values but an int dtype?"""
-    # numpy.nan will ensure an int series becomes a float series, so we need to
-    # check for both int and float
-    if not pandas.api.types.is_bool_dtype(
-        series
-    ) and pandas.api.types.is_numeric_dtype(series):
-        series = series.dropna()
-        return ((series == 0) | (series == 1)).all()
-    elif not pandas.api.types.is_bool_dtype(
-        series
-    ) and pandas.api.types.is_object_dtype(series):
-        try:
-            series = series.astype(int)
-        except ValueError:
-            return False
-        series = series.dropna()
-        return ((series == 0) | (series == 1)).all()
-    else:
-        return False
-
-
 def series_to_bool(series):
     if is_bool_as_int(series):
         return series.astype(int).astype(bool)
@@ -77,8 +51,11 @@ def series_to_bool(series):
 
 
 def transform_percentage(x):
+    """
+    Return (comma delimited) x and column percentage
+    """
     transformed = (
-        x.map("{:.0f}".format)
+        x.map("{:,.0f}".format)
         + " ("
         + (((x / x.sum()) * 100).round(1)).astype(str)
         + ")"
@@ -147,43 +124,13 @@ def title_multiindex(df):
     return df
 
 
-def reorder_dashes(data):
-    """
-    Some strings (i.e. numbers that contain dashes) should be sorted
-    numerically rather than alphabetically
-    Assuming a dash implies a range, sort the categories by the max number
-    contained in each string
-    Strings with no numbers will be sorted last
-    """
-    max_val = {}
-    level_1_values = data.index.get_level_values(1)
-    for label in level_1_values:
-        matches = re.findall(r"\d+", label)
-        if matches:
-            highest = max([int(m) for m in matches])
-        else:
-            highest = math.inf
-        max_val[label] = highest
-    d = dict(
-        zip(
-            dict(sorted(max_val.items(), key=operator.itemgetter(1))).keys(),
-            range(len(data.index)),
-        )
-    )
-    data["sorter"] = level_1_values.map(d)
-    data = data.sort_values("sorter")
-    data = data.drop("sorter", axis=1)
-    return data
-
-
 def reorder_dataframe(df):
     # Use a dataframe to preserve order
     # TODO: investigate use of sort_values
     reordered = pandas.DataFrame()
     for category, data in df.groupby(level=0):
         level_1_values = data.index.get_level_values(1)
-        if any("-" in label for label in level_1_values):
-            data = reorder_dashes(data)
+        data = reorder_dashes(data)
         if "Missing" in level_1_values:
             reordered = pandas.concat(
                 [
@@ -196,10 +143,6 @@ def reorder_dataframe(df):
         else:
             reordered = pandas.concat([data, reordered])
     return reordered
-
-
-def match_paths(files, pattern):
-    return fnmatch.filter(files, pattern)
 
 
 def parse_args():
