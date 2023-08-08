@@ -536,7 +536,8 @@ actions:
       --measures-pattern "event_clinical_any_*_rate"
       --measures-pattern "event_medication_any_*_rate"
       --include-denominator
-      --column-name "clinical_any" "medication_any"
+      --exclude-numerator
+      --column-names "clinical_any:Any GAS Clinical Event" "medication_any:Any Antibiotic"
       --output-name "table1.html"
     needs: [join_measures_rounded]
     outputs:

@@ -17,6 +17,13 @@ provided column names
 """
 
 
+def parse_column(columns):
+    if ":" in columns:
+        return tuple(columns.split(":"))
+    else:
+        return (columns, columns.replace("_", " ").title())
+
+
 # NOTE: this is slightly different than the utils subset_table
 # because it takes a list of patterns
 # TODO: standardise to one subset_table
@@ -64,7 +71,7 @@ def transform_percentage(x):
     return transformed
 
 
-def get_percentages(df, include_denominator):
+def get_percentages(df, include_denominator, exclude_numerator):
     """
     Create a new column which has count (%) of group
     After computation is complete reconvert numeric to string and replace
@@ -81,6 +88,8 @@ def get_percentages(df, include_denominator):
         percent["rate"] = rate
     else:
         percent = percent.drop("denominator", axis=1)
+    if exclude_numerator:
+        percent = percent.drop("numerator", axis=1)
     percent = percent.rename(
         columns={
             "numerator": "No. with event (%)",
@@ -160,7 +169,8 @@ def parse_args():
     )
     parser.add_argument(
         "--column-names",
-        nargs="*",
+        nargs="+",
+        type=parse_column,
         help="Split measures with these names into separate columns",
     )
     parser.add_argument(
@@ -179,6 +189,11 @@ def parse_args():
         action="store_true",
         help="Include denominator (%) and rate",
     )
+    parser.add_argument(
+        "--exclude-numerator",
+        action="store_true",
+        help="Exclude numerator (%)",
+    )
     return parser.parse_args()
 
 
@@ -190,6 +205,7 @@ def main():
     output_name = args.output_name
     columns = args.column_names
     include_denominator = args.include_denominator
+    exclude_numerator = args.exclude_numerator
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -199,7 +215,7 @@ def main():
     subset = subset_table(measure_table, measures_pattern, end_date)
 
     table1 = pandas.DataFrame()
-    for column in columns:
+    for column, column_title in columns:
         sub = subset[subset.name.str.contains(column)]
         sub = sub.set_index(["category", "group"])
         sub = sub[["numerator", "denominator"]]
@@ -207,9 +223,9 @@ def main():
         overall = sub.loc[sub.iloc[0].name[0]].sum()
         overall.name = ("Total", "")
         sub = pandas.concat([pandas.DataFrame(overall).T, sub])
-        sub = get_percentages(sub, include_denominator)
+        sub = get_percentages(sub, include_denominator, exclude_numerator)
         sub.columns = pandas.MultiIndex.from_product(
-            [[f"{column.title()}"], sub.columns]
+            [[column_title], sub.columns]
         )
         if table1.empty:
             table1 = sub
