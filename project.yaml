@@ -112,6 +112,29 @@ actions:
   ### End curation check ###
 
   ### MONTHLY ###
+  generate_study_population_report_excluded:
+    run: cohortextractor:latest generate_cohort
+      --study-definition study_definition_excluded
+      --index-date-range "2023-03-01 to 2023-03-01 by month"
+      --param frequency=monthly
+      --output-dir=output/report
+      --output-format=csv.gz
+    outputs:
+      highly_sensitive:
+        cohort: output/report/input_excluded_2023-03-01.csv.gz
+
+  count_excluded:
+      run: python:latest python analysis/count_excluded.py
+           --input-files output/report/input_excluded_2023-03-01.csv.gz
+           --output-dir output/report/results/paper
+           --output-name "excluded.csv"
+           --redact
+      needs: [generate_study_population_report_excluded]
+      outputs:
+        moderately_sensitive:
+          # Only output the single summary file
+          measure_csv: output/report/results/paper/excluded.csv
+
   generate_study_population_report_monthly_0:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_report
