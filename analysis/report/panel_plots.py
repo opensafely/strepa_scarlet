@@ -426,7 +426,7 @@ def get_group_chart(
             )
             # Save the season table only if there is more than one group
             more_than_one_group = panel_group_data.group.nunique() > 1
-            if (produce_season_table or mark_seasons) and more_than_one_group:
+            if (produce_season_table and more_than_one_group) or mark_seasons:
                 season_table = make_season_table(
                     panel_group_data.set_index("date"),
                     "group",
