@@ -65,7 +65,7 @@ actions:
     needs: [curation_weekly]
     outputs:
       moderately_sensitive:
-        measure_csv: output/curation/measure_event_*.csv
+        measure_csv: output/curation/measure_event_*_rate.csv
 
   curation_diagnostics:
     run: cohortextractor:latest generate_cohort
