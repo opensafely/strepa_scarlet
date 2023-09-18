@@ -646,7 +646,8 @@ actions:
     outputs:
       moderately_sensitive:
         measure: output/report/results/paper/phenoxymethylpenicillin_with_clinical_any_by_subgroup.png
-        tables: output/report/results/paper/event_phenoxymethylpenicillin_with_clinical_any_age_band_rate_table.html
+        table_age: output/report/results/paper/event_phenoxymethylpenicillin_with_clinical_any_age_band_rate_table.html
+        table_region: output/report/results/paper/event_phenoxymethylpenicillin_with_clinical_any_region_rate_table.html
 
   supplemental_antibiotics_groups:
     run: >
