@@ -102,7 +102,7 @@ def plot_measures(
                 df_copy, category, column_to_plot, output_dir, filename
             )
             # TODO: check whether this works for weekly
-            if season_table and mark_seasons:
+            if not season_table.empty and mark_seasons:
                 annotate_seasons(season_table, column_to_plot, ax)
 
     elif frequency == "week":
