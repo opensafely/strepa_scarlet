@@ -267,6 +267,7 @@ actions:
       --input-file output/report/results/measure_unrounded.csv
       --output-dir output/report/results
       --frequency month
+      --xtick-frequency 2
     needs: [join_measures_unrounded]
     outputs:
       moderately_sensitive:
@@ -637,7 +638,7 @@ actions:
       --output-name "phenoxymethylpenicillin_with_clinical_any_by_subgroup"
       --exclude-group "Missing"
       --scale "rate"
-      --xtick-frequency 3
+      --xtick-frequency 2
       --produce-season-table
       --base-fontsize 12
       --columns 1

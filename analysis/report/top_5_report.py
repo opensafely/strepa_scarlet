@@ -234,7 +234,7 @@ def get_proportion_of_events(df, code, date):
 
 
 def plot_top_codes_over_time(
-    code_df, top_codes, measure, output_dir, frequency
+    code_df, top_codes, measure, output_dir, frequency, xtick_frequency=1
 ):
     """
     Plots the top 5 codes over time for each measure.
@@ -287,6 +287,9 @@ def plot_top_codes_over_time(
             )
             ax.set_xticks(xticks)
             ax.set_xticklabels([x.strftime("%B %Y") for x in xticks])
+            for index, label in enumerate(ax.xaxis.get_ticklabels()):
+                if index % xtick_frequency != 0:
+                    label.set_visible(False)
         elif frequency == "week":
             xticks = pd.date_range(
                 start=code_proportions["date"].min(),
@@ -319,6 +322,7 @@ def main():
     input_file = args.input_file
     output_dir = args.output_dir
     frequency = args.frequency
+    xtick_frequency = args.xtick_frequency
     base_fontsize = args.base_fontsize
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -404,6 +408,7 @@ def main():
             measure=measure,
             output_dir=output_dir,
             frequency=frequency,
+            xtick_frequency=xtick_frequency,
         )
 
 
@@ -425,6 +430,12 @@ def parse_args():
         default="month",
         choices=["month", "week"],
         help="The frequency of the data",
+    )
+    parser.add_argument(
+        "--xtick-frequency",
+        help="Display every nth xtick",
+        type=int,
+        default=1,
     )
     parser.add_argument(
         "--base-fontsize",
