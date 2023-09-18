@@ -331,6 +331,11 @@ def main():
     measure_table = get_measure_tables(input_file)
 
     all_codes = {**MEDICATION_TO_CODELIST, **CLINICAL_TO_CODELIST}
+    if frequency == "month":
+        for med, codelist in MEDICATION_TO_CODELIST.items():
+            all_codes[f"{med}_with_clinical_any"] = codelist
+        for clin, codelist in CLINICAL_TO_CODELIST.items():
+            all_codes[f"{clin}_with_medication_any"] = codelist
 
     for key, codelist in all_codes.items():
         measure = f"event_code_{key}_rate"
