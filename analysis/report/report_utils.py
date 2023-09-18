@@ -356,14 +356,17 @@ def make_season_table(df, category, column_to_plot, output_dir, filename=None):
         table.numerator = pd.to_numeric(table.numerator, errors="coerce")
         table.denominator = pd.to_numeric(table.denominator, errors="coerce")
     except ValueError:
-        return None
-    if filename:
-        # If too much is redacted, we cannot make the table
+        table = pd.DataFrame()
+        formatted = pd.DataFrame()
+    # If too much is redacted, we cannot make the table
+    # But project yaml might expect existance of html
+    if filename and not table.empty:
         try:
             formatted = format_season_table(table, column_to_plot, category)
-        except KeyError:
-            return None
-        formatted = reorder_dashes(formatted, level=0)
+            formatted = reorder_dashes(formatted, level=0)
+        except:
+            formatted = pd.DataFrame()
+    if filename:
         formatted.to_html(output_dir / f"{filename}_table.html")
     return table
 
