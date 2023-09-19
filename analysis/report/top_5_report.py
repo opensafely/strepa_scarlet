@@ -227,25 +227,23 @@ def get_proportion_of_events(df, code, date):
     if total_events == 0:
         row["proportion"] = 0
     else:
-        row["proportion"] = (code_events / total_events) * 100
+        row["proportion"] = round((code_events / total_events) * 100, 2)
+        row["total"] = total_events
         row["count"] = code_events
 
     return row
 
 
-def plot_top_codes_over_time(
-    code_df, top_codes, measure, output_dir, frequency, xtick_frequency=1
-):
+def make_top_codes_over_time_dict(code_df, top_codes, measure, output_dir):
     """
-    Plots the top 5 codes over time for each measure.
+    Creates and saves df with proportion of each of the top codes
     Args:
         code_df: A codelist table.
         top_codes: A dictionary of the top codes for each measure with corresponding descriptions.
         measure: The measure ID.
-        output_dir: The directory to save the plot to.
+        output_dir: The directory to save the csv to.
 
     """
-
     # Create a new dataframe with the proportion of events for each code on
     # each date.
     code_proportions = pd.DataFrame()
@@ -261,7 +259,27 @@ def plot_top_codes_over_time(
                 ),
             ]
         )
+    code_proportions["name"] = code_proportions["code"].map(top_codes)
 
+    # save the underlying data for the plot
+    code_proportions.to_csv(
+        output_dir / f"{measure}_top_5_codes_over_time.csv", index=False
+    )
+    return code_proportions
+
+
+def plot_top_codes_over_time(
+    code_proportions, measure, output_dir, frequency, xtick_frequency=1
+):
+    """
+    Plots the top 5 codes over time for each measure.
+    Args:
+        code_proportions: a table of top code proportions.
+        measure: The measure ID.
+        output_dir: The directory to save the plot to.
+        frequency: month or week
+        xtick_frequency: interval to display x-axis tick label
+    """
     plt.figure(figsize=(10, 6))
     # seaborn styling
     sns.set_style("whitegrid")
@@ -274,10 +292,9 @@ def plot_top_codes_over_time(
         code_proportions["date"] = pd.to_datetime(code_proportions["date"])
         # Plot the proportion of events for each code on each date.
         # Plots should be on the same graph.
-        for code, description in top_codes.items():
-            code_proportions.loc[code_proportions["code"] == code, :].plot(
-                x="date", y="count", label=description, ax=ax
-            )
+        groups = code_proportions.groupby("code")
+        for code, data in groups:
+            data.plot(x="date", y="count", label=data.iloc[0]["name"], ax=ax)
 
         if frequency == "month":
             xticks = pd.date_range(
@@ -309,11 +326,6 @@ def plot_top_codes_over_time(
     plt.savefig(
         output_dir / f"{measure}_top_5_codes_over_time.png",
         bbox_inches="tight",
-    )
-
-    # save the underlying data for the plot
-    code_proportions.to_csv(
-        output_dir / f"{measure}_top_5_codes_over_time.csv", index=False
     )
 
 
@@ -407,9 +419,14 @@ def main():
         )
 
         # plot the top codes over time
-        plot_top_codes_over_time(
+        code_proportions = make_top_codes_over_time_dict(
             code_df=code_df,
             top_codes=top_codes_dict,
+            measure=measure,
+            output_dir=output_dir,
+        )
+        plot_top_codes_over_time(
+            code_proportions=code_proportions,
             measure=measure,
             output_dir=output_dir,
             frequency=frequency,
