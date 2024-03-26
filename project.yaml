@@ -272,7 +272,7 @@ actions:
     outputs:
       moderately_sensitive:
         tables: output/report/results/top_5*.csv
-        figures: output/report/results/*top_5_codes_over_time.png
+        figures: output/report/results/*top_5_codes_over_time.jpg
         data: output/report/results/*top_5_codes_over_time.csv
 
   plot_measure_report:
@@ -643,6 +643,18 @@ actions:
         measure: released_outputs/output/report/results/paper/phenoxymethylpenicillin_with_clinical_any_by_subgroup.jpg
         table_age: released_outputs/output/report/results/paper/event_phenoxymethylpenicillin_with_clinical_any_age_band_rate_table.html
         table_region: released_outputs/output/report/results/paper/event_phenoxymethylpenicillin_with_clinical_any_region_rate_table.html
+
+  figure_4: 
+    run: >
+      python:latest python analysis/report/top_5_over_time.py
+      --input-file released_outputs/output/report/results/event_code_sore_throat_tonsillitis_rate_top_5_codes_over_time.csv
+      --output-dir released_outputs/output/report/results/paper
+      --frequency month
+      --xtick-frequency 2
+    outputs: 
+      moderately_sensitive:
+        plot: released_outputs/output/report/results/paper/sore_throat_tonsillitis_rate_top_5_codes_over_time.jpg
+
 
   supplemental_antibiotics_groups:
     run: >
