@@ -431,9 +431,8 @@ def subset_table(measure_table, measures_pattern, measures_list):
 def write_group_chart(group_chart, lgds, path, plot_title):
     suptitle = plt.suptitle(plot_title)
     group_chart.savefig(
-        path, bbox_extra_artists=tuple(lgds) + (suptitle,), bbox_inches="tight"
+        f"{path}.jpg", bbox_extra_artists=(tuple(lgds) + (suptitle,)), bbox_inches="tight", dpi=300
     )
-
 
 # NOTE: These paths will only work for notebook generation, which is run on /workspace
 REPORT_DIR = Path.cwd().parent.parent / "output/report"
@@ -551,7 +550,7 @@ def display_medicine(
         )
     )
     display_image(
-        f"event_code_{medicine_path}_rate_top_5_codes_over_time.png",
+        f"event_code_{medicine_path}_rate_top_5_codes_over_time.jpg",
         dir=results_dir,
     )
     display(
@@ -560,9 +559,9 @@ def display_medicine(
         )
     )
     display(Markdown("##### Count"))
-    display_image(f"{medicine_path}_by_subgroup_count.png", dir=results_dir)
+    display_image(f"{medicine_path}_by_subgroup_count.jpg", dir=results_dir)
     display(Markdown("##### Rate"))
-    display_image(f"{medicine_path}_by_subgroup.png", dir=results_dir)
+    display_image(f"{medicine_path}_by_subgroup.jpg", dir=results_dir)
     if time_period == "month":
         display(
             Markdown(
@@ -575,7 +574,7 @@ def display_medicine(
             )
         )
         display_image(
-            f"{medicine_path}_with_clinical_any_by_subgroup.png",
+            f"{medicine_path}_with_clinical_any_by_subgroup.jpg",
             dir=results_dir,
         )
 
@@ -625,7 +624,7 @@ def display_clinical(
             )
         )
         display_image(
-            f"event_code_{clinical_path}_rate_top_5_codes_over_time.png",
+            f"event_code_{clinical_path}_rate_top_5_codes_over_time.jpg",
             dir=results_dir,
         )
         display(
@@ -635,10 +634,10 @@ def display_clinical(
         )
         display(Markdown("##### Count"))
         display_image(
-            f"{clinical_path}_by_subgroup_count.png", dir=results_dir
+            f"{clinical_path}_by_subgroup_count.jpg", dir=results_dir
         )
         display(Markdown("##### Rate"))
-        display_image(f"{clinical_path}_by_subgroup.png", dir=results_dir)
+        display_image(f"{clinical_path}_by_subgroup.jpg", dir=results_dir)
         if time_period == "month":
             display(Markdown("##### Rate with an antibiotic of interest"))
             display(
@@ -647,6 +646,6 @@ def display_clinical(
                 )
             )
             display_image(
-                f"{clinical_path}_with_medication_any_by_subgroup.png",
+                f"{clinical_path}_with_medication_any_by_subgroup.jpg",
                 dir=results_dir,
             )

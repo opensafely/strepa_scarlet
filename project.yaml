@@ -298,7 +298,7 @@ actions:
     needs: [join_measures_rounded, join_measures_unrounded]
     outputs:
       moderately_sensitive:
-        measure: output/report/results/*.png
+        measure: output/report/results/*.jpg
         deciles_tables: output/report/results/deciles_table*.csv
 
   panel_plots_stacked_medications:
@@ -320,7 +320,7 @@ actions:
     needs: [join_measures_rounded]
     outputs:
       moderately_sensitive:
-        measure: output/report/results/all_medications_by_year.png
+        measure: output/report/results/all_medications_by_year.jpg
 
   panel_plots_stacked_diagnostics:
     run: >
@@ -336,7 +336,7 @@ actions:
     needs: [join_measures_rounded]
     outputs:
       moderately_sensitive:
-        measure: output/report/results/any_clinical_event_by_year.png
+        measure: output/report/results/any_clinical_event_by_year.jpg
 
   event_counts_medication:
     run: >
@@ -460,7 +460,7 @@ actions:
     outputs:
       moderately_sensitive:
         tables: output/report/weekly/results/top_5*.csv
-        figures: output/report/weekly/results/*top_5_codes_over_time.png
+        figures: output/report/weekly/results/*top_5_codes_over_time.jpg
         data: output/report/weekly/results/*top_5_codes_over_time.csv
 
   plot_measure_report_weekly:
@@ -486,7 +486,7 @@ actions:
     needs: [join_measures_rounded_weekly, join_measures_unrounded_weekly]
     outputs:
       moderately_sensitive:
-        measure: output/report/weekly/results/*.png
+        measure: output/report/weekly/results/*.jpg
         deciles_tables: output/report/weekly/results/deciles_t*.csv
 
   event_counts_medication_weekly:

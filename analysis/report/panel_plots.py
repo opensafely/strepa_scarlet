@@ -378,7 +378,7 @@ def get_group_chart(
         rows = rows + 1
 
     # NOTE: constrained_layout=True available in matplotlib>=3.5
-    figure = plt.figure(figsize=(12 + 6 * (columns - 1), 4.8 * rows))
+    figure = plt.figure(figsize=(12 + 6 * (columns - 1), 4.8 * rows), dpi=300)
 
     lgds = []
     for index, panel in enumerate(groups):
