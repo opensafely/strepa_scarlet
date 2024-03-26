@@ -428,11 +428,12 @@ def subset_table(measure_table, measures_pattern, measures_list):
     return measure_table[measure_table["name"].isin(measures_list)]
 
 
-def write_group_chart(group_chart, lgds, path, plot_title):
-    suptitle = plt.suptitle(plot_title)
-    group_chart.savefig(
-        f"{path}.jpg", bbox_extra_artists=(tuple(lgds) + (suptitle,)), bbox_inches="tight", dpi=300
-    )
+def write_group_chart(group_chart, lgds, path, plot_title=None):
+    save_args = {"fname": f"{path}.jpg", "dpi": 300, "bbox_inches": "tight"}
+    if plot_title:
+        suptitle = plt.suptitle(plot_title)
+        save_args.update({"bbox_extra_artists": (tuple(lgds) + (suptitle,))})
+    group_chart.savefig(**save_args)
 
 # NOTE: These paths will only work for notebook generation, which is run on /workspace
 REPORT_DIR = Path.cwd().parent.parent / "output/report"

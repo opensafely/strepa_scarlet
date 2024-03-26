@@ -677,7 +677,7 @@ def main():
         produce_season_table=produce_season_table,
         mark_seasons=mark_seasons,
     )
-    write_group_chart(chart, lgds, output_dir / output_name, plot_title)
+    write_group_chart(chart, lgds, output_dir / output_name)
     chart.close()
 
 
