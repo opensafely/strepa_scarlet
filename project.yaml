@@ -585,7 +585,7 @@ actions:
       --measures-list "event_invasive_strep_a_rate"
       --output-dir released_outputs/output/report/results/paper
       --output-name "gas_clinical_events"
-      --date-lines "2020-03-01" "2021-03-01"
+      --date-lines "2020-04-01" "2021-04-01"
       --column-to-plot "numerator"
       --hide-legend
       --columns 1
@@ -607,7 +607,7 @@ actions:
       --measures-list "event_group-3_with_clinical_any_rate"
       --output-dir released_outputs/output/report/results/paper
       --output-name "grouped_medications_with"
-      --date-lines "2020-03-01" "2021-03-01"
+      --date-lines "2020-04-01" "2021-04-01"
       --column-to-plot "numerator"
       --hide-legend
       --columns 1
@@ -665,7 +665,7 @@ actions:
       --measures-list "event_group-3_rate"
       --output-dir released_outputs/output/report/results/paper
       --output-name "grouped_medications"
-      --date-lines "2020-03-01" "2021-03-01"
+      --date-lines "2020-04-01" "2021-04-01"
       --column-to-plot "numerator"
       --hide-legend
       --columns 1
@@ -687,7 +687,7 @@ actions:
       --measures-pattern "event_*_with_clinical_any_rate"
       --output-dir released_outputs/output/report/results/paper
       --output-name "antibiotic_with_clinical_any"
-      --date-lines "2020-03-01" "2021-03-01"
+      --date-lines "2020-04-01" "2021-04-01"
       --column-to-plot "numerator"
       --hide-legend
       --columns 1
