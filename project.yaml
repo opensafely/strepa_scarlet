@@ -551,160 +551,162 @@ actions:
         notebook: output/report/report_weekly.html
 
 
-  ### Actions for paper ###
-  table1:
-    run: >
-      python:latest python analysis/report/table1.py
-      --input-file released_outputs/output/report/results/measure_rounded.csv
-      --output-dir released_outputs/output/report/results/paper
-      --measures-pattern "event_clinical_any_*_rate"
-      --measures-pattern "event_medication_any_*_rate"
-      --include-denominator
-      --exclude-numerator
-      --column-names "clinical_any:Any GAS Clinical Event" "medication_any:Any Antibiotic"
-      --output-name "table1.html"
-    outputs:
-      moderately_sensitive:
-        tables: released_outputs/output/report/results/paper/table1.html
-
-  group_medications:
-    run: >
-      python:latest python analysis/report/group_medications.py
-      --measure-path released_outputs/output/report/results/measure_rounded.csv
-      --output-dir released_outputs/output/report/results/paper
-    outputs:
-      moderately_sensitive:
-        tables: released_outputs/output/report/results/paper/grouped_measures.csv
-
-  figure_1:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file released_outputs/output/report/results/measure_rounded.csv
-      --measures-list "event_sore_throat_tonsillitis_rate"
-      --measures-list "event_scarlet_fever_rate"
-      --measures-list "event_invasive_strep_a_rate"
-      --output-dir released_outputs/output/report/results/paper
-      --output-name "gas_clinical_events"
-      --date-lines "2020-04-01" "2021-04-01"
-      --column-to-plot "numerator"
-      --hide-legend
-      --columns 1
-      --base-fontsize 12
-      --xtick-frequency 2
-      --produce-season-table
-      --mark-seasons
-    outputs:
-      moderately_sensitive:
-        measure: released_outputs/output/report/results/paper/gas_clinical_events.jpg
-        tables: released_outputs/output/report/results/paper/gas_clinical_events_table.html
-
-  figure_2:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file released_outputs/output/report/results/paper/grouped_measures.csv
-      --measures-list "event_group-1_with_clinical_any_rate"
-      --measures-list "event_group-2_with_clinical_any_rate"
-      --measures-list "event_group-3_with_clinical_any_rate"
-      --output-dir released_outputs/output/report/results/paper
-      --output-name "grouped_medications_with"
-      --date-lines "2020-04-01" "2021-04-01"
-      --column-to-plot "numerator"
-      --hide-legend
-      --columns 1
-      --base-fontsize 12
-      --xtick-frequency 2
-      --produce-season-table
-      --mark-seasons
-    needs: [group_medications]
-    outputs:
-      moderately_sensitive:
-        measure: released_outputs/output/report/results/paper/grouped_medications_with.jpg
-        tables: released_outputs/output/report/results/paper/grouped_medications_with_table.html
-
-  pheno_panel_plot_paper:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file released_outputs/output/report/results/measure_rounded.csv
-      --measures-list "event_phenoxymethylpenicillin_with_clinical_any_age_band_rate"
-      --measures-list "event_phenoxymethylpenicillin_with_clinical_any_region_rate"
-      --measures-list "event_phenoxymethylpenicillin_with_clinical_any_ethnicity_rate"
-      --measures-list "event_phenoxymethylpenicillin_with_clinical_any_imd_rate"
-      --order "age_band" "region" "ethnicity" "imd"
-      --output-dir released_outputs/output/report/results/paper
-      --output-name "phenoxymethylpenicillin_with_clinical_any_by_subgroup"
-      --exclude-group "Missing"
-      --scale "rate"
-      --xtick-frequency 2
-      --produce-season-table
-      --base-fontsize 12
-      --columns 1
-    outputs:
-      moderately_sensitive:
-        measure: released_outputs/output/report/results/paper/phenoxymethylpenicillin_with_clinical_any_by_subgroup.jpg
-        table_age: released_outputs/output/report/results/paper/event_phenoxymethylpenicillin_with_clinical_any_age_band_rate_table.html
-        table_region: released_outputs/output/report/results/paper/event_phenoxymethylpenicillin_with_clinical_any_region_rate_table.html
-
-  figure_4: 
-    run: >
-      python:latest python analysis/report/top_5_over_time.py
-      --input-file released_outputs/output/report/results/event_code_sore_throat_tonsillitis_rate_top_5_codes_over_time.csv
-      --output-dir released_outputs/output/report/results/paper
-      --frequency month
-      --xtick-frequency 2
-    outputs: 
-      moderately_sensitive:
-        plot: released_outputs/output/report/results/paper/sore_throat_tonsillitis_rate_top_5_codes_over_time.jpg
+  ### Actions for paper (run locally) ###
 
 
-  supplemental_antibiotics_groups:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file released_outputs/output/report/results/paper/grouped_measures.csv
-      --measures-list "event_group-1_rate"
-      --measures-list "event_group-2_rate"
-      --measures-list "event_group-3_rate"
-      --output-dir released_outputs/output/report/results/paper
-      --output-name "grouped_medications"
-      --date-lines "2020-04-01" "2021-04-01"
-      --column-to-plot "numerator"
-      --hide-legend
-      --columns 1
-      --base-fontsize 12
-      --xtick-frequency 2
-      --produce-season-table
-      --mark-seasons
-    needs: [group_medications]
-    outputs:
-      moderately_sensitive:
-        measure: released_outputs/output/report/results/paper/grouped_medications.jpg
-        tables: released_outputs/output/report/results/paper/grouped_medications_table.html
+  # table1:
+  #   run: >
+  #     python:latest python analysis/report/table1.py
+  #     --input-file released_outputs/output/report/results/measure_rounded.csv
+  #     --output-dir released_outputs/output/report/results/paper
+  #     --measures-pattern "event_clinical_any_*_rate"
+  #     --measures-pattern "event_medication_any_*_rate"
+  #     --include-denominator
+  #     --exclude-numerator
+  #     --column-names "clinical_any:Any GAS Clinical Event" "medication_any:Any Antibiotic"
+  #     --output-name "table1.html"
+  #   outputs:
+  #     moderately_sensitive:
+  #       tables: released_outputs/output/report/results/paper/table1.html
+
+  # group_medications:
+  #   run: >
+  #     python:latest python analysis/report/group_medications.py
+  #     --measure-path released_outputs/output/report/results/measure_rounded.csv
+  #     --output-dir released_outputs/output/report/results/paper
+  #   outputs:
+  #     moderately_sensitive:
+  #       tables: released_outputs/output/report/results/paper/grouped_measures.csv
+
+  # figure_1:
+  #   run: >
+  #     python:latest python analysis/report/panel_plots.py
+  #     --input-file released_outputs/output/report/results/measure_rounded.csv
+  #     --measures-list "event_sore_throat_tonsillitis_rate"
+  #     --measures-list "event_scarlet_fever_rate"
+  #     --measures-list "event_invasive_strep_a_rate"
+  #     --output-dir released_outputs/output/report/results/paper
+  #     --output-name "gas_clinical_events"
+  #     --date-lines "2020-04-01" "2021-04-01"
+  #     --column-to-plot "numerator"
+  #     --hide-legend
+  #     --columns 1
+  #     --base-fontsize 12
+  #     --xtick-frequency 2
+  #     --produce-season-table
+  #     --mark-seasons
+  #   outputs:
+  #     moderately_sensitive:
+  #       measure: released_outputs/output/report/results/paper/gas_clinical_events.jpg
+  #       tables: released_outputs/output/report/results/paper/gas_clinical_events_table.html
+
+  # figure_2:
+  #   run: >
+  #     python:latest python analysis/report/panel_plots.py
+  #     --input-file released_outputs/output/report/results/paper/grouped_measures.csv
+  #     --measures-list "event_group-1_with_clinical_any_rate"
+  #     --measures-list "event_group-2_with_clinical_any_rate"
+  #     --measures-list "event_group-3_with_clinical_any_rate"
+  #     --output-dir released_outputs/output/report/results/paper
+  #     --output-name "grouped_medications_with"
+  #     --date-lines "2020-04-01" "2021-04-01"
+  #     --column-to-plot "numerator"
+  #     --hide-legend
+  #     --columns 1
+  #     --base-fontsize 12
+  #     --xtick-frequency 2
+  #     --produce-season-table
+  #     --mark-seasons
+  #   needs: [group_medications]
+  #   outputs:
+  #     moderately_sensitive:
+  #       measure: released_outputs/output/report/results/paper/grouped_medications_with.jpg
+  #       tables: released_outputs/output/report/results/paper/grouped_medications_with_table.html
+
+  # pheno_panel_plot_paper:
+  #   run: >
+  #     python:latest python analysis/report/panel_plots.py
+  #     --input-file released_outputs/output/report/results/measure_rounded.csv
+  #     --measures-list "event_phenoxymethylpenicillin_with_clinical_any_age_band_rate"
+  #     --measures-list "event_phenoxymethylpenicillin_with_clinical_any_region_rate"
+  #     --measures-list "event_phenoxymethylpenicillin_with_clinical_any_ethnicity_rate"
+  #     --measures-list "event_phenoxymethylpenicillin_with_clinical_any_imd_rate"
+  #     --order "age_band" "region" "ethnicity" "imd"
+  #     --output-dir released_outputs/output/report/results/paper
+  #     --output-name "phenoxymethylpenicillin_with_clinical_any_by_subgroup"
+  #     --exclude-group "Missing"
+  #     --scale "rate"
+  #     --xtick-frequency 2
+  #     --produce-season-table
+  #     --base-fontsize 12
+  #     --columns 1
+  #   outputs:
+  #     moderately_sensitive:
+  #       measure: released_outputs/output/report/results/paper/phenoxymethylpenicillin_with_clinical_any_by_subgroup.jpg
+  #       table_age: released_outputs/output/report/results/paper/event_phenoxymethylpenicillin_with_clinical_any_age_band_rate_table.html
+  #       table_region: released_outputs/output/report/results/paper/event_phenoxymethylpenicillin_with_clinical_any_region_rate_table.html
+
+  # figure_4: 
+  #   run: >
+  #     python:latest python analysis/report/top_5_over_time.py
+  #     --input-file released_outputs/output/report/results/event_code_sore_throat_tonsillitis_rate_top_5_codes_over_time.csv
+  #     --output-dir released_outputs/output/report/results/paper
+  #     --frequency month
+  #     --xtick-frequency 2
+  #   outputs: 
+  #     moderately_sensitive:
+  #       plot: released_outputs/output/report/results/paper/sore_throat_tonsillitis_rate_top_5_codes_over_time.jpg
 
 
-  supplemental_antibiotic_with_gas:
-    run: >
-      python:latest python analysis/report/panel_plots.py
-      --input-file released_outputs/output/report/results/measure_rounded.csv
-      --measures-pattern "event_*_with_clinical_any_rate"
-      --output-dir released_outputs/output/report/results/paper
-      --output-name "antibiotic_with_clinical_any"
-      --date-lines "2020-04-01" "2021-04-01"
-      --column-to-plot "numerator"
-      --hide-legend
-      --columns 1
-      --base-fontsize 12
-      --xtick-frequency 2
-      --produce-season-table
-      --mark-seasons
-    outputs:
-      moderately_sensitive:
-        measure: released_outputs/output/report/results/paper/antibiotic_with_clinical_any.jpg
-        tables: released_outputs/output/report/results/paper/antibiotic_with_clinical_any_table.html
+  # supplemental_antibiotics_groups:
+  #   run: >
+  #     python:latest python analysis/report/panel_plots.py
+  #     --input-file released_outputs/output/report/results/paper/grouped_measures.csv
+  #     --measures-list "event_group-1_rate"
+  #     --measures-list "event_group-2_rate"
+  #     --measures-list "event_group-3_rate"
+  #     --output-dir released_outputs/output/report/results/paper
+  #     --output-name "grouped_medications"
+  #     --date-lines "2020-04-01" "2021-04-01"
+  #     --column-to-plot "numerator"
+  #     --hide-legend
+  #     --columns 1
+  #     --base-fontsize 12
+  #     --xtick-frequency 2
+  #     --produce-season-table
+  #     --mark-seasons
+  #   needs: [group_medications]
+  #   outputs:
+  #     moderately_sensitive:
+  #       measure: released_outputs/output/report/results/paper/grouped_medications.jpg
+  #       tables: released_outputs/output/report/results/paper/grouped_medications_table.html
 
-  supplemental_table_with_pcnt:
-    run: >
-      python:latest python analysis/report/pcnt_table.py
-      --input-file released_outputs/output/report/results/measure_rounded.csv
-      --output-dir released_outputs/output/report/results/paper
-    outputs:
-      moderately_sensitive:
-        tables: released_outputs/output/report/results/paper/pcnt_with_indication.html
+
+  # supplemental_antibiotic_with_gas:
+  #   run: >
+  #     python:latest python analysis/report/panel_plots.py
+  #     --input-file released_outputs/output/report/results/measure_rounded.csv
+  #     --measures-pattern "event_*_with_clinical_any_rate"
+  #     --output-dir released_outputs/output/report/results/paper
+  #     --output-name "antibiotic_with_clinical_any"
+  #     --date-lines "2020-04-01" "2021-04-01"
+  #     --column-to-plot "numerator"
+  #     --hide-legend
+  #     --columns 1
+  #     --base-fontsize 12
+  #     --xtick-frequency 2
+  #     --produce-season-table
+  #     --mark-seasons
+  #   outputs:
+  #     moderately_sensitive:
+  #       measure: released_outputs/output/report/results/paper/antibiotic_with_clinical_any.jpg
+  #       tables: released_outputs/output/report/results/paper/antibiotic_with_clinical_any_table.html
+
+  # supplemental_table_with_pcnt:
+  #   run: >
+  #     python:latest python analysis/report/pcnt_table.py
+  #     --input-file released_outputs/output/report/results/measure_rounded.csv
+  #     --output-dir released_outputs/output/report/results/paper
+  #   outputs:
+  #     moderately_sensitive:
+  #       tables: released_outputs/output/report/results/paper/pcnt_with_indication.html
