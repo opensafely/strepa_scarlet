@@ -710,3 +710,5 @@ actions:
   #   outputs:
   #     moderately_sensitive:
   #       tables: released_outputs/output/report/results/paper/pcnt_with_indication.html
+  #       figure: released_outputs/output/report/results/paper/pcnt_over_time*.jpg
+

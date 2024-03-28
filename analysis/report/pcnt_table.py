@@ -2,6 +2,9 @@ import pathlib
 import argparse
 import pandas
 import fnmatch
+import re
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 
 from report_utils import ci_95_proportion, ci_to_str
 
@@ -38,6 +41,48 @@ def subset_table(measure_table, measures_pattern, date):
 
     return table_subset
 
+def plot_pcnt_over_time(measure_table, output_dir, type):
+    """
+    Plot the percentage over time for each measure.
+    """
+    measure_table['date'] = pandas.to_datetime(measure_table['date'])
+    measure_table['value'] *= 100
+    
+
+    valid_dates = measure_table.dropna(subset=['value'])['date']
+    start_date = valid_dates.min()
+    end_date = valid_dates.max()
+    measure_table = measure_table[(measure_table['date'] >= start_date) & (measure_table['date'] <= end_date)]
+    
+    plt.figure(figsize=(10, 6))
+    for name, group in measure_table.groupby('name'):
+
+        legend_label = name
+
+        if type == "clinical":
+            match = re.search(r"event_(\w+)_with_clinical_any_pcnt", name)
+            if match:
+                legend_label = match.group(1).title()
+        elif type == "medication":
+            match = re.search(r"event_(\w+)_with_medication_any_pcnt", name)
+            if match:
+                legend_label = match.group(1).title()
+
+        plt.plot(group['date'], group['value'], label=legend_label)
+    
+    plt.xlabel('Date')
+    plt.ylabel('Percentage')
+    plt.title(f'Percentage with {type} event')
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize='small')
+    plt.xticks(rotation=90)
+    plt.grid(True)
+    plt.ylim(bottom=0)
+    plt.xlim(start_date, end_date)
+    plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%b-%Y'))
+    plt.tight_layout()
+    plt.savefig(output_dir / f"pcnt_over_time_{type}.jpg", dpi=300)
+    plt.close()
 
 def match_paths(files, pattern):
     return fnmatch.filter(files, pattern)
@@ -106,6 +151,17 @@ def main():
     table = pandas.DataFrame(joined)
     table.to_html(output_dir / "pcnt_with_indication.html", index=True)
 
+    filtered_table_med = measure_table[
+        measure_table['name'].str.contains('with_medication_any_pcnt')
+    ]   
+    plot_pcnt_over_time(filtered_table_med, output_dir, "medication")
+
+    filtered_table_clinical = measure_table[
+        measure_table['name'].str.contains('with_clinical_any_pcnt')
+    ]    
+    plot_pcnt_over_time(filtered_table_clinical, output_dir, "clinical")
+    
+ 
 
 if __name__ == "__main__":
     main()
