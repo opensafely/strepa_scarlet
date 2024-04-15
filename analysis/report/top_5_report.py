@@ -324,8 +324,9 @@ def plot_top_codes_over_time(
     plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
 
     plt.savefig(
-        output_dir / f"{measure}_top_5_codes_over_time.png",
+        output_dir / f"{measure}_top_5_codes_over_time.jpg",
         bbox_inches="tight",
+        dpi=300,
     )
 
 

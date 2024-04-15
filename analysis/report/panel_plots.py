@@ -378,7 +378,7 @@ def get_group_chart(
         rows = rows + 1
 
     # NOTE: constrained_layout=True available in matplotlib>=3.5
-    figure = plt.figure(figsize=(12 + 6 * (columns - 1), 4.8 * rows))
+    figure = plt.figure(figsize=(12 + 6 * (columns - 1), 4.8 * rows), dpi=300)
 
     lgds = []
     for index, panel in enumerate(groups):
@@ -395,6 +395,16 @@ def get_group_chart(
             repeated,
             autolabel=True,
         )
+
+        if title =="Sore Throat Tonsillitis":
+            title = "Sore Throat/Tonsillitis"
+        elif title == "Invasive Strep A":
+            title = "iGAS"
+        elif title == "Age Band":
+            title = "Age Band (years)"
+        elif title == "Imd":
+            title = "Index of Multiple Deprivation (IMD) quintile"
+
         ax.set_title(title)
         # Filter out group, but ignore case
         if exclude_group:
@@ -424,6 +434,7 @@ def get_group_chart(
                 lgd_params,
                 hide_legend,
             )
+           
             # Save the season table only if there is more than one group
             more_than_one_group = panel_group_data.group.nunique() > 1
             if (produce_season_table and more_than_one_group) or mark_seasons:
@@ -432,7 +443,7 @@ def get_group_chart(
                     "group",
                     column_to_plot,
                     output_dir,
-                    panel_group_data.iloc[0]["name"],
+                    panel_group_data.iloc[0]["name"].replace("/", "_"),
                 )
                 if mark_seasons:
                     annotate_seasons(season_table, column_to_plot, ax)
@@ -677,7 +688,7 @@ def main():
         produce_season_table=produce_season_table,
         mark_seasons=mark_seasons,
     )
-    write_group_chart(chart, lgds, output_dir / output_name, plot_title)
+    write_group_chart(chart, lgds, output_dir / output_name)
     chart.close()
 
 
